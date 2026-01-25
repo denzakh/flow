@@ -1,0 +1,5 @@
+{
+  "name": "EXPORT Flow Calendar ",
+  "description": "A minimalist, Fluent-inspired task planner that groups your day into natural time blocks—Morning, Afternoon, and Evening—allowing for flexible, stress-free scheduling that automatically adapts as the day progresses.",
+  "requestFramePermissions": []
+}
