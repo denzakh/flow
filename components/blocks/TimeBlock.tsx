@@ -1,7 +1,7 @@
 import React from 'react';
 import { LayoutGrid, Plus, AlertCircle } from 'lucide-react';
 import { TimeBlockConfig, TimePeriod, Task, TaskWeight, Language } from '../../types.ts';
-import { WEIGHT_CONFIG, BLOCK_CAPACITY } from '../../constants.tsx';
+import { WEIGHT_CONFIG, BLOCK_CAPACITY, TRANSLATIONS } from '../../constants.tsx';
 import TaskItem from '../TaskItem.tsx';
 import { getIcon } from '../../constants.tsx';
 
