@@ -4,9 +4,9 @@ import { Sun, SunDim, Moon, CloudMoon, Zap, Target, Layers, Coffee, Trees, Heart
 import { TimePeriod, TimeBlockConfig, TaskWeight } from './types';
 
 export const WEIGHT_CONFIG = {
-  [TaskWeight.QUICK]: { label: 'Quick', points: 1, icon: Zap, color: '#107c10' },
-  [TaskWeight.FOCUSED]: { label: 'Focused', points: 3, icon: Target, color: '#0078d4' },
-  [TaskWeight.DEEP]: { label: 'Deep', points: 6, icon: Layers, color: '#5c2d91' }
+  [TaskWeight.QUICK]: { label: 'Quick', points: 1, icon: Zap, color: '#34d399' },
+  [TaskWeight.FOCUSED]: { label: 'Focused', points: 3, icon: Target, color: '#60a5fa' },
+  [TaskWeight.DEEP]: { label: 'Deep', points: 6, icon: Layers, color: '#a78bfa' }
 };
 
 export const RECOVERY_TIPS = {

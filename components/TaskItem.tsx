@@ -28,10 +28,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
 
   const togglePeriod = (p: TimePeriod) => {
     const current = task.periods || [];
-    const updated = current.includes(p) 
-      ? current.filter(x => x !== p) 
+    const updated = current.includes(p)
+      ? current.filter(x => x !== p)
       : [...current, p];
-    
+
     if (updated.length > 0) {
       onUpdate(task.id, { periods: updated });
     }
@@ -59,12 +59,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
         <button
           onClick={() => onToggle(task.id)}
           className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-            task.completed ? 'bg-emerald-500 border-emerald-500' : 'border-emerald-500/30'
+            task.completed ? 'bg-[#0a0a0a] border-[#0a0a0a]' : 'border-white/30'
           }`}
         >
           {task.completed && <Check size={14} className="text-white" />}
         </button>
-        
+
         <div className="flex-1 min-w-0 flex items-center gap-2 overflow-hidden" onClick={() => !isEditing && setIsExpanded(!isExpanded)}>
           {isEditing ? (
             <input
@@ -74,47 +74,47 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
               onChange={(e) => setEditTitle(e.target.value)}
               onBlur={handleSave}
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-              className="w-full text-sm font-bold bg-white/40 border-none rounded-lg px-2 py-1 focus:ring-2 focus:ring-emerald-500/10 text-charcoal"
+              className="w-full text-sm font-bold bg-[#0a0a0a] border border-white/10 rounded-lg px-2 py-1 focus:ring-2 focus:ring-white/20 text-white"
             />
           ) : (
             <div className="flex-1 min-w-0 flex flex-col">
-              <span className={`text-sm font-bold truncate tracking-tight text-charcoal ${task.completed ? 'line-through opacity-50' : ''}`}>
+              <span className={`text-sm font-bold truncate tracking-tight text-white ${task.completed ? 'line-through opacity-50' : ''}`}>
                 {task.title}
               </span>
               {task.periods.length > 1 && (
                 <div className="flex items-center gap-1 mt-0.5">
-                  <Layers size={8} className="text-emerald-500/60" />
-                  <span className="text-[8px] font-black uppercase text-emerald-500/60 tracking-tighter">Multi-Block</span>
+                  <Layers size={14} className="text-white/60" />
+                  <span className="text-[8px] font-black uppercase text-white/60 tracking-tighter">Multi-Block</span>
                 </div>
               )}
             </div>
           )}
-          
+
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {task.recurrence && task.recurrence !== 'none' && (
-              <Repeat size={10} className="text-charcoal/30" />
+              <Repeat size={14} className="text-white/30" />
             )}
-            <div className="px-2 py-0.5 rounded-lg bg-white/30 flex items-center gap-1" style={{ color: weightInfo.color }}>
-              <WeightIcon size={10} />
+            <div className="px-2 py-0.5 rounded-lg bg-[#0a0a0a] flex items-center gap-1" style={{ color: weightInfo.color }}>
+              <WeightIcon size={14} />
               <span className="text-[9px] font-black uppercase">{weightInfo.label}</span>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-1">
-          <button onClick={(e) => { e.stopPropagation(); setShowMoveMenu(!showMoveMenu); }} className="p-2 text-charcoal/20 hover:text-emerald-500 transition-colors"><MoreHorizontal size={16} /></button>
-          <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className="p-2 text-charcoal/10 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16} /></button>
+          <button onClick={(e) => { e.stopPropagation(); setShowMoveMenu(!showMoveMenu); }} className="p-2 bg-[#0a0a0a] text-white transition-colors"><MoreHorizontal size={22} /></button>
+          <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className="p-2 bg-[#0a0a0a] text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={22} /></button>
         </div>
       </div>
 
       {showMoveMenu && (
         <div className="absolute right-0 top-full mt-1 w-44 glass-container rounded-2xl z-20 overflow-hidden py-2 shadow-xl animate-in fade-in zoom-in duration-200">
-          <div className="px-4 py-2 text-[10px] font-black uppercase text-charcoal/40 tracking-widest border-b border-white/20 mb-1">Manage Blocks</div>
+          <div className="px-4 py-2 text-[10px] font-black uppercase text-white/40 tracking-widest border-b border-white/10 mb-1">Manage Blocks</div>
           {periods.map(p => (
-            <button 
-              key={p.id} 
-              onClick={() => { togglePeriod(p.id); setShowMoveMenu(false); }} 
-              className={`w-full text-left px-4 py-3 text-xs font-black flex items-center justify-between transition-colors ${task.periods.includes(p.id) ? 'text-emerald-600 bg-emerald-500/5' : 'text-charcoal/60 hover:bg-white/40'}`}
+            <button
+              key={p.id}
+              onClick={() => { togglePeriod(p.id); setShowMoveMenu(false); }}
+              className={`w-full text-left px-4 py-3 text-xs font-black flex items-center justify-between transition-colors ${task.periods.includes(p.id) ? 'bg-[#0a0a0a] text-white' : 'text-white/60 hover:bg-white/5'}`}
             >
               {p.label}
               {task.periods.includes(p.id) && <Check size={14} />}
@@ -124,10 +124,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
       )}
 
       {isExpanded && (
-        <div className="mt-4 pt-4 border-t border-white/20 space-y-4 animate-in fade-in">
+        <div className="mt-4 pt-4 border-t border-white/10 space-y-4 animate-in fade-in">
           <div className="grid grid-cols-2 gap-4">
              <div className="space-y-2">
-                <span className="text-[9px] font-black uppercase text-charcoal/30 tracking-widest">Weight:</span>
+                <span className="text-[9px] font-black uppercase text-white/30 tracking-widest">Weight:</span>
                 <div className="flex gap-1">
                    {weights.map(w => {
                       const Icon = w.icon;
@@ -138,25 +138,25 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
                            key={w.id}
                            onClick={() => changeWeight(w.id)}
                            className={`p-2 flex-1 rounded-xl flex items-center justify-center transition-all ${
-                             active ? 'bg-white shadow-sm ring-1 ring-emerald-500/10' : 'bg-charcoal/5 opacity-40 hover:opacity-60'
+                             active ? 'bg-[#0a0a0a] shadow-sm ring-1 ring-white/20' : 'bg-[#0a0a0a] opacity-40 hover:opacity-60'
                            }`}
-                           style={{ color: active ? info.color : 'inherit' }}
+                           style={{ color: active ? '#ffffff' : 'inherit' }}
                         >
-                           <Icon size={14} />
+                           <Icon size={22} />
                         </button>
                       );
                    })}
                 </div>
              </div>
              <div className="space-y-2">
-                <span className="text-[9px] font-black uppercase text-charcoal/30 tracking-widest">Priority:</span>
+                <span className="text-[9px] font-black uppercase text-white/30 tracking-widest">Priority:</span>
                 <div className="flex gap-1">
                    {(['low', 'medium', 'high'] as const).map(p => (
                       <button
                          key={p}
                          onClick={() => onUpdate(task.id, { priority: p })}
                          className={`p-2 flex-1 rounded-xl flex items-center justify-center text-[9px] font-black uppercase tracking-tighter transition-all ${
-                           task.priority === p ? 'bg-white shadow-sm ring-1 ring-emerald-500/10 text-charcoal' : 'bg-charcoal/5 text-charcoal/30'
+                           task.priority === p ? 'bg-[#0a0a0a] shadow-sm ring-1 ring-white/20 text-white' : 'bg-[#0a0a0a] text-white/30'
                          }`}
                       >
                          {p[0]}
@@ -167,12 +167,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-charcoal/60 text-xs font-bold">
-              <Calendar size={14} className="text-emerald-500" />
+            <div className="flex items-center gap-2 text-white/60 text-xs font-bold">
+              <Calendar size={14} className="text-white" />
               <span>{task.dueDate || t.deadline}</span>
             </div>
             {task.recurrence && task.recurrence !== 'none' && (
-              <div className="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest flex items-center gap-2">
+              <div className="text-[10px] font-black text-white/60 uppercase tracking-widest flex items-center gap-2">
                 <Repeat size={12} />
                 {t[`rec_${task.recurrence === 'all-blocks' ? 'all_blocks' : task.recurrence}` as keyof typeof t]}
               </div>
@@ -180,16 +180,16 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
           </div>
 
           <div className="space-y-2">
-             <span className="text-[9px] font-black uppercase text-charcoal/30 tracking-widest">Scheduled for:</span>
+             <span className="text-[9px] font-black uppercase text-white/30 tracking-widest">Scheduled for:</span>
              <div className="flex flex-wrap gap-1.5">
                {periods.map(p => (
-                 <button 
+                 <button
                    key={p.id}
                    onClick={() => togglePeriod(p.id)}
                    className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-tighter transition-all ${
-                     task.periods.includes(p.id) 
-                       ? 'bg-emerald-500 text-white shadow-sm' 
-                       : 'bg-white/40 text-charcoal/40 hover:bg-white/60'
+                     task.periods.includes(p.id)
+                       ? 'bg-[#0a0a0a] text-white shadow-sm'
+                       : 'bg-[#0a0a0a] text-white/40 hover:bg-white/20'
                    }`}
                  >
                    {p.label}
@@ -201,9 +201,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
           <div className="flex gap-2">
             <button
                onClick={() => setIsEditing(true)}
-               className="flex-1 py-3 rounded-xl bg-charcoal/5 text-charcoal/60 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2"
+               className="flex-1 py-3 rounded-xl bg-[#0a0a0a] text-white/60 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2"
             >
-               <Edit2 size={12} /> Edit Title
+               <Edit2 size={14} /> Edit Title
             </button>
             <button
               onClick={() => {
@@ -211,15 +211,15 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
                 const cleanDate = date.replace(/-/g, '');
                 window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(task.title)}&dates=${cleanDate}T090000/${cleanDate}T100000`, '_blank');
               }}
-              className="flex-1 py-3 rounded-xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest shadow-sm hover:shadow-emerald-500/20 active:scale-95 transition-all"
+              className="flex-1 py-3 rounded-xl bg-[#0a0a0a] text-white text-[10px] font-black uppercase tracking-widest shadow-sm active:scale-95 transition-all"
             >
               To Google Calendar
             </button>
           </div>
         </div>
       )}
-      
-      <div className={`absolute left-0 top-1/4 bottom-1/4 w-1 rounded-r-full ${task.priority === 'high' ? 'bg-rose-400' : task.priority === 'medium' ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+
+      <div className={`absolute left-0 top-1/4 bottom-1/4 w-1 rounded-r-full ${task.priority === 'high' ? 'bg-rose-400' : task.priority === 'medium' ? 'bg-amber-400' : 'bg-white'}`} />
     </div>
   );
 };

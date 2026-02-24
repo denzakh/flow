@@ -63,21 +63,22 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
     };
 
     return (
-        <div className='min-h-screen flex items-center justify-center p-6 animate-in fade-in duration-1000'>
+        <div className='min-h-screen flex items-center justify-center p-6 animate-in fade-in duration-1000 bg-[#0a0a0a]'>
             {/* Background Decorative Element */}
             <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none' />
+            <div className='absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none' />
 
-            <div className='w-full max-w-md glass-container rounded-[2.5rem] p-12 space-y-10 shadow-2xl relative border-white/60 bg-white/70 overflow-hidden'>
-                <div className='absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400/30 to-indigo-500/30 rounded-t-[2.5rem]' />
+            <div className='w-full max-w-md glass-container rounded-[2.5rem] p-12 space-y-10 shadow-2xl relative border-white/5 bg-[#0f0f0f]/80 overflow-hidden'>
+                <div className='absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500/30 to-amber-500/30 rounded-t-[2.5rem]' />
 
                 <div className='text-center space-y-3'>
-                    <div className='w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-white/40'>
-                        <RefreshCcw size={32} className='text-emerald-600' />
+                    <div className='w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-white/10'>
+                        <RefreshCcw size={32} className='text-emerald-400' />
                     </div>
-                    <h2 className='text-4xl font-black text-charcoal tracking-tight leading-none'>
+                    <h2 className='text-4xl font-black text-white tracking-tight leading-none'>
                         {mode === 'login' ? 'Welcome Back' : 'Start Flow'}
                     </h2>
-                    <p className='text-charcoal/40 text-sm font-bold tracking-tight'>
+                    <p className='text-white/40 text-sm font-bold tracking-tight'>
                         {mode === 'login'
                             ? 'Continue your rhythm'
                             : 'Your journey to recovery starts here'}
@@ -88,9 +89,9 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                     <button
                         onClick={handleGoogleAuth}
                         disabled={isLoading}
-                        className='w-full py-4 glass-card rounded-2xl flex items-center justify-center gap-4 font-bold text-charcoal hover:bg-white/80 transition-all border border-white/60 active:scale-[0.98] disabled:opacity-50 shadow-sm'
+                        className='w-full py-4 bg-[#0a0a0a] rounded-2xl flex items-center justify-center gap-4 font-bold text-white hover:bg-[#1a1a1a] transition-all active:scale-[0.98] disabled:opacity-50 shadow-sm'
                     >
-                        <div className='w-6 h-6 flex items-center justify-center bg-white rounded-lg shadow-sm'>
+                        <div className='w-6 h-6 flex items-center justify-center bg-white rounded-lg'>
                             <svg viewBox='0 0 24 24' className='w-4 h-4'>
                                 <path
                                     fill='#4285F4'
@@ -114,19 +115,19 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                     </button>
 
                     <div className='relative flex items-center py-4'>
-                        <div className='flex-grow border-t border-charcoal/5'></div>
-                        <span className='flex-shrink mx-4 text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/20'>
+                        <div className='flex-grow border-t border-white/5'></div>
+                        <span className='flex-shrink mx-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/20'>
                             or use email
                         </span>
-                        <div className='flex-grow border-t border-charcoal/5'></div>
+                        <div className='flex-grow border-t border-white/5'></div>
                     </div>
 
                     <form onSubmit={handleSubmit} className='space-y-4'>
                         {mode === 'signup' && (
                             <div className='relative group'>
                                 <User
-                                    className='absolute left-5 top-1/2 -translate-y-1/2 text-charcoal/20 group-focus-within:text-emerald-500 transition-colors'
-                                    size={18}
+                                    className='absolute left-5 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-white transition-colors'
+                                    size={22}
                                 />
                                 <input
                                     type='text'
@@ -134,14 +135,14 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                                     placeholder='Full Name'
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className='w-full bg-white/40 border border-transparent rounded-[1.25rem] py-4.5 pl-14 pr-4 font-bold text-charcoal placeholder:text-charcoal/15 focus:ring-4 focus:ring-emerald-500/5 focus:bg-white/80 focus:border-emerald-500/20 transition-all outline-none text-sm'
+                                    className='w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4.5 pl-14 pr-4 font-bold text-white placeholder:text-white/30 focus:ring-0 focus:border-white/20 transition-all outline-none text-sm'
                                 />
                             </div>
                         )}
                         <div className='relative group'>
                             <Mail
-                                className='absolute left-5 top-1/2 -translate-y-1/2 text-charcoal/20 group-focus-within:text-emerald-500 transition-colors'
-                                size={18}
+                                className='absolute left-5 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-white transition-colors'
+                                size={22}
                             />
                             <input
                                 type='email'
@@ -149,13 +150,13 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                                 placeholder='Email Address'
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className='w-full bg-white/40 border border-transparent rounded-[1.25rem] py-4.5 pl-14 pr-4 font-bold text-charcoal placeholder:text-charcoal/15 focus:ring-4 focus:ring-emerald-500/5 focus:bg-white/80 focus:border-emerald-500/20 transition-all outline-none text-sm'
+                                className='w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4.5 pl-14 pr-4 font-bold text-white placeholder:text-white/30 focus:ring-0 focus:border-white/20 transition-all outline-none text-sm'
                             />
                         </div>
                         <div className='relative group'>
                             <Lock
-                                className='absolute left-5 top-1/2 -translate-y-1/2 text-charcoal/20 group-focus-within:text-emerald-500 transition-colors'
-                                size={18}
+                                className='absolute left-5 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-white transition-colors'
+                                size={22}
                             />
                             <input
                                 type='password'
@@ -163,13 +164,13 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                                 placeholder='Password'
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className='w-full bg-white/40 border border-transparent rounded-[1.25rem] py-4.5 pl-14 pr-4 font-bold text-charcoal placeholder:text-charcoal/15 focus:ring-4 focus:ring-emerald-500/5 focus:bg-white/80 focus:border-emerald-500/20 transition-all outline-none text-sm'
+                                className='w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4.5 pl-14 pr-4 font-bold text-white placeholder:text-white/30 focus:ring-0 focus:border-white/20 transition-all outline-none text-sm'
                             />
                         </div>
                         <button
                             type='submit'
                             disabled={isLoading}
-                            className='w-full py-5 bg-emerald-500 text-white rounded-[1.25rem] font-black shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98] mt-4'
+                            className='w-full py-5 bg-[#0a0a0a] text-white rounded-[24px] font-black shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98] mt-4'
                         >
                             {isLoading ? (
                                 <RefreshCcw
@@ -183,7 +184,7 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                                             ? 'Sign In'
                                             : 'Create Account'}
                                     </span>
-                                    <ArrowRight size={20} />
+                                    <ArrowRight size={22} />
                                 </>
                             )}
                         </button>
@@ -195,18 +196,18 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                         onClick={() =>
                             setMode(mode === 'login' ? 'signup' : 'login')
                         }
-                        className='text-xs font-bold text-charcoal/30 hover:text-emerald-600 transition-colors px-4 py-2'
+                        className='text-xs font-bold text-white hover:text-white transition-all px-4 py-2'
                     >
                         {mode === 'login'
                             ? "Don't have an account? Sign up"
                             : 'Already have an account? Log in'}
                     </button>
 
-                    <div className='h-px bg-charcoal/5 w-1/2 mx-auto' />
+                    <div className='h-px bg-white/10 w-1/2 mx-auto' />
 
                     <button
                         onClick={handleGuest}
-                        className='w-full py-2 text-[10px] font-black uppercase tracking-[0.25em] text-charcoal/15 hover:text-emerald-500 transition-all'
+                        className='w-full py-2 text-[10px] font-black uppercase tracking-[0.25em] text-white hover:text-white transition-all'
                     >
                         Continue as Guest
                     </button>
