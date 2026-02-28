@@ -1,5 +1,5 @@
 import React from 'react';
-import { BedDouble, Sparkles } from 'lucide-react';
+import { BedDouble, Sparkles } from '../../utils/MaterialIcons';
 import { RECOVERY_TIPS } from '../../constants.tsx';
 
 interface RecoveryBannerProps {

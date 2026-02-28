@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react';
-import { RefreshCcw, Sparkles } from 'lucide-react';
+import { getIcon } from './constants.tsx';
 import { Task, TimePeriod, UserSettings, TimeBlockConfig, Language, AlarmConfig, Recurrence, TaskWeight, UserProfile } from './types.ts';
 import { TRANSLATIONS, ALARM_SOUNDS, RECOVERY_TIPS, WEIGHT_CONFIG } from './constants.tsx';
-import { suggestWeight } from './services/geminiService.ts';
+import { suggestWeight } from './services/taskOptimizer.ts';
 import TaskItem from './components/TaskItem.tsx';
 import Auth from './components/Auth.tsx';
 import Header from './components/layout/Header.tsx';
@@ -66,7 +66,6 @@ const App: React.FC = () => {
   const [selectedPeriods, setSelectedPeriods] = useState<TimePeriod[]>([TimePeriod.MORNING]);
   const [selectedRecurrence, setSelectedRecurrence] = useState<Recurrence>('none');
   const [selectedWeight, setSelectedWeight] = useState<TaskWeight>(TaskWeight.FOCUSED);
-  const [isSuggestingWeight, setIsSuggestingWeight] = useState(false);
 
   const [tempWake, setTempWake] = useState(settings.wakeUpTime);
   const [tempRest, setTempRest] = useState(settings.restTime);
@@ -233,30 +232,17 @@ const App: React.FC = () => {
 
   const titleTimeoutRef = useRef<number | null>(null);
   useEffect(() => {
-    let isMounted = true;
     const currentTitle = newTaskTitle.trim();
-
     if (currentTitle.length > 3) {
       if (titleTimeoutRef.current) clearTimeout(titleTimeoutRef.current);
-
-      titleTimeoutRef.current = window.setTimeout(async () => {
-        if (!isMounted) return;
-        setIsSuggestingWeight(true);
-        try {
-          const weight = await suggestWeight(currentTitle);
-          if (isMounted && newTaskTitle.trim() === currentTitle) {
-            setSelectedWeight(weight);
-          }
-        } catch (err) {
-          console.warn("Weight suggestion failed", err);
-        } finally {
-          if (isMounted) setIsSuggestingWeight(false);
+      titleTimeoutRef.current = window.setTimeout(() => {
+        const weight = suggestWeight(currentTitle);
+        if (newTaskTitle.trim() === currentTitle) {
+          setSelectedWeight(weight);
         }
       }, 1000);
     }
-
     return () => {
-      isMounted = false;
       if (titleTimeoutRef.current) clearTimeout(titleTimeoutRef.current);
     };
   }, [newTaskTitle]);
@@ -326,27 +312,30 @@ const App: React.FC = () => {
   };
 
   if (appState === 'splash') {
+    console.log('Rendering splash screen');
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0a0a0a] z-[100]">
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0a0a0a] z-[100]" style={{ background: '#0a0a0a' }}>
         <BackgroundSpots isWindDown={false} />
         <div className="relative mb-12">
-          <RefreshCcw size={80} className="text-white animate-[spin_10s_linear_infinite]" />
+          {getIcon('refresh', 'text-white animate-[spin_10s_linear_infinite]', 80)}
           <div className="absolute inset-0 flex items-center justify-center">
-            <Sparkles size={22} className="text-white animate-pulse" />
+            {getIcon('auto_awesome', 'text-white animate-pulse', 22)}
           </div>
         </div>
-        <h1 className="text-5xl font-light text-white tracking-tighter mb-4">Flow</h1>
-        <p className="text-white font-bold uppercase tracking-[0.4em] text-[10px]">Harmonize your day</p>
+        <h1 className="text-5xl font-light text-white tracking-tighter mb-4" style={{ color: 'white' }}>Flow</h1>
+        <p className="text-white font-bold uppercase tracking-[0.4em] text-[10px]" style={{ color: 'white' }}>Harmonize your day</p>
       </div>
     );
   }
 
   if (appState === 'auth') {
+    console.log('Rendering auth screen');
     return <Auth lang={settings.language} onAuth={(u) => { setUser(u); setAppState('ready'); }} />;
   }
 
+  console.log('Rendering main app, viewMode:', viewMode);
   return (
-    <div className="min-h-screen max-w-lg mx-auto px-6 py-12 relative">
+    <div className="min-h-screen max-w-lg mx-auto px-6 py-8 relative">
       <BackgroundSpots isWindDown={isWindDown} />
 
       {isAlarmPlaying && (
@@ -367,7 +356,7 @@ const App: React.FC = () => {
         language={settings.language}
       />
 
-      <div className="flex flex-col gap-6 mb-8">
+      <div className="flex flex-col gap-4 mb-6">
         <ViewSwitcher
           viewMode={viewMode}
           onModeChange={setViewMode}

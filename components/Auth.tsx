@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import {
     Mail,
     Lock,
-    User,
+    Person,
     ChevronRight,
     Chrome,
     ArrowRight,
     UserCircle,
-    RefreshCcw,
-} from 'lucide-react';
+    Refresh,
+} from '../utils/MaterialIcons';
 import { UserProfile } from '../types';
 
 interface AuthProps {
@@ -73,7 +73,7 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
 
                 <div className='text-center space-y-3'>
                     <div className='w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-white/10'>
-                        <RefreshCcw size={32} className='text-emerald-400' />
+                        <Refresh size={32} className='text-emerald-400' />
                     </div>
                     <h2 className='text-4xl font-black text-white tracking-tight leading-none'>
                         {mode === 'login' ? 'Welcome Back' : 'Start Flow'}
@@ -125,7 +125,7 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                     <form onSubmit={handleSubmit} className='space-y-4'>
                         {mode === 'signup' && (
                             <div className='relative group'>
-                                <User
+                                <Person
                                     className='absolute left-5 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-white transition-colors'
                                     size={22}
                                 />
@@ -173,7 +173,7 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                             className='w-full py-5 bg-[#0a0a0a] text-white rounded-[24px] font-black shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98] mt-4'
                         >
                             {isLoading ? (
-                                <RefreshCcw
+                                <Refresh
                                     size={22}
                                     className='animate-spin'
                                 />

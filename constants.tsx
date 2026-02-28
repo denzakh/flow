@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sun, SunDim, Moon, CloudMoon, Zap, Target, Layers, Coffee, Trees, Heart } from 'lucide-react';
+import { Sun, SunDim, CloudMoon, Moon, Zap, Target, Layers, Heart } from './utils/MaterialIcons';
 import { TimePeriod, TimeBlockConfig, TaskWeight } from './types';
 
 export const WEIGHT_CONFIG = {
@@ -46,6 +46,7 @@ export const ALARM_SOUNDS = [
 export const TRANSLATIONS = {
   en: {
     today: "Today's Flow",
+    day: "Day",
     upcoming: "Future Flow",
     week: "Week",
     month: "Month",
@@ -93,6 +94,7 @@ export const TRANSLATIONS = {
   },
   ru: {
     today: "Ваш поток",
+    day: "День",
     upcoming: "Будущий поток",
     week: "Неделя",
     month: "Месяц",
@@ -140,6 +142,7 @@ export const TRANSLATIONS = {
   },
   es: {
     today: "Tu Flujo",
+    day: "Día",
     upcoming: "Flujo Futuro",
     week: "Semana",
     month: "Mes",
@@ -189,15 +192,13 @@ export const TRANSLATIONS = {
 
 export const BLOCK_CAPACITY = 12;
 
-export const getIcon = (iconName: string, className?: string) => {
+export const getIcon = (iconName: string, className?: string, size: number = 24) => {
   switch (iconName) {
-    case 'Sun': return <Sun className={className} />;
-    case 'SunDim': return <SunDim className={className} />;
-    case 'CloudMoon': return <CloudMoon className={className} />;
-    case 'Moon': return <Moon className={className} />;
-    case 'Coffee': return <Coffee className={className} />;
-    case 'Trees': return <Trees className={className} />;
-    case 'Heart': return <Heart className={className} />;
+    case 'Sun': return <Sun size={size} className={className} />;
+    case 'SunDim': return <SunDim size={size} className={className} />;
+    case 'CloudMoon': return <CloudMoon size={size} className={className} />;
+    case 'Moon': return <Moon size={size} className={className} />;
+    case 'Heart': return <Heart size={size} className={className} />;
     default: return null;
   }
 };

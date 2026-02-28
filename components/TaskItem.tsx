@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { Check, Trash2, ArrowRight, ChevronDown, ChevronUp, StickyNote, Calendar, Edit2, Save, X, MoreHorizontal, Repeat, Layers, Zap, Target } from 'lucide-react';
+import { Check, Trash2, ArrowRight, ChevronDown, ChevronUp, StickyNote, Calendar, Edit2, Save, X, MoreHorizontal, Repeat, Layers, Zap, Target } from '../utils/MaterialIcons';
 import { Task, TimePeriod, Language, TaskWeight } from '../types.ts';
 import { WEIGHT_CONFIG, TRANSLATIONS } from '../constants.tsx';
 
@@ -19,7 +19,6 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
 
   const t = TRANSLATIONS[lang];
   const weightInfo = WEIGHT_CONFIG[task.weight];
-  const WeightIcon = weightInfo.icon;
 
   const handleSave = () => {
     onUpdate(task.id, { title: editTitle });
@@ -54,8 +53,13 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
   ];
 
   return (
-    <div className={`group relative flex flex-col glass-card rounded-2xl p-4 transition-all active:scale-[0.98] ${task.completed ? 'opacity-40 grayscale-[0.5]' : ''}`}>
-      <div className="flex items-center justify-between gap-3 touch-target">
+    <div 
+      className="glass-2 p-4 transition-all active:scale-[0.98] cursor-pointer hover-lift"
+      style={{
+        opacity: task.completed ? 0.4 : 1,
+      }}
+    >
+      <div className="flex items-center justify-between gap-3 touch-target" style={{ position: 'relative', zIndex: 1 }}>
         <button
           onClick={() => onToggle(task.id)}
           className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
@@ -94,16 +98,25 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
             {task.recurrence && task.recurrence !== 'none' && (
               <Repeat size={14} className="text-white/30" />
             )}
-            <div className="px-2 py-0.5 rounded-lg bg-[#0a0a0a] flex items-center gap-1" style={{ color: weightInfo.color }}>
-              <WeightIcon size={14} />
-              <span className="text-[9px] font-black uppercase">{weightInfo.label}</span>
-            </div>
+            <span className={`badge-2 badge-2-sm badge-${task.weight}`}>
+              {weightInfo.label}
+            </span>
           </div>
         </div>
 
         <div className="flex items-center gap-1">
-          <button onClick={(e) => { e.stopPropagation(); setShowMoveMenu(!showMoveMenu); }} className="p-2 bg-[#0a0a0a] text-white transition-colors"><MoreHorizontal size={22} /></button>
-          <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className="p-2 bg-[#0a0a0a] text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={22} /></button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); setShowMoveMenu(!showMoveMenu); }} 
+            className="glass-btn w-9 h-9 flex items-center justify-center p-0"
+          >
+            <MoreHorizontal size={20} />
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} 
+            className="glass-btn w-9 h-9 flex items-center justify-center p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Trash2 size={20} />
+          </button>
         </div>
       </div>
 

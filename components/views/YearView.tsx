@@ -16,8 +16,11 @@ const YearView: React.FC<YearViewProps> = ({ viewDate, tasks, language }) => {
         const startDay = new Date(viewDate.getFullYear(), m, 1).getDay();
 
         return (
-          <div key={m} className="space-y-2">
-            <span className="text-[9px] font-black uppercase tracking-widest text-white">
+          <div key={m} className="glass-2 p-3 space-y-2" style={{
+            borderRadius: '16px',
+            padding: '12px',
+          }}>
+            <span className="text-[9px] font-black uppercase tracking-widest text-white block text-center">
               {monthDate.toLocaleDateString(language, { month: 'long' })}
             </span>
             <div className="grid grid-cols-7 gap-0.5">
@@ -30,8 +33,8 @@ const YearView: React.FC<YearViewProps> = ({ viewDate, tasks, language }) => {
                 return (
                   <div
                     key={d}
-                    className={`w-2 h-2 flex items-center justify-center text-[6px] font-black ${
-                      hasTasks ? 'text-white' : 'text-white/20'
+                    className={`w-2 h-2 flex items-center justify-center text-[6px] font-black rounded-full ${
+                      hasTasks ? 'bg-white text-[#0a0a0a]' : 'text-white/20'
                     }`}
                   >
                     {d + 1}

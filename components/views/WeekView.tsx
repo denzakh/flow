@@ -27,9 +27,12 @@ const WeekView: React.FC<WeekViewProps> = ({ viewDate, tasks, settings, todayStr
         const isToday = dStr === todayStr;
 
         return (
-          <div key={dStr} className={`flex gap-3 ${isWeekend ? 'opacity-90' : ''}`}>
-            <div className={`w-20 text-center py-2 rounded-lg flex-shrink-0 ${
-              isToday ? 'bg-[#0a0a0a] text-white' : 'bg-[#0a0a0a] text-white/40'
+          <div key={dStr} className={`glass-2 p-3 flex gap-3 ${isWeekend ? 'opacity-90' : ''}`} style={{
+            borderRadius: '16px',
+            padding: '12px 16px',
+          }}>
+            <div className={`w-20 text-center py-2 rounded-xl flex-shrink-0 ${
+              isToday ? 'bg-[#0a0a0a] text-white border border-white/20' : 'text-white/40'
             }`}>
               <span className="text-[8px] font-black uppercase tracking-wider block">
                 {day.toLocaleDateString(language, { weekday: 'short' })}
@@ -38,7 +41,7 @@ const WeekView: React.FC<WeekViewProps> = ({ viewDate, tasks, settings, todayStr
             </div>
             <div className="flex-1 flex gap-2">
               {[TimePeriod.MORNING, TimePeriod.AFTERNOON, TimePeriod.EVENING].map(p => (
-                <div key={p} className="flex-1 h-12 rounded-md bg-[#0a0a0a] flex items-center justify-center p-1 border border-white/10">
+                <div key={p} className="flex-1 h-12 rounded-lg bg-[#0a0a0a] flex items-center justify-center p-1 border border-white/10">
                   {dayTasks.filter(t => t.periods.includes(p)).map(t => (
                     <div key={t.id} className={`w-1.5 h-1.5 rounded-full ${t.completed ? 'bg-white/20' : 'bg-white'}`} />
                   ))}

@@ -39,8 +39,8 @@ const MonthView: React.FC<MonthViewProps> = ({ viewDate, tasks, settings, todayS
             <div
               key={dStr}
               onClick={() => onDayClick(day)}
-              className={`aspect-square rounded-xl p-1 flex flex-col items-center justify-between transition-all cursor-pointer ${
-                isToday ? 'bg-[#0a0a0a] text-white shadow-lg' : 'bg-[#0a0a0a]/50 text-white/60 hover:bg-[#0a0a0a]'
+              className={`aspect-square rounded-xl p-1 flex flex-col items-center justify-between transition-all cursor-pointer glass-2 ${
+                isToday ? 'text-white shadow-lg' : 'text-white/60 hover:bg-[#0a0a0a]'
               }`}
             >
               <span className="text-[10px] font-black">{day.getDate()}</span>

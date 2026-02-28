@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCcw } from '../../utils/MaterialIcons';
 import { TRANSLATIONS } from '../../constants.tsx';
 
 interface DateNavigatorProps {

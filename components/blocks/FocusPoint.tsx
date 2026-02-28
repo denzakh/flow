@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Repeat, Check, Clock, Plus, Zap, Target, Layers } from 'lucide-react';
+import { Sparkles, Repeat, Check, Clock, Plus, Zap, Target, Layers } from '../../utils/MaterialIcons';
 import { TimePeriod, TaskWeight, Recurrence, Language } from '../../types.ts';
 import { WEIGHT_CONFIG, TRANSLATIONS } from '../../constants.tsx';
-import { suggestWeight } from '../../services/geminiService.ts';
+import { suggestWeight } from '../../services/taskOptimizer.ts';
 
 interface FocusPointProps {
   onTaskAdd: (title: string, periods: TimePeriod[], recurrence: Recurrence, weight: TaskWeight) => void;
@@ -32,38 +32,15 @@ const FocusPoint: React.FC<FocusPointProps> = ({
   const t = TRANSLATIONS[language];
   const [taskTitle, setTaskTitle] = useState('');
   const [isRecurrenceMenuOpen, setIsRecurrenceMenuOpen] = useState(false);
-  const [isSuggestingWeight, setIsSuggestingWeight] = useState(false);
   const taskInputRef = useRef<HTMLInputElement>(null);
-  const titleTimeoutRef = useRef<number | null>(null);
 
-  // AI weight suggestion
+  // Автоматическая рекомендация веса задачи на основе эвристик
   useEffect(() => {
-    let isMounted = true;
     const currentTitle = taskTitle.trim();
-
     if (currentTitle.length > 3) {
-      if (titleTimeoutRef.current) clearTimeout(titleTimeoutRef.current);
-
-      titleTimeoutRef.current = window.setTimeout(async () => {
-        if (!isMounted) return;
-        setIsSuggestingWeight(true);
-        try {
-          const weight = await suggestWeight(currentTitle);
-          if (isMounted && taskTitle.trim() === currentTitle) {
-            onWeightChange(weight);
-          }
-        } catch (err) {
-          console.warn("Weight suggestion failed", err);
-        } finally {
-          if (isMounted) setIsSuggestingWeight(false);
-        }
-      }, 1000);
+      const weight = suggestWeight(currentTitle);
+      onWeightChange(weight);
     }
-
-    return () => {
-      isMounted = false;
-      if (titleTimeoutRef.current) clearTimeout(titleTimeoutRef.current);
-    };
   }, [taskTitle, onWeightChange]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -83,15 +60,14 @@ const FocusPoint: React.FC<FocusPointProps> = ({
   const weights = ['quick', 'focused', 'deep'] as TaskWeight[];
 
   return (
-    <div className="glass-container p-6 rounded-[2.5rem] space-y-6" style={{
+    <div className="glass-2 mb-6" style={{
       borderRadius: '40px',
-      border: '1px solid #2B48AC',
-      background: 'rgba(1, 1, 1, 0.05)',
-      boxShadow: '-4px -4px 10px 0 rgba(129, 177, 213, 0.30) inset, 4px 4px 15px 0 rgba(160, 123, 78, 0.40)'
+      padding: '24px',
     }}>
-      <div className="px-2">
-        <h3 className="text-xs font-light uppercase tracking-widest text-white">{t.addPoint}</h3>
-      </div>
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div className="px-2 mb-4">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">{t.addPoint}</h3>
+        </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className={`relative group ${isInputFocused ? 'input-gradient-focus' : 'input-gradient'}`}>
@@ -146,7 +122,6 @@ const FocusPoint: React.FC<FocusPointProps> = ({
         <div className="space-y-3 px-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Effort Weight</span>
-            {isSuggestingWeight && <span className="text-[9px] font-bold text-emerald-400 animate-pulse italic">Thinking...</span>}
           </div>
           
           <div className="flex gap-2">
@@ -159,8 +134,8 @@ const FocusPoint: React.FC<FocusPointProps> = ({
                   key={w}
                   type="button"
                   onClick={() => onWeightChange(w)}
-                  className={`flex-1 py-3 rounded-2xl flex flex-col items-center gap-1 border transition-all ${
-                    isSelected ? 'bg-[#0a0a0a] border-white/20 shadow-md' : 'bg-[#0a0a0a] border-transparent opacity-60'
+                  className={`glass-btn flex-1 py-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${
+                    isSelected ? 'shadow-md' : 'opacity-60'
                   }`}
                 >
                   <Icon size={22} style={{ color: isSelected ? '#ffffff' : 'inherit' }} />
@@ -185,10 +160,10 @@ const FocusPoint: React.FC<FocusPointProps> = ({
                   key={p}
                   type="button"
                   onClick={() => onPeriodToggle(p)}
-                  className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                  className={`glass-btn flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
                     selectedPeriods.includes(p)
-                      ? 'bg-[#0a0a0a] text-white shadow-lg scale-100'
-                      : 'bg-[#0a0a0a] text-white/40 scale-95 opacity-60'
+                      ? 'text-white'
+                      : 'text-white/40'
                   }`}
                 >
                   {t[p as keyof typeof t]}
@@ -198,6 +173,7 @@ const FocusPoint: React.FC<FocusPointProps> = ({
           </div>
         )}
       </form>
+      </div>
     </div>
   );
 };

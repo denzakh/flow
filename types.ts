@@ -11,9 +11,13 @@ export enum TaskWeight {
   DEEP = 'deep'
 }
 
+export type Priority = 'low' | 'medium' | 'high';
+
 export type Language = 'en' | 'ru' | 'es';
 
 export type Recurrence = 'none' | 'daily' | 'weekly' | 'monthly' | 'all-blocks';
+
+export type OptimizationStrategy = 'balanced' | 'quick-wins' | 'priority-first';
 
 export interface AlarmConfig {
   enabled: boolean;
@@ -37,7 +41,7 @@ export interface Task {
   completed: boolean;
   createdAt: number;
   originalPeriod?: TimePeriod;
-  priority: 'low' | 'medium' | 'high';
+  priority: Priority;
   weight: TaskWeight;
   notes?: string;
   dueDate?: string;

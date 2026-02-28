@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutGrid, Plus, AlertCircle } from 'lucide-react';
+import { LayoutGrid, Plus, AlertCircle } from '../../utils/MaterialIcons';
 import { TimeBlockConfig, TimePeriod, Task, TaskWeight, Language } from '../../types.ts';
 import { WEIGHT_CONFIG, BLOCK_CAPACITY, TRANSLATIONS } from '../../constants.tsx';
 import TaskItem from '../TaskItem.tsx';
@@ -39,9 +39,31 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
   const t = TRANSLATIONS[language];
 
   return (
-    <section className="transition-all duration-700 relative p-6 rounded-[2.5rem] night-block" style={{ opacity: 1, transform: 'scale(1)', zIndex: 10 }}>
+    <section 
+      className={`glass-2 transition-all duration-700 relative p-6`}
+      style={{ 
+        opacity: 1, 
+        transform: 'scale(1)', 
+        zIndex: 10,
+        borderRadius: '40px',
+        padding: '24px',
+        border: isActive 
+          ? '1px solid rgba(212, 165, 116, 0.4)' 
+          : isNight 
+            ? 'none'
+            : '1px solid rgba(255, 255, 255, 0.08)',
+        boxShadow: isActive
+          ? '0 0 40px rgba(212, 165, 116, 0.15)'
+          : isNight
+            ? '-4px -4px 10px 0 rgba(129, 177, 213, 0.30) inset, 4px 4px 15px 0 rgba(160, 123, 78, 0.40)'
+            : undefined,
+        background: isNight ? 'rgba(1, 1, 1, 0.05)' : undefined,
+        backdropFilter: isNight ? 'none' : undefined,
+        WebkitBackdropFilter: isNight ? 'none' : undefined,
+      }}
+    >
       {isOverCapacity && (
-        <div className="absolute top-0 left-0 w-full h-full border-2 border-amber-500/20 rounded-[2.5rem] pointer-events-none animate-pulse" />
+        <div className="absolute top-0 left-0 w-full h-full border-2 border-amber-500/20 rounded-[2.5rem] pointer-events-none animate-pulse" style={{ borderRadius: '40px' }} />
       )}
       
       <div className="flex items-center justify-between mb-4 px-2 relative" style={{ zIndex: 1 }}>

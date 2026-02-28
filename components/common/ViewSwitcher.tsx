@@ -13,23 +13,20 @@ const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ viewMode, onModeChange, lan
   const t = TRANSLATIONS[language];
 
   return (
-    <div className="flex justify-between py-[10px] px-[10px]" style={{
-      borderRadius: '24px',
-      border: '1px solid #2B48AC',
-      background: 'rgba(1, 1, 1, 0.05)',
-      boxShadow: '-4px -4px 10px 0 rgba(129, 177, 213, 0.30) inset, 4px 4px 15px 0 rgba(160, 123, 78, 0.40)'
-    }}>
+    <div className="flex justify-between py-[10px] px-[10px] glass-2">
       {(['day', 'week', 'month', 'year'] as ViewMode[]).map(mode => (
         <button
           key={mode}
           onClick={() => onModeChange(mode)}
-          className="text-[12px] font-black uppercase tracking-widest transition-all"
+          className="text-[11px] font-black uppercase tracking-[0.15em] transition-all"
           style={{
             borderRadius: '16px',
-            background: viewMode === mode ? '#000' : 'transparent',
+            background: viewMode === mode ? '#0a0a0a' : 'transparent',
             boxShadow: viewMode === mode ? '0 10px 15px -3px rgba(16, 185, 129, 0.10), 0 4px 6px -4px rgba(16, 185, 129, 0.10)' : 'none',
-            padding: '10px 10px',
-            color: viewMode === mode ? '#ffffff' : 'rgba(255, 255, 255, 0.40)'
+            padding: '12px 20px',
+            color: viewMode === mode ? '#ffffff' : '#a0a0a0',
+            border: viewMode === mode ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid transparent',
+            minWidth: '70px',
           }}
         >
           {t[mode]}
