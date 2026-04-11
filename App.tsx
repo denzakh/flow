@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react';
 import { getIcon } from './constants.tsx';
-import { Task, TimePeriod, UserSettings, TimeBlockConfig, Language, AlarmConfig, Recurrence, TaskWeight, UserProfile } from './types.ts';
-import { TRANSLATIONS, ALARM_SOUNDS, RECOVERY_TIPS, WEIGHT_CONFIG } from './constants.tsx';
-import { suggestWeight } from './services/taskOptimizer.ts';
+import { Task, TimePeriod, UserSettings, TimeBlockConfig, Language, AlarmConfig, Recurrence, TaskWeight, UserProfile, VoiceSettings, VoiceCommand, CommandType } from './types.ts';
+import { TRANSLATIONS, ALARM_SOUNDS, RECOVERY_TIPS, WEIGHT_CONFIG, VOICE_TRANSLATIONS } from './constants.tsx';
+import { suggestWeight, adjustTaskPeriods } from './services/taskOptimizer.ts';
 import TaskItem from './components/TaskItem.tsx';
 import Auth from './components/Auth.tsx';
 import Header from './components/layout/Header.tsx';
@@ -15,6 +15,9 @@ import YearView from './components/views/YearView.tsx';
 import SettingsModal from './components/modals/SettingsModal.tsx';
 import AlarmModal from './components/modals/AlarmModal.tsx';
 import AlarmPlayingModal from './components/modals/AlarmPlayingModal.tsx';
+import { VoiceControlService } from './services/voice/VoiceControlService.ts';
+import { VoiceCommandProcessor } from './services/voice/VoiceCommandProcessor.ts';
+import VoiceFeedback from './components/voice/VoiceFeedback.tsx';
 import restIcon from './assets/images/Background+Border+Shadow.png';
 
 type ViewMode = 'day' | 'week' | 'month' | 'year';
@@ -75,6 +78,32 @@ const App: React.FC = () => {
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
   const [isInputFocused, setIsInputFocused] = useState(false);
 
+  // Voice control state
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
+    enabled: true,
+    language: settings.language === 'ru' ? 'ru' : 'en',
+    autoSubmit: false,
+    requireConfirmation: true,
+    ttsEnabled: true,
+    confidenceThreshold: 0.7
+  });
+  const [voiceService, setVoiceService] = useState<VoiceControlService | null>(null);
+  const [voiceProcessor, setVoiceProcessor] = useState<VoiceCommandProcessor | null>(null);
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
+  const [isVoiceProcessing, setIsVoiceProcessing] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState('');
+  const [voiceConfidence, setVoiceConfidence] = useState<number | undefined>();
+  const [voiceStatus, setVoiceStatus] = useState<'idle' | 'listening' | 'processing' | 'error' | 'success'>('idle');
+  const [voiceError, setVoiceError] = useState<string | undefined>();
+  const [showVoiceConfirmation, setShowVoiceConfirmation] = useState(false);
+  const [pendingVoiceCommand, setPendingVoiceCommand] = useState<VoiceCommand | null>(null);
+
+  // Capacity notification state
+  const [capacityNotification, setCapacityNotification] = useState<{
+    type: 'transferred' | 'full';
+    message: string;
+  } | null>(null);
+
   useEffect(() => {
     if (appState === 'splash') {
       const timer = setTimeout(() => {
@@ -97,6 +126,59 @@ const App: React.FC = () => {
     if (user) localStorage.setItem('flow_user', JSON.stringify(user));
     else localStorage.removeItem('flow_user');
   }, [user]);
+
+  // Initialize voice control service
+  useEffect(() => {
+    if (voiceSettings.enabled && !voiceService) {
+      const service = new VoiceControlService(voiceSettings);
+      setVoiceService(service);
+
+      const processor = new VoiceCommandProcessor(voiceSettings.language);
+      setVoiceProcessor(processor);
+    } else if (!voiceSettings.enabled && voiceService) {
+      voiceService.dispose();
+      setVoiceService(null);
+      setVoiceProcessor(null);
+    }
+  }, [voiceSettings.enabled]);
+
+  // Update voice service settings when they change
+  useEffect(() => {
+    if (voiceService && voiceProcessor) {
+      voiceService.updateSettings(voiceSettings);
+      voiceProcessor.setLanguage(voiceSettings.language);
+    }
+  }, [voiceSettings, voiceService, voiceProcessor]);
+
+  // Basic task operations (must be declared before voice handlers)
+  const toggleTask = useCallback((id: string) => setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t)), []);
+  const deleteTask = useCallback((id: string) => setTasks(prev => prev.filter(t => t.id !== id)), []);
+  const updateTask = useCallback((id: string, updates: Partial<Task>) => setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t)), []);
+
+  // Bulk task operations
+  const deleteAllCompletedTasks = useCallback(() => {
+    setTasks(prev => prev.filter(t => !t.completed));
+  }, []);
+
+  const deleteAllTasks = useCallback(() => {
+    setTasks([]);
+  }, []);
+
+  const getTaskStats = useCallback(() => {
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.completed).length;
+    const active = total - completed;
+    return { total, completed, active };
+  }, [tasks]);
+
+  const navigateDate = (direction: number) => {
+    const newDate = new Date(viewDate);
+    if (viewMode === 'day') newDate.setDate(newDate.getDate() + direction);
+    else if (viewMode === 'week') newDate.setDate(newDate.getDate() + direction * 7);
+    else if (viewMode === 'month') newDate.setMonth(newDate.getMonth() + direction);
+    else if (viewMode === 'year') newDate.setFullYear(newDate.getFullYear() + direction);
+    setViewDate(newDate);
+  };
 
   const isWindDown = useMemo(() => {
     const [rH, rM] = settings.restTime.split(':').map(Number);
@@ -129,12 +211,6 @@ const App: React.FC = () => {
     return TimePeriod.EVENING;
   }, [settings, currentTime]);
 
-  useEffect(() => {
-    if (appState === 'ready' && activePeriodId !== TimePeriod.NIGHT && selectedPeriods.length === 1 && selectedPeriods[0] === TimePeriod.MORNING) {
-      setSelectedPeriods([activePeriodId]);
-    }
-  }, [activePeriodId, appState]);
-
   const isNightSilence = activePeriodId === TimePeriod.NIGHT;
 
   const isRecoveryMode = useMemo(() => {
@@ -163,6 +239,308 @@ const App: React.FC = () => {
       { id: TimePeriod.NIGHT, label: t.night, startTime: formatTime(restMinutes), endTime: formatTime(wakeMinutes), icon: 'Moon' }
     ] as TimeBlockConfig[];
   }, [settings, t]);
+
+  // Handle voice command result
+  const handleVoiceCommand = useCallback(async (command: VoiceCommand) => {
+    setIsVoiceProcessing(true);
+    setVoiceStatus('processing');
+
+    console.log('🎤 Received command:', command.type, 'intent:', command.intent);
+
+    try {
+      // Check confidence threshold
+      if (command.confidence < voiceSettings.confidenceThreshold && voiceSettings.requireConfirmation) {
+        setPendingVoiceCommand(command);
+        setShowVoiceConfirmation(true);
+        setIsVoiceProcessing(false);
+        setVoiceStatus('idle');
+        return;
+      }
+
+      // Execute command
+      await executeVoiceCommand(command);
+
+      // Success feedback
+      if (voiceSettings.ttsEnabled && voiceService) {
+        const feedback = getVoiceFeedback(command.type, command.intent, true);
+        console.log('🔊 Speaking feedback:', feedback);
+        voiceService.speak(feedback);
+      }
+
+      setVoiceStatus('success');
+      setTimeout(() => setVoiceStatus('idle'), 2000);
+    } catch (error) {
+      console.error('Voice command error:', error);
+      setVoiceStatus('error');
+      setVoiceError('Failed to execute command');
+
+      if (voiceSettings.ttsEnabled && voiceService) {
+        voiceService.speak(VOICE_TRANSLATIONS[voiceSettings.language].error);
+      }
+
+      setTimeout(() => {
+        setVoiceStatus('idle');
+        setVoiceError(undefined);
+      }, 3000);
+    } finally {
+      setIsVoiceProcessing(false);
+    }
+  }, [voiceSettings, voiceService, tasks, viewDate, viewMode, settings]);
+
+  // Execute voice command
+  const executeVoiceCommand = useCallback(async (command: VoiceCommand) => {
+    switch (command.type) {
+      case CommandType.ADD_TASK:
+        if (command.entities.title) {
+          const weight = suggestWeight(command.entities.title);
+          let periodsToUse = selectedRecurrence === 'all-blocks'
+            ? [TimePeriod.MORNING, TimePeriod.AFTERNOON, TimePeriod.EVENING]
+            : selectedPeriods.length > 0 ? [...selectedPeriods] : [activePeriodId];
+
+          // Filter out NIGHT period and check capacity
+          periodsToUse = periodsToUse.filter(p => p !== TimePeriod.NIGHT);
+
+          console.log('🎤 Voice add task:', command.entities.title, 'periods:', periodsToUse, 'date:', todayStr);
+          console.log('🕐 Current time:', currentTime, 'active period:', activePeriodId);
+
+          // Check capacity and adjust periods if needed (with current time context)
+          const adjustment = adjustTaskPeriods(tasks, periodsToUse, todayStr, weight, activePeriodId, currentTime);
+
+          console.log('🎤 Voice adjustment:', adjustment);
+
+          if (adjustment.transferred) {
+            periodsToUse = adjustment.periods;
+            const taskDate = adjustment.date;
+
+            const periodNames = {
+              [TimePeriod.MORNING]: t.morning,
+              [TimePeriod.AFTERNOON]: t.afternoon,
+              [TimePeriod.EVENING]: t.evening
+            };
+
+            const isNewDay = taskDate !== todayStr;
+
+            let message = `Задача "${command.entities.title}"`;
+            if (isNewDay) {
+              const tomorrow = new Date(taskDate);
+              const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
+              message += ` перенесена на ${periodName} завтра (${tomorrow.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })})`;
+            } else {
+              const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
+              message += ` перенесена на ${periodName}`;
+            }
+
+            console.log('🎤 Voice transferred:', message);
+
+            setCapacityNotification({
+              type: 'transferred',
+              message
+            });
+            setTimeout(() => setCapacityNotification(null), 5000);
+          } else if (adjustment.allFull) {
+            setCapacityNotification({
+              type: 'full',
+              message: 'Все блоки переполнены! Задача добавлена с превышением лимита.'
+            });
+            setTimeout(() => setCapacityNotification(null), 5000);
+          }
+
+          const newTask: Task = {
+            id: Math.random().toString(36).substr(2, 9),
+            title: command.entities.title,
+            periods: periodsToUse,
+            completed: false,
+            createdAt: Date.now(),
+            priority: 'medium',
+            weight,
+            recurrence: 'none',
+            dueDate: adjustment.date
+          };
+
+          console.log('🎤 Creating voice task:', newTask);
+
+          setTasks([...tasks, newTask]);
+        }
+        break;
+
+      case CommandType.TOGGLE_TASK:
+        if (command.entities.index !== undefined) {
+          const taskIndex = command.entities.index - 1;
+          if (taskIndex >= 0 && taskIndex < tasks.length) {
+            toggleTask(tasks[taskIndex].id);
+          }
+        } else if (command.entities.title) {
+          const task = tasks.find(t =>
+            t.title.toLowerCase().includes(command.entities.title!.toLowerCase())
+          );
+          if (task) {
+            toggleTask(task.id);
+          }
+        }
+        break;
+
+      case CommandType.DELETE_TASK:
+        if (command.entities.index !== undefined) {
+          const taskIndex = command.entities.index - 1;
+          if (taskIndex >= 0 && taskIndex < tasks.length) {
+            deleteTask(tasks[taskIndex].id);
+          }
+        }
+        break;
+
+      case CommandType.NAVIGATE_DATE:
+        if (command.entities.direction === 'next') {
+          navigateDate(1);
+        } else if (command.entities.direction === 'prev') {
+          navigateDate(-1);
+        } else if (command.entities.direction === 'today') {
+          const today = new Date();
+          setViewDate(today);
+          // Also reset view mode to day if in week/month/year
+          if (viewMode !== 'day') {
+            setViewMode('day');
+          }
+        }
+        break;
+
+      case CommandType.CHANGE_VIEW:
+        if (command.entities.viewMode) {
+          setViewMode(command.entities.viewMode);
+        }
+        break;
+
+      case CommandType.UPDATE_TASK:
+        console.log('🔄 UPDATE_TASK command:', command);
+        if (command.entities.index !== undefined) {
+          const taskIndex = command.entities.index - 1;
+          console.log('📍 Task index:', taskIndex, '/', tasks.length);
+          if (taskIndex >= 0 && taskIndex < tasks.length) {
+            const task = tasks[taskIndex];
+            console.log('✅ Task:', task.title, 'weight:', task.weight);
+            const updates: Partial<Task> = {};
+
+            if (command.entities.weight) {
+              updates.weight = command.entities.weight;
+              console.log('⚖️ New weight:', command.entities.weight);
+            }
+
+            if (command.entities.period) {
+              updates.periods = [command.entities.period!];
+              console.log('🕐 New period:', command.entities.period);
+            }
+
+            if (command.entities.priority) {
+              updates.priority = command.entities.priority;
+              console.log('🔥 New priority:', command.entities.priority);
+            }
+
+            if (Object.keys(updates).length > 0) {
+              console.log('💾 Updating:', task.id, updates);
+              updateTask(tasks[taskIndex].id, updates);
+            } else {
+              console.log('⚠️ No updates');
+            }
+          } else {
+            console.log('❌ Index out of range');
+          }
+        } else {
+          console.log('❌ No index');
+        }
+        break;
+    }
+  }, [tasks, selectedPeriods, selectedRecurrence, activePeriodId, todayStr, toggleTask, deleteTask, updateTask, navigateDate, t, setCapacityNotification]);
+
+  // Toggle voice listening
+  const toggleVoiceListening = useCallback(() => {
+    if (!voiceService) return;
+
+    if (isVoiceListening) {
+      voiceService.stopListening();
+      setIsVoiceListening(false);
+      setVoiceStatus('idle');
+      setVoiceTranscript('');
+      setVoiceConfidence(undefined);
+    } else {
+      setVoiceStatus('listening');
+      setIsVoiceListening(true);
+
+      voiceService.startListening(
+        (transcript, isFinal, confidence) => {
+          setVoiceTranscript(transcript);
+
+          if (confidence !== undefined) {
+            setVoiceConfidence(confidence);
+          }
+
+          if (isFinal && voiceProcessor) {
+            const command = voiceProcessor.parseCommand(transcript);
+            handleVoiceCommand(command);
+            setIsVoiceListening(false);
+          }
+        },
+        (error) => {
+          console.error('Voice recognition error:', error);
+          setVoiceStatus('error');
+          setVoiceError(error);
+          setIsVoiceListening(false);
+
+          setTimeout(() => {
+            setVoiceStatus('idle');
+            setVoiceError(undefined);
+          }, 3000);
+        }
+      );
+    }
+  }, [voiceService, isVoiceListening, voiceProcessor, handleVoiceCommand]);
+
+  // Get voice feedback message
+  const getVoiceFeedback = (commandType: CommandType, intent: string, success: boolean): string => {
+    const lang = voiceSettings.language;
+    const translations = VOICE_TRANSLATIONS[lang];
+
+    if (!success) {
+      return translations.error;
+    }
+
+    switch (commandType) {
+      case CommandType.ADD_TASK:
+        return translations.taskAdded;
+      case CommandType.DELETE_TASK:
+        return translations.taskDeleted;
+      case CommandType.TOGGLE_TASK:
+        return translations.taskCompleted;
+      case CommandType.NAVIGATE_DATE:
+        return translations.navigated;
+      case CommandType.CHANGE_VIEW:
+        return translations.viewChanged;
+      case CommandType.UPDATE_TASK:
+        return translations.taskUpdated;
+      default:
+        return translations.navigated;
+    }
+  };
+
+  // Handle voice confirmation
+  const handleVoiceConfirmation = useCallback((confirmed: boolean) => {
+    setShowVoiceConfirmation(false);
+
+    if (confirmed && pendingVoiceCommand) {
+      executeVoiceCommand(pendingVoiceCommand);
+
+      if (voiceSettings.ttsEnabled && voiceService) {
+        const feedback = getVoiceFeedback(pendingVoiceCommand.type, pendingVoiceCommand.intent, true);
+        voiceService.speak(feedback);
+      }
+    }
+
+    setPendingVoiceCommand(null);
+  }, [pendingVoiceCommand, voiceSettings, voiceService, executeVoiceCommand]);
+
+  useEffect(() => {
+    if (appState === 'ready' && activePeriodId !== TimePeriod.NIGHT && selectedPeriods.length === 1 && selectedPeriods[0] === TimePeriod.MORNING) {
+      setSelectedPeriods([activePeriodId]);
+    }
+  }, [activePeriodId, appState]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -251,9 +629,9 @@ const App: React.FC = () => {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
 
-    const periodsToUse = selectedRecurrence === 'all-blocks'
+    let periodsToUse = selectedRecurrence === 'all-blocks'
       ? [TimePeriod.MORNING, TimePeriod.AFTERNOON, TimePeriod.EVENING]
-      : selectedPeriods;
+      : [...selectedPeriods]; // Create a copy
 
     const baseTask: Omit<Task, 'id' | 'periods' | 'dueDate'> = {
       title: newTaskTitle,
@@ -264,8 +642,59 @@ const App: React.FC = () => {
       recurrence: selectedRecurrence
     };
 
-    const targetDate = viewMode === 'day' ? todayStr : viewDate.toISOString().split('T')[0];
+    let targetDate = viewMode === 'day' ? todayStr : viewDate.toISOString().split('T')[0];
+
+    console.log('📝 Adding task:', newTaskTitle, 'periods:', periodsToUse, 'date:', targetDate);
+    console.log('🕐 Current time:', currentTime, 'active period:', activePeriodId);
+
+    // Check capacity and adjust periods if needed (pass current time and period)
+    const adjustment = adjustTaskPeriods(tasks, periodsToUse, targetDate, selectedWeight, activePeriodId, currentTime);
+
+    console.log('🔄 Adjustment result:', adjustment);
+
+    if (adjustment.transferred) {
+      // Task was transferred to a different period or day
+      periodsToUse = adjustment.periods;
+      targetDate = adjustment.date;
+
+      const periodNames = {
+        [TimePeriod.MORNING]: t.morning,
+        [TimePeriod.AFTERNOON]: t.afternoon,
+        [TimePeriod.EVENING]: t.evening
+      };
+
+      const isNewDay = targetDate !== todayStr;
+
+      let message = '';
+      if (isNewDay) {
+        const tomorrow = new Date(targetDate);
+        const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
+        message = `Задача перенесена на ${periodName} завтра (${tomorrow.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })})`;
+      } else {
+        const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
+        message = `Задача перенесена на ${periodName} (блок переполнен)`;
+      }
+
+      console.log('✅ Task transferred:', message);
+
+      setCapacityNotification({
+        type: 'transferred',
+        message
+      });
+      setTimeout(() => setCapacityNotification(null), 5000);
+    } else if (adjustment.allFull) {
+      // All periods are full
+      console.log('⚠️ All periods full');
+      setCapacityNotification({
+        type: 'full',
+        message: 'Все временные блоки переполнены! Задача добавлена с превышением лимита.'
+      });
+      setTimeout(() => setCapacityNotification(null), 5000);
+    }
+
     const newTask: Task = { ...baseTask, id: Math.random().toString(36).substr(2, 9), periods: periodsToUse, dueDate: targetDate };
+
+    console.log('✨ Creating task:', newTask);
 
     setTasks([...tasks, newTask]);
     setNewTaskTitle('');
@@ -273,19 +702,6 @@ const App: React.FC = () => {
     if (activePeriodId !== TimePeriod.NIGHT) {
       setSelectedPeriods([activePeriodId]);
     }
-  };
-
-  const toggleTask = useCallback((id: string) => setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t)), []);
-  const deleteTask = useCallback((id: string) => setTasks(prev => prev.filter(t => t.id !== id)), []);
-  const updateTask = useCallback((id: string, updates: Partial<Task>) => setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t)), []);
-
-  const navigateDate = (direction: number) => {
-    const newDate = new Date(viewDate);
-    if (viewMode === 'day') newDate.setDate(newDate.getDate() + direction);
-    else if (viewMode === 'week') newDate.setDate(newDate.getDate() + direction * 7);
-    else if (viewMode === 'month') newDate.setMonth(newDate.getMonth() + direction);
-    else if (viewMode === 'year') newDate.setFullYear(newDate.getFullYear() + direction);
-    setViewDate(newDate);
   };
 
   const handleSaveSettings = () => {
@@ -312,7 +728,6 @@ const App: React.FC = () => {
   };
 
   if (appState === 'splash') {
-    console.log('Rendering splash screen');
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0a0a0a] z-[100]" style={{ background: '#0a0a0a' }}>
         <BackgroundSpots isWindDown={false} />
@@ -329,11 +744,9 @@ const App: React.FC = () => {
   }
 
   if (appState === 'auth') {
-    console.log('Rendering auth screen');
     return <Auth lang={settings.language} onAuth={(u) => { setUser(u); setAppState('ready'); }} />;
   }
 
-  console.log('Rendering main app, viewMode:', viewMode);
   return (
     <div className="min-h-screen max-w-lg mx-auto px-6 py-8 relative">
       <BackgroundSpots isWindDown={isWindDown} />
@@ -354,7 +767,58 @@ const App: React.FC = () => {
         onSettingsClick={() => setShowSettings(true)}
         onAlarmClick={() => setShowAlarmMenu(true)}
         language={settings.language}
+        isVoiceListening={isVoiceListening}
+        isVoiceSupported={voiceService?.isRecognitionSupported() || false}
+        onVoiceClick={toggleVoiceListening}
+        isVoiceEnabled={voiceSettings.enabled}
       />
+
+      <VoiceFeedback
+        isListening={isVoiceListening}
+        isProcessing={isVoiceProcessing}
+        transcript={voiceTranscript}
+        confidence={voiceConfidence}
+        status={voiceStatus}
+        errorMessage={voiceError}
+      />
+
+      {capacityNotification && (
+        <div className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top duration-300 ${
+          capacityNotification.type === 'transferred'
+            ? 'bg-emerald-500/90 text-white'
+            : 'bg-amber-500/90 text-white'
+        } backdrop-blur-sm`}>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold">
+              {capacityNotification.message}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {showVoiceConfirmation && pendingVoiceCommand && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card max-w-md w-full p-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <h3 className="text-lg font-light text-white mb-4">
+              {VOICE_TRANSLATIONS[voiceSettings.language].confirmAdd.replace('{title}', pendingVoiceCommand.entities.title || '')}
+            </h3>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleVoiceConfirmation(false)}
+                className="flex-1 py-2 px-4 rounded-lg bg-white/10 text-white/80 hover:bg-white/20 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleVoiceConfirmation(true)}
+                className="flex-1 py-2 px-4 rounded-lg bg-active text-white hover:opacity-90 transition-opacity"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col gap-4 mb-6">
         <ViewSwitcher
@@ -386,6 +850,54 @@ const App: React.FC = () => {
             collapsedBlocks={collapsedBlocks}
             language={settings.language}
             onTaskAdd={(title, periods, recurrence, weight) => {
+              console.log('📝 FocusPoint adding task:', title, 'periods:', periods, 'weight:', weight);
+
+              // Check capacity and adjust periods if needed
+              const adjustment = adjustTaskPeriods(tasks, periods, todayStr, weight, activePeriodId, currentTime);
+
+              console.log('🔄 FocusPoint adjustment:', adjustment);
+
+              let finalPeriods = periods;
+              let finalDate = todayStr;
+
+              if (adjustment.transferred) {
+                finalPeriods = adjustment.periods;
+                finalDate = adjustment.date;
+
+                const periodNames = {
+                  [TimePeriod.MORNING]: t.morning,
+                  [TimePeriod.AFTERNOON]: t.afternoon,
+                  [TimePeriod.EVENING]: t.evening
+                };
+
+                const isNewDay = finalDate !== todayStr;
+
+                let message = '';
+                if (isNewDay) {
+                  const tomorrow = new Date(finalDate);
+                  const periodName = finalPeriods[0] ? periodNames[finalPeriods[0]] : '';
+                  message = `Задача перенесена на ${periodName} завтра (${tomorrow.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })})`;
+                } else {
+                  const periodName = finalPeriods[0] ? periodNames[finalPeriods[0]] : '';
+                  message = `Задача перенесена на ${periodName} (блок переполнен)`;
+                }
+
+                console.log('✅ FocusPoint task transferred:', message);
+
+                setCapacityNotification({
+                  type: 'transferred',
+                  message
+                });
+                setTimeout(() => setCapacityNotification(null), 5000);
+              } else if (adjustment.allFull) {
+                console.log('⚠️ FocusPoint: All periods full');
+                setCapacityNotification({
+                  type: 'full',
+                  message: 'Все временные блоки переполнены! Задача добавлена с превышением лимита.'
+                });
+                setTimeout(() => setCapacityNotification(null), 5000);
+              }
+
               const baseTask: Omit<Task, 'id' | 'periods' | 'dueDate'> = {
                 title,
                 completed: false,
@@ -394,7 +906,10 @@ const App: React.FC = () => {
                 weight,
                 recurrence
               };
-              const newTask: Task = { ...baseTask, id: Math.random().toString(36).substr(2, 9), periods, dueDate: todayStr };
+
+              console.log('✨ FocusPoint creating task:', { ...baseTask, periods: finalPeriods, dueDate: finalDate });
+
+              const newTask: Task = { ...baseTask, id: Math.random().toString(36).substr(2, 9), periods: finalPeriods, dueDate: finalDate };
               setTasks([...tasks, newTask]);
               setNewTaskTitle('');
               setSelectedRecurrence('none');
@@ -409,6 +924,8 @@ const App: React.FC = () => {
             onPeriodToggle={togglePeriodSelection}
             onRecurrenceChange={setSelectedRecurrence}
             onInputFocusChange={setIsInputFocused}
+            onDeleteAllCompleted={deleteAllCompletedTasks}
+            onDeleteAll={deleteAllTasks}
             selectedWeight={selectedWeight}
             selectedPeriods={selectedPeriods}
             selectedRecurrence={selectedRecurrence}
@@ -428,6 +945,8 @@ const App: React.FC = () => {
           tempLang={tempLang}
           tempAlarm={tempAlarm}
           error={settingsError}
+          voiceSettings={voiceSettings}
+          onVoiceSettingsChange={setVoiceSettings}
           onSave={handleSaveSettings}
           onClose={() => setShowSettings(false)}
           onLogout={handleLogout}

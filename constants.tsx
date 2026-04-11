@@ -190,6 +190,59 @@ export const TRANSLATIONS = {
   }
 };
 
+export const VOICE_TRANSLATIONS = {
+  en: {
+    listening: 'Listening...',
+    processing: 'Processing...',
+    error: 'Sorry, I didn\'t catch that',
+    confirmAdd: 'Add task "{title}"?',
+    confirmDelete: 'Delete this task?',
+    confirmToggle: 'Mark task as completed?',
+    taskAdded: 'Task added',
+    taskDeleted: 'Task deleted',
+    taskCompleted: 'Task completed',
+    taskUpdated: 'Task updated',
+    navigated: 'Done',
+    viewChanged: 'View changed',
+    noMicrophone: 'Microphone not available',
+    permissionDenied: 'Microphone permission denied',
+    voiceSettings: 'Voice Control',
+    enableVoice: 'Enable Voice Control',
+    voiceLanguage: 'Voice Language',
+    autoSubmit: 'Auto Submit Commands',
+    requireConfirmation: 'Require Confirmation',
+    enableTTS: 'Voice Feedback',
+    confidenceThreshold: 'Recognition Confidence',
+    russian: 'Russian',
+    english: 'English'
+  },
+  ru: {
+    listening: 'Слушаю...',
+    processing: 'Обработка...',
+    error: 'Извините, я не понял',
+    confirmAdd: 'Добавить задачу "{title}"?',
+    confirmDelete: 'Удалить эту задачу?',
+    confirmToggle: 'Отметить задачу выполненной?',
+    taskAdded: 'Задача добавлена',
+    taskDeleted: 'Задача удалена',
+    taskCompleted: 'Задача выполнена',
+    taskUpdated: 'Задача обновлена',
+    navigated: 'Готово',
+    viewChanged: 'Вид изменен',
+    noMicrophone: 'Микрофон недоступен',
+    permissionDenied: 'Доступ к микрофону запрещен',
+    voiceSettings: 'Голосовое управление',
+    enableVoice: 'Включить голосовое управление',
+    voiceLanguage: 'Язык голоса',
+    autoSubmit: 'Автоматическая отправка',
+    requireConfirmation: 'Требовать подтверждение',
+    enableTTS: 'Голосовая обратная связь',
+    confidenceThreshold: 'Уверенность распознавания',
+    russian: 'Русский',
+    english: 'Английский'
+  }
+};
+
 export const BLOCK_CAPACITY = 12;
 
 export const getIcon = (iconName: string, className?: string, size: number = 24) => {

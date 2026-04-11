@@ -64,3 +64,50 @@ export interface UserProfile {
   avatar?: string;
   isGuest: boolean;
 }
+
+// Voice Control Types
+export enum CommandType {
+  ADD_TASK = 'add_task',
+  TOGGLE_TASK = 'toggle_task',
+  DELETE_TASK = 'delete_task',
+  NAVIGATE_DATE = 'navigate_date',
+  CHANGE_VIEW = 'change_view',
+  UPDATE_TASK = 'update_task',
+  UNKNOWN = 'unknown'
+}
+
+export interface CommandEntities {
+  title?: string;
+  index?: number;
+  weight?: TaskWeight;
+  period?: TimePeriod;
+  date?: Date;
+  direction?: 'next' | 'prev' | 'today';
+  viewMode?: 'day' | 'week' | 'month' | 'year';
+}
+
+export interface VoiceCommand {
+  type: CommandType;
+  intent: string;
+  entities: CommandEntities;
+  confidence: number;
+  rawText: string;
+}
+
+export interface VoiceSettings {
+  enabled: boolean;
+  language: 'ru' | 'en';
+  autoSubmit: boolean;
+  requireConfirmation: boolean;
+  ttsEnabled: boolean;
+  ttsVoice?: string;
+  confidenceThreshold: number;
+}
+
+export interface VoiceCommandResult {
+  success: boolean;
+  command?: VoiceCommand;
+  error?: string;
+  requiresConfirmation: boolean;
+  confirmationMessage?: string;
+}

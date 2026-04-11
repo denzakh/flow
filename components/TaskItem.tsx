@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { Check, Trash2, ArrowRight, ChevronDown, ChevronUp, StickyNote, Calendar, Edit2, Save, X, MoreHorizontal, Repeat, Layers, Zap, Target } from '../utils/MaterialIcons';
+import { Check, Trash2, ArrowRight, ChevronDown, ChevronUp, StickyNote, Calendar, Edit2, Save, X, Repeat, Layers, Zap, Target } from '../utils/MaterialIcons';
 import { Task, TimePeriod, Language, TaskWeight } from '../types.ts';
 import { WEIGHT_CONFIG, TRANSLATIONS } from '../constants.tsx';
 
@@ -14,7 +14,6 @@ interface TaskItemProps {
 const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onUpdate }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [showMoveMenu, setShowMoveMenu] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
 
   const t = TRANSLATIONS[lang];
@@ -105,36 +104,14 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, lang, onToggle, onDelete, onU
         </div>
 
         <div className="flex items-center gap-1">
-          <button 
-            onClick={(e) => { e.stopPropagation(); setShowMoveMenu(!showMoveMenu); }} 
-            className="glass-btn w-9 h-9 flex items-center justify-center p-0"
-          >
-            <MoreHorizontal size={20} />
-          </button>
-          <button 
-            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} 
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
             className="glass-btn w-9 h-9 flex items-center justify-center p-0 opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <Trash2 size={20} />
           </button>
         </div>
       </div>
-
-      {showMoveMenu && (
-        <div className="absolute right-0 top-full mt-1 w-44 glass-container rounded-2xl z-20 overflow-hidden py-2 shadow-xl animate-in fade-in zoom-in duration-200">
-          <div className="px-4 py-2 text-[10px] font-black uppercase text-white/40 tracking-widest border-b border-white/10 mb-1">Manage Blocks</div>
-          {periods.map(p => (
-            <button
-              key={p.id}
-              onClick={() => { togglePeriod(p.id); setShowMoveMenu(false); }}
-              className={`w-full text-left px-4 py-3 text-xs font-black flex items-center justify-between transition-colors ${task.periods.includes(p.id) ? 'bg-[#0a0a0a] text-white' : 'text-white/60 hover:bg-white/5'}`}
-            >
-              {p.label}
-              {task.periods.includes(p.id) && <Check size={14} />}
-            </button>
-          ))}
-        </div>
-      )}
 
       {isExpanded && (
         <div className="mt-4 pt-4 border-t border-white/10 space-y-4 animate-in fade-in">

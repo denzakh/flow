@@ -1,7 +1,7 @@
-import React from 'react';
-import { X, LogOut, AlertCircle } from '../../utils/MaterialIcons';
-import { UserSettings, AlarmConfig, Language } from '../../types.ts';
-import { TRANSLATIONS } from '../../constants.tsx';
+import React, { useState, useEffect } from 'react';
+import { X, LogOut, AlertCircle, Mic } from '../../utils/MaterialIcons';
+import { UserSettings, AlarmConfig, Language, VoiceSettings } from '../../types.ts';
+import { TRANSLATIONS, VOICE_TRANSLATIONS } from '../../constants.tsx';
 
 interface SettingsModalProps {
   settings: UserSettings;
@@ -10,12 +10,14 @@ interface SettingsModalProps {
   tempLang: Language;
   tempAlarm: AlarmConfig;
   error: string | null;
+  voiceSettings?: VoiceSettings;
   onSave: () => void;
   onClose: () => void;
   onLogout: () => void;
   onTempWakeChange: (value: string) => void;
   onTempRestChange: (value: string) => void;
   onTempLangChange: (lang: Language) => void;
+  onVoiceSettingsChange?: (settings: VoiceSettings) => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -25,14 +27,45 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   tempLang,
   tempAlarm,
   error,
+  voiceSettings,
   onSave,
   onClose,
   onLogout,
   onTempWakeChange,
   onTempRestChange,
-  onTempLangChange
+  onTempLangChange,
+  onVoiceSettingsChange
 }) => {
   const t = TRANSLATIONS[settings.language];
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [tempVoiceSettings, setTempVoiceSettings] = useState<VoiceSettings>(
+    voiceSettings || {
+      enabled: false,
+      language: settings.language === 'ru' ? 'ru' : 'en',
+      autoSubmit: false,
+      requireConfirmation: true,
+      ttsEnabled: true,
+      confidenceThreshold: 0.7
+    }
+  );
+
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        setAvailableVoices(voices);
+      };
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
+
+  const handleVoiceToggle = (key: keyof VoiceSettings) => {
+    setTempVoiceSettings(prev => ({
+      ...prev,
+      [key]: !prev[key as keyof VoiceSettings]
+    }));
+  };
 
   return (
     <div className="fixed inset-0 z-[110] flex items-end animate-in slide-in-from-bottom duration-500">
@@ -92,6 +125,186 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               ))}
             </div>
           </div>
+
+          {/* Voice Control Section */}
+          {voiceSettings && onVoiceSettingsChange && (
+            <div className="pt-6 border-t border-white/5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Mic size={18} className="text-white/60" />
+                <label className="text-[10px] font-black uppercase text-white/60 tracking-widest">
+                  {VOICE_TRANSLATIONS[settings.language].voiceSettings || 'Voice Control'}
+                </label>
+              </div>
+
+              {/* Enable Voice Control */}
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].enableVoice || 'Enable Voice'}</label>
+                <button
+                  onClick={() => {
+                    handleVoiceToggle('enabled');
+                    onVoiceSettingsChange({ ...tempVoiceSettings, enabled: !tempVoiceSettings.enabled });
+                  }}
+                  className={`w-12 h-6 rounded-full transition-colors ${
+                    tempVoiceSettings.enabled ? 'bg-active' : 'bg-white/20'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full transition-transform ${
+                      tempVoiceSettings.enabled ? 'translate-x-6' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Voice Language */}
+              <div className="space-y-2">
+                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].voiceLanguage || 'Language'}</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setTempVoiceSettings(prev => ({ ...prev, language: 'ru' }));
+                      onVoiceSettingsChange({ ...tempVoiceSettings, language: 'ru' });
+                    }}
+                    className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${
+                      tempVoiceSettings.language === 'ru'
+                        ? 'bg-active text-white'
+                        : 'bg-white/10 text-white/60 hover:bg-white/20'
+                    }`}
+                  >
+                    {VOICE_TRANSLATIONS[settings.language].russian || 'RU'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTempVoiceSettings(prev => ({ ...prev, language: 'en' }));
+                      onVoiceSettingsChange({ ...tempVoiceSettings, language: 'en' });
+                    }}
+                    className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${
+                      tempVoiceSettings.language === 'en'
+                        ? 'bg-active text-white'
+                        : 'bg-white/10 text-white/60 hover:bg-white/20'
+                    }`}
+                  >
+                    {VOICE_TRANSLATIONS[settings.language].english || 'EN'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Auto Submit */}
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].autoSubmit || 'Auto Submit'}</label>
+                <button
+                  onClick={() => {
+                    handleVoiceToggle('autoSubmit');
+                    onVoiceSettingsChange({ ...tempVoiceSettings, autoSubmit: !tempVoiceSettings.autoSubmit });
+                  }}
+                  className={`w-12 h-6 rounded-full transition-colors ${
+                    tempVoiceSettings.autoSubmit ? 'bg-active' : 'bg-white/20'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full transition-transform ${
+                      tempVoiceSettings.autoSubmit ? 'translate-x-6' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Require Confirmation */}
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].requireConfirmation || 'Require Confirmation'}</label>
+                <button
+                  onClick={() => {
+                    handleVoiceToggle('requireConfirmation');
+                    onVoiceSettingsChange({ ...tempVoiceSettings, requireConfirmation: !tempVoiceSettings.requireConfirmation });
+                  }}
+                  className={`w-12 h-6 rounded-full transition-colors ${
+                    tempVoiceSettings.requireConfirmation ? 'bg-active' : 'bg-white/20'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full transition-transform ${
+                      tempVoiceSettings.requireConfirmation ? 'translate-x-6' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* TTS Feedback */}
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].enableTTS || 'Voice Feedback'}</label>
+                <button
+                  onClick={() => {
+                    handleVoiceToggle('ttsEnabled');
+                    onVoiceSettingsChange({ ...tempVoiceSettings, ttsEnabled: !tempVoiceSettings.ttsEnabled });
+                  }}
+                  className={`w-12 h-6 rounded-full transition-colors ${
+                    tempVoiceSettings.ttsEnabled ? 'bg-active' : 'bg-white/20'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full transition-transform ${
+                      tempVoiceSettings.ttsEnabled ? 'translate-x-6' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Voice Selection for TTS */}
+              {tempVoiceSettings.ttsEnabled && availableVoices.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-sm text-white/80">Voice</label>
+                  <select
+                    value={tempVoiceSettings.ttsVoice || ''}
+                    onChange={(e) => {
+                      const newSettings = { ...tempVoiceSettings, ttsVoice: e.target.value };
+                      setTempVoiceSettings(newSettings);
+                      onVoiceSettingsChange(newSettings);
+                    }}
+                    className="w-full bg-white/10 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-active"
+                  >
+                    <option value="" className="bg-gray-800">Default</option>
+                    {availableVoices
+                      .filter(voice => voice.lang.startsWith(tempVoiceSettings.language === 'ru' ? 'ru' : 'en'))
+                      .map(voice => (
+                        <option
+                          key={voice.name}
+                          value={voice.name}
+                          className="bg-gray-800"
+                        >
+                          {voice.name} ({voice.lang})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Confidence Threshold */}
+              <div className="space-y-2">
+                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].confidenceThreshold || 'Confidence Threshold'}</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={tempVoiceSettings.confidenceThreshold}
+                    onChange={(e) => {
+                      const newSettings = {
+                        ...tempVoiceSettings,
+                        confidenceThreshold: parseFloat(e.target.value)
+                      };
+                      setTempVoiceSettings(newSettings);
+                      onVoiceSettingsChange(newSettings);
+                    }}
+                    className="flex-1"
+                  />
+                  <span className="text-sm text-white/80 w-12 text-right">
+                    {Math.round(tempVoiceSettings.confidenceThreshold * 100)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="pt-6 border-t border-white/5 flex flex-col gap-3">
             <button

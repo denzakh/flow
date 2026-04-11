@@ -2,6 +2,7 @@ import React from 'react';
 import { TimePeriod, Task, Language } from '../../types.ts';
 import RecoveryBanner from '../blocks/RecoveryBanner.tsx';
 import FocusPoint from '../blocks/FocusPoint.tsx';
+import TaskManagerPanel from '../TaskManagerPanel';
 import TimeBlockList from '../blocks/TimeBlockList.tsx';
 
 interface DayViewProps {
@@ -25,6 +26,8 @@ interface DayViewProps {
   onPeriodToggle: (period: TimePeriod) => void;
   onRecurrenceChange: (recurrence: any) => void;
   onInputFocusChange: (focused: boolean) => void;
+  onDeleteAllCompleted: () => void;
+  onDeleteAll: () => void;
   selectedWeight: any;
   selectedPeriods: TimePeriod[];
   selectedRecurrence: any;
@@ -52,6 +55,8 @@ const DayView: React.FC<DayViewProps> = ({
   onPeriodToggle,
   onRecurrenceChange,
   onInputFocusChange,
+  onDeleteAllCompleted,
+  onDeleteAll,
   selectedWeight,
   selectedPeriods,
   selectedRecurrence,
@@ -66,7 +71,14 @@ const DayView: React.FC<DayViewProps> = ({
           language={language}
         />
       )}
-      
+
+      <TaskManagerPanel
+        tasks={tasks}
+        language={language}
+        onDeleteAllCompleted={onDeleteAllCompleted}
+        onDeleteAll={onDeleteAll}
+      />
+
       <FocusPoint
         onTaskAdd={onTaskAdd}
         selectedWeight={selectedWeight}

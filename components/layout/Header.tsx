@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, Settings } from '../../utils/MaterialIcons';
+import { Bell, Settings, Mic } from '../../utils/MaterialIcons';
 import { UserSettings } from '../../types.ts';
 import { TRANSLATIONS } from '../../constants.tsx';
 
@@ -11,6 +11,11 @@ interface HeaderProps {
   onSettingsClick: () => void;
   onAlarmClick: () => void;
   language: keyof typeof TRANSLATIONS;
+  // Voice control props
+  isVoiceListening?: boolean;
+  isVoiceSupported?: boolean;
+  onVoiceClick?: () => void;
+  isVoiceEnabled?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -20,7 +25,11 @@ const Header: React.FC<HeaderProps> = ({
   alarmEnabled,
   onSettingsClick,
   onAlarmClick,
-  language
+  language,
+  isVoiceListening = false,
+  isVoiceSupported = false,
+  onVoiceClick,
+  isVoiceEnabled = false
 }) => {
   const t = TRANSLATIONS[language];
 
@@ -52,6 +61,18 @@ const Header: React.FC<HeaderProps> = ({
           </h1>
         </div>
         <div className="flex gap-2">
+          {/* Voice Control Button */}
+          {isVoiceSupported && onVoiceClick && isVoiceEnabled && (
+            <button
+              onClick={onVoiceClick}
+              className={`glass-btn w-12 h-12 flex items-center justify-center ${
+                isVoiceListening ? 'voice-listening' : ''
+              }`}
+              title={isVoiceListening ? 'Stop listening' : 'Start voice control'}
+            >
+              <Mic size={22} className={isVoiceListening ? 'voice-icon-active' : ''} />
+            </button>
+          )}
           <button
             onClick={onAlarmClick}
             className={`glass-btn w-12 h-12 flex items-center justify-center ${

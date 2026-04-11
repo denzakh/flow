@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body><h1>Test</h1>
+<script>
+const tests = [
+  'Сегодня',
+  'сегодня',
+  'Сегодняшний день',
+  'на сегодня'
+];
+
+const pattern = /(?:покажи|перейди\s+на|сегодня|сейчас)/i;
+
+tests.forEach(test => {
+  console.log(test, 'match:', pattern.test(test));
+});
+</script>
+</body>
+</html>
