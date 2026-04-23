@@ -8,7 +8,45 @@ import { taskPatterns } from './commands/TaskCommands';
 import { navigationPatterns } from './commands/NavigationCommands';
 import { updatePatterns, numberMapping } from './commands/UpdateCommands';
 
-type Language = 'ru' | 'en';
+type Language = 'ru' | 'en' | 'es';
+
+// Noise phrases that should NOT become tasks
+const NOISE_PHRASES: Record<string, string[]> = {
+  ru: [
+    'окей гугл',
+    'привет',
+    'алиса',
+    'стоп',
+    'отмена',
+    'эй',
+    'хм',
+    'мм',
+    'эм'
+    // Убраны: 'да', 'нет', 'ага' — слишком короткие, блокируют нормальные команды
+  ],
+  en: [
+    'ok google',
+    'hey siri',
+    'hello',
+    'hi',
+    'stop',
+    'cancel',
+    'hey',
+    'um',
+    'hmm'
+    // Убраны: 'yeah', 'no', 'uh huh' — слишком короткие
+  ],
+  es: [
+    'oye siri',
+    'hola',
+    'para',
+    'cancela',
+    'eh',
+    'um',
+    'hmm'
+    // Убраны: 'si', 'no' — слишком короткие
+  ]
+};
 
 export class VoiceCommandProcessor {
   private language: Language;
@@ -18,56 +56,95 @@ export class VoiceCommandProcessor {
   }
 
   /**
+   * Нормализовать текст для распознавания команд
+   * - Приводит к нижнему регистру
+   * - Удаляет пунктуацию
+   * - Заменяет ё на е (STT часто возвращает inconsistently)
+   * - Удаляет лишние пробелы
+   */
+  private normalizeText(text: string): string {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/ё/g, 'е')         // STT often returns ё inconsistently
+      .replace(/[.,!?;:]+/g, '')  // strip punctuation
+      .replace(/\s+/g, ' ');      // collapse whitespace
+  }
+
+  /**
    * Главная функция обработки текста в команду
    */
-  parseCommand(text: string): VoiceCommand {
-    const trimmedText = text.trim();
-    if (!trimmedText) {
-      return this.createUnknownCommand(text);
+  parseCommand(text: string, sttConfidence?: number): VoiceCommand {
+    const normalizedText = this.normalizeText(text);
+    if (!normalizedText) {
+      return this.createUnknownCommand(text, sttConfidence);
+    }
+
+    // ПРОВЕРКА НА ШУМ В САМОМ НАЧАЛЕ (до любой другой обработки)
+    const noisePhrases = NOISE_PHRASES[this.language] || NOISE_PHRASES.en;
+
+    // Приводим normalizedText к нижнему регистру и обрезаем пробелы для надежного сравнения
+    const cleanNormalizedText = normalizedText.trim().toLowerCase();
+
+    // Используем точное совпадение для коротких фраз, includes() для длинных
+    const isNoise = noisePhrases.some(phrase => {
+      // Для фраз короче 6 символов — используем includes() для надежности
+      if (phrase.length < 6) {
+        return cleanNormalizedText.includes(phrase.toLowerCase());
+      }
+      // Для длинных фраз — проверка на вхождение
+      return cleanNormalizedText.includes(phrase.toLowerCase());
+    });
+
+    console.log('🔍 Noise check:', { original: text, normalized: normalizedText, cleanNormalized: cleanNormalizedText, matched: isNoise });
+
+    if (isNoise) {
+      console.log('🚫 Noise phrase detected, ignoring:', normalizedText);
+      return this.createUnknownCommand(text, sttConfidence, true);
     }
 
     // Попытка распознать конкретные команды
-    const command = this.tryRecognizeCommand(trimmedText);
+    const command = this.tryRecognizeCommand(normalizedText, sttConfidence);
 
     if (command.type !== CommandType.UNKNOWN) {
       return command;
     }
 
     // Fallback: любой текст считается добавлением задачи
-    return this.createAddTaskCommand(trimmedText);
+    return this.createAddTaskCommand(normalizedText, sttConfidence);
   }
 
   /**
    * Попытка распознать конкретную команду
    */
-  private tryRecognizeCommand(text: string): VoiceCommand {
+  private tryRecognizeCommand(text: string, sttConfidence?: number): VoiceCommand {
     // Проверка команд навигации
-    const navCommand = this.tryNavigationCommand(text);
+    const navCommand = this.tryNavigationCommand(text, sttConfidence);
     if (navCommand) return navCommand;
 
-    // Проверка команд обновления (ПЕРЕД добавлением, чтобы не перехватить "сделай задачу X")
-    const updateCommand = this.tryUpdateCommand(text);
-    if (updateCommand) return updateCommand;
-
-    // Проверка команд переключения задач
-    const toggleCommand = this.tryToggleCommand(text);
-    if (toggleCommand) return toggleCommand;
-
-    // Проверка команд удаления
-    const deleteCommand = this.tryDeleteCommand(text);
+    // Проверка команд удаления (ПЕРЕД update, чтобы не перехватить "удали задачу")
+    const deleteCommand = this.tryDeleteCommand(text, sttConfidence);
     if (deleteCommand) return deleteCommand;
 
+    // Проверка команд переключения задач (ПЕРЕД update)
+    const toggleCommand = this.tryToggleCommand(text, sttConfidence);
+    if (toggleCommand) return toggleCommand;
+
+    // Проверка команд обновления (ПЕРЕД добавлением, чтобы не перехватить "сделай задачу X")
+    const updateCommand = this.tryUpdateCommand(text, sttConfidence);
+    if (updateCommand) return updateCommand;
+
     // Проверка команд изменения вида
-    const viewCommand = this.tryViewCommand(text);
+    const viewCommand = this.tryViewCommand(text, sttConfidence);
     if (viewCommand) return viewCommand;
 
-    return this.createUnknownCommand(text);
+    return this.createUnknownCommand(text, sttConfidence);
   }
 
   /**
    * Попытка распознать команду навигации
    */
-  private tryNavigationCommand(text: string): VoiceCommand | null {
+  private tryNavigationCommand(text: string, sttConfidence?: number): VoiceCommand | null {
     const patterns = navigationPatterns[this.language] || navigationPatterns.en;
 
     // Проверять в порядке специфичности: сначала view modes, потом days
@@ -83,32 +160,37 @@ export class VoiceCommandProcessor {
         const match = text.match(pattern);
         if (match) {
           const entities: CommandEntities = {};
+          // Навигационные команды имеют четкие паттерны, используем высокий confidence
+          // Если STT confidence есть и > 0, используем его, иначе высокий fallback
+          const confidence = (sttConfidence !== undefined && sttConfidence > 0)
+            ? Math.min(sttConfidence * 0.95, 0.98)
+            : 0.85;
 
           switch (action) {
             case 'nextDay':
               entities.direction = 'next';
-              return this.createCommand(CommandType.NAVIGATE_DATE, action, entities, text, 0.9);
+              return this.createCommand(CommandType.NAVIGATE_DATE, action, entities, text, confidence);
             case 'prevDay':
               entities.direction = 'prev';
-              return this.createCommand(CommandType.NAVIGATE_DATE, action, entities, text, 0.9);
+              return this.createCommand(CommandType.NAVIGATE_DATE, action, entities, text, confidence);
             case 'today':
               entities.direction = 'today';
-              return this.createCommand(CommandType.NAVIGATE_DATE, action, entities, text, 0.9);
+              return this.createCommand(CommandType.NAVIGATE_DATE, action, entities, text, confidence);
             case 'goToDay':
               entities.viewMode = 'day';
-              return this.createCommand(CommandType.CHANGE_VIEW, action, entities, text, 0.9);
+              return this.createCommand(CommandType.CHANGE_VIEW, action, entities, text, confidence);
             case 'goToWeek':
               entities.viewMode = 'week';
-              return this.createCommand(CommandType.CHANGE_VIEW, action, entities, text, 0.9);
+              return this.createCommand(CommandType.CHANGE_VIEW, action, entities, text, confidence);
             case 'goToMonth':
               entities.viewMode = 'month';
-              return this.createCommand(CommandType.CHANGE_VIEW, action, entities, text, 0.9);
+              return this.createCommand(CommandType.CHANGE_VIEW, action, entities, text, confidence);
             case 'goToYear':
               entities.viewMode = 'year';
-              return this.createCommand(CommandType.CHANGE_VIEW, action, entities, text, 0.9);
+              return this.createCommand(CommandType.CHANGE_VIEW, action, entities, text, confidence);
           }
 
-          return this.createCommand(CommandType.NAVIGATE_DATE, action, entities, text, 0.9);
+          return this.createCommand(CommandType.NAVIGATE_DATE, action, entities, text, confidence);
         }
       }
     }
@@ -119,12 +201,14 @@ export class VoiceCommandProcessor {
   /**
    * Попытка распознать команду переключения задачи
    */
-  private tryToggleCommand(text: string): VoiceCommand | null {
+  private tryToggleCommand(text: string, sttConfidence?: number): VoiceCommand | null {
     const patterns = taskPatterns[this.language]?.toggle || taskPatterns.en.toggle;
+    console.log('🔄 Trying toggle command:', text);
 
     for (const pattern of patterns) {
       const match = text.match(pattern);
       if (match) {
+        console.log('✅ Toggle pattern matched:', pattern.source);
         const entities: CommandEntities = {};
 
         // Извлечь индекс или название задачи
@@ -132,51 +216,66 @@ export class VoiceCommandProcessor {
           const index = this.parseNumber(match[1]);
           if (index > 0) {
             entities.index = index;
+            console.log('📍 Toggle by index:', index);
           } else {
-            entities.title = match[1].trim();
+            const extractedName = match[1].trim();
+            entities.title = extractedName;
+            console.log('🔄 Toggle pattern matched:', { text: text, taskName: extractedName });
           }
         }
 
-        return this.createCommand(CommandType.TOGGLE_TASK, 'toggle', entities, text, 0.85);
+        // Используем STT confidence если доступно, иначе 0.85
+        const confidence = sttConfidence !== undefined ? sttConfidence * 0.9 : 0.85;
+        return this.createCommand(CommandType.TOGGLE_TASK, 'toggle', entities, text, confidence);
       }
     }
 
+    console.log('❌ No toggle pattern matched');
     return null;
   }
 
   /**
    * Попытка распознать команду удаления
    */
-  private tryDeleteCommand(text: string): VoiceCommand | null {
+  private tryDeleteCommand(text: string, sttConfidence?: number): VoiceCommand | null {
     const patterns = taskPatterns[this.language]?.delete || taskPatterns.en.delete;
+    console.log('🗑️ Trying delete command:', text);
 
     for (const pattern of patterns) {
       const match = text.match(pattern);
       if (match) {
+        console.log('✅ Delete pattern matched:', pattern.source);
         const entities: CommandEntities = {};
 
         if (match[1]) {
           const index = this.parseNumber(match[1]);
           if (index > 0) {
             entities.index = index;
+            console.log('📍 Delete by index:', index);
+          } else {
+            entities.title = match[1].trim();
+            console.log('📍 Delete by title:', entities.title);
           }
         }
 
-        return this.createCommand(CommandType.DELETE_TASK, 'delete', entities, text, 0.85);
+        // Используем STT confidence если доступно, иначе 0.85
+        const confidence = sttConfidence !== undefined ? sttConfidence * 0.9 : 0.85;
+        return this.createCommand(CommandType.DELETE_TASK, 'delete', entities, text, confidence);
       }
     }
 
+    console.log('❌ No delete pattern matched');
     return null;
   }
 
   /**
    * Попытка распознать команду обновления
    */
-  private tryUpdateCommand(text: string): VoiceCommand | null {
+  private tryUpdateCommand(text: string, sttConfidence?: number): VoiceCommand | null {
     console.log('🔍 Trying update command:', text);
-    // Очищаем текст от знаков препинания в конце
-    const cleanText = text.replace(/[.!?,;:]+$/, '').trim();
-    console.log('🧹 Cleaned text:', cleanText);
+    // Нормализуем текст для pattern matching
+    const normalizedText = this.normalizeText(text);
+    console.log('🧹 Normalized text:', normalizedText);
 
     const patterns = updatePatterns[this.language] || updatePatterns.en;
     console.log('📋 Patterns loaded:', {
@@ -185,9 +284,12 @@ export class VoiceCommandProcessor {
       changePriority: patterns.changePriority?.length || 0
     });
 
+    // Используем STT confidence если доступно, иначе 0.8 для update команд
+    const baseConfidence = sttConfidence !== undefined ? sttConfidence * 0.85 : 0.8;
+
     // Проверка изменения веса
     for (const pattern of patterns.changeWeight) {
-      const match = cleanText.match(pattern);
+      const match = normalizedText.match(pattern);
       if (match && (match[1] || match[2])) {
         // Умное определение: где число, а где вес
         const group1 = match[1] ? match[1].trim() : '';
@@ -216,14 +318,14 @@ export class VoiceCommandProcessor {
 
         if (index > 0 && weight) {
           console.log('✅ UPDATE_TASK: changeWeight', entities);
-          return this.createCommand(CommandType.UPDATE_TASK, 'changeWeight', entities, text, 0.8);
+          return this.createCommand(CommandType.UPDATE_TASK, 'changeWeight', entities, text, baseConfidence);
         }
       }
     }
 
     // Проверка изменения периода
     for (const pattern of patterns.changePeriod) {
-      const match = cleanText.match(pattern);
+      const match = normalizedText.match(pattern);
       if (match && (match[1] || match[2])) {
         const group1 = match[1] ? match[1].trim() : '';
         const group2 = match[2] ? match[2].trim() : '';
@@ -250,7 +352,7 @@ export class VoiceCommandProcessor {
 
         if (index > 0 && period) {
           console.log('✅ UPDATE_TASK: changePeriod', entities);
-          return this.createCommand(CommandType.UPDATE_TASK, 'changePeriod', entities, text, 0.8);
+          return this.createCommand(CommandType.UPDATE_TASK, 'changePeriod', entities, text, baseConfidence);
         }
       }
     }
@@ -258,7 +360,7 @@ export class VoiceCommandProcessor {
     // Проверка изменения приоритета
     if (patterns.changePriority) {
       for (const pattern of patterns.changePriority) {
-        const match = cleanText.match(pattern);
+        const match = normalizedText.match(pattern);
         if (match && (match[1] || match[2])) {
           const group1 = match[1] ? match[1].trim() : '';
           const group2 = match[2] ? match[2].trim() : '';
@@ -285,7 +387,7 @@ export class VoiceCommandProcessor {
 
           if (index > 0 && priority) {
             console.log('✅ UPDATE_TASK: changePriority', entities);
-            return this.createCommand(CommandType.UPDATE_TASK, 'changePriority', entities, text, 0.8);
+            return this.createCommand(CommandType.UPDATE_TASK, 'changePriority', entities, text, baseConfidence);
           }
         }
       }
@@ -298,7 +400,7 @@ export class VoiceCommandProcessor {
   /**
    * Попытка распознать команду изменения вида
    */
-  private tryViewCommand(text: string): VoiceCommand | null {
+  private tryViewCommand(text: string, sttConfidence?: number): VoiceCommand | null {
     const viewPatterns: Record<string, RegExp> = {
       en: /(?:show|go to|switch to|показать|переключить)\s*(day|week|month|year|день|неделю|месяц|год)/i,
       ru: /(?:показать|переключи|перейди)\s*(?:на)?\s*(day|week|month|year|день|неделю|месяц|год)/i
@@ -310,12 +412,14 @@ export class VoiceCommandProcessor {
     if (match && match[1]) {
       const viewMode = this.parseViewMode(match[1]);
       if (viewMode) {
+        // Используем STT confidence если доступно, иначе 0.85
+        const confidence = sttConfidence !== undefined ? sttConfidence * 0.9 : 0.85;
         return this.createCommand(
           CommandType.CHANGE_VIEW,
           'changeView',
           { viewMode },
           text,
-          0.85
+          confidence
         );
       }
     }
@@ -326,16 +430,19 @@ export class VoiceCommandProcessor {
   /**
    * Создать команду добавления задачи
    */
-  private createAddTaskCommand(title: string): VoiceCommand {
+  private createAddTaskCommand(title: string, sttConfidence?: number): VoiceCommand {
     // Очистить title от ключевых слов команд
     const cleanTitle = this.cleanTitle(title);
+
+    // Используем STT confidence если доступно, иначе 0.75 для fallback
+    const confidence = (sttConfidence !== undefined && sttConfidence > 0) ? sttConfidence * 0.8 : 0.75;
 
     return this.createCommand(
       CommandType.ADD_TASK,
       'add',
       { title: cleanTitle },
       title,
-      0.75 // Более низкая уверенность для fallback команды
+      confidence
     );
   }
 
@@ -358,13 +465,14 @@ export class VoiceCommandProcessor {
   /**
    * Создать неизвестную команду
    */
-  private createUnknownCommand(text: string): VoiceCommand {
+  private createUnknownCommand(text: string, sttConfidence?: number, silent: boolean = false): VoiceCommand {
     return {
       type: CommandType.UNKNOWN,
       intent: 'unknown',
       entities: {},
       confidence: 0,
-      rawText: text
+      rawText: text,
+      silent
     };
   }
 
@@ -404,7 +512,6 @@ export class VoiceCommandProcessor {
       'быструю': TaskWeight.QUICK,
       'быстрое': TaskWeight.QUICK,
       'быстро': TaskWeight.QUICK,
-      'quick': TaskWeight.QUICK,
       'фокус': TaskWeight.FOCUSED,
       'фокусированная': TaskWeight.FOCUSED,
       'фокусированной': TaskWeight.FOCUSED,
@@ -414,15 +521,13 @@ export class VoiceCommandProcessor {
       'фокусировано': TaskWeight.FOCUSED,
       'фокусированном': TaskWeight.FOCUSED,
       'фокусированных': TaskWeight.FOCUSED,
-      'focused': TaskWeight.FOCUSED,
       'глубокая': TaskWeight.DEEP,
       'глубокой': TaskWeight.DEEP,
       'глубокий': TaskWeight.DEEP,
       'глубокую': TaskWeight.DEEP,
       'глубокое': TaskWeight.DEEP,
       'глубоко': TaskWeight.DEEP,
-      'глубоком': TaskWeight.DEEP,
-      'deep': TaskWeight.DEEP
+      'глубоком': TaskWeight.DEEP
     };
 
     // Точное совпадение
@@ -612,40 +717,6 @@ export class VoiceCommandProcessor {
     };
 
     return viewMap[normalized] || null;
-  }
-
-  /**
-   * Извлечь сущности из текста по паттерну
-   */
-  private extractEntities(text: string, pattern: RegExp): CommandEntities {
-    const entities: CommandEntities = {};
-    const match = text.match(pattern);
-
-    if (match) {
-      // Извлечь именованные группы из match
-      for (let i = 1; i < match.length; i++) {
-        if (match[i]) {
-          // Паттерн должен иметь именованные группы
-        }
-      }
-    }
-
-    return entities;
-  }
-
-  /**
-   * Рассчитать уверенность распознавания
-   */
-  private calculateConfidence(matches: number, textLength: number): number {
-    // Базовая уверенность на количестве совпадений
-    let confidence = Math.min(matches * 0.3, 0.9);
-
-    // Бонус за корректную длину текста
-    if (textLength >= 5 && textLength <= 50) {
-      confidence += 0.1;
-    }
-
-    return Math.min(confidence, 1.0);
   }
 
   /**

@@ -79,14 +79,23 @@ const App: React.FC = () => {
   const [isInputFocused, setIsInputFocused] = useState(false);
 
   // Voice control state
-  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
-    enabled: true,
-    language: settings.language === 'ru' ? 'ru' : 'en',
-    autoSubmit: false,
-    requireConfirmation: true,
-    ttsEnabled: true,
-    confidenceThreshold: 0.7
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(() => {
+    const saved = localStorage.getItem('flow_voice_settings');
+    return saved ? JSON.parse(saved) : {
+      enabled: true,
+      language: settings.language as 'ru' | 'en' | 'es',
+      autoSubmit: false,
+      requireConfirmation: true,
+      ttsEnabled: true,
+      confidenceThreshold: 0.7
+    };
   });
+
+  // Save voiceSettings to localStorage
+  useEffect(() => {
+    localStorage.setItem('flow_voice_settings', JSON.stringify(voiceSettings));
+  }, [voiceSettings]);
+
   const [voiceService, setVoiceService] = useState<VoiceControlService | null>(null);
   const [voiceProcessor, setVoiceProcessor] = useState<VoiceCommandProcessor | null>(null);
   const [isVoiceListening, setIsVoiceListening] = useState(false);
@@ -242,6 +251,14 @@ const App: React.FC = () => {
 
   // Handle voice command result
   const handleVoiceCommand = useCallback(async (command: VoiceCommand) => {
+    // ПРОВЕРКА НА ТИХИЙ ОТВЕТ (шумовые фразы)
+    if (command.silent === true) {
+      console.log('🔇 Silent command detected, ignoring:', command.rawText);
+      setIsVoiceProcessing(false);
+      setVoiceStatus('idle');
+      return;
+    }
+
     setIsVoiceProcessing(true);
     setVoiceStatus('processing');
 
@@ -250,6 +267,9 @@ const App: React.FC = () => {
     try {
       // Check confidence threshold
       if (command.confidence < voiceSettings.confidenceThreshold && voiceSettings.requireConfirmation) {
+        // Stop auto-restart before showing confirmation
+        voiceService?.stopListening();
+
         setPendingVoiceCommand(command);
         setShowVoiceConfirmation(true);
         setIsVoiceProcessing(false);
@@ -320,14 +340,20 @@ const App: React.FC = () => {
 
             const isNewDay = taskDate !== todayStr;
 
-            let message = `Задача "${command.entities.title}"`;
+            let message;
             if (isNewDay) {
               const tomorrow = new Date(taskDate);
               const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
-              message += ` перенесена на ${periodName} завтра (${tomorrow.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })})`;
+              const dateStr = tomorrow.toLocaleDateString(settings.language === 'ru' ? 'ru-RU' : settings.language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short' });
+              message = t.taskTransferredTomorrow
+                .replace('{title}', command.entities.title || '')
+                .replace('{period}', periodName)
+                .replace('{date}', dateStr);
             } else {
               const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
-              message += ` перенесена на ${periodName}`;
+              message = t.taskTransferred
+                .replace('{title}', command.entities.title || '')
+                .replace('{period}', periodName);
             }
 
             console.log('🎤 Voice transferred:', message);
@@ -340,7 +366,7 @@ const App: React.FC = () => {
           } else if (adjustment.allFull) {
             setCapacityNotification({
               type: 'full',
-              message: 'Все блоки переполнены! Задача добавлена с превышением лимита.'
+              message: t.allBlocksFull
             });
             setTimeout(() => setCapacityNotification(null), 5000);
           }
@@ -364,26 +390,57 @@ const App: React.FC = () => {
         break;
 
       case CommandType.TOGGLE_TASK:
+        console.log('🔄 UI Update:', { type: command.type, taskId: null, entities: command.entities });
         if (command.entities.index !== undefined) {
           const taskIndex = command.entities.index - 1;
+          console.log('🔄 Toggle by index:', taskIndex, 'tasks.length:', tasks.length);
           if (taskIndex >= 0 && taskIndex < tasks.length) {
-            toggleTask(tasks[taskIndex].id);
+            const taskId = tasks[taskIndex].id;
+            console.log('🔄 Toggling task:', taskId, tasks[taskIndex].title);
+            setTasks(prev => prev.map(t =>
+              t.id === taskId ? { ...t, completed: !t.completed } : t
+            ));
           }
         } else if (command.entities.title) {
+          console.log('🔄 Toggle by title:', command.entities.title);
+          // Нечёткое сравнение: ищем по включению (contains), а не точному совпадению
           const task = tasks.find(t =>
-            t.title.toLowerCase().includes(command.entities.title!.toLowerCase())
+            t.title.toLowerCase().includes(command.entities.title!.toLowerCase()) ||
+            command.entities.title!.toLowerCase().includes(t.title.toLowerCase())
           );
           if (task) {
-            toggleTask(task.id);
+            console.log('🔄 Toggling task:', task.id, task.title);
+            setTasks(prev => prev.map(t =>
+              t.id === task.id ? { ...t, completed: !t.completed } : t
+            ));
+          } else {
+            console.log('❌ Task not found by title:', command.entities.title);
           }
         }
         break;
 
       case CommandType.DELETE_TASK:
+        console.log('🗑️ UI Update:', { type: command.type, taskId: null, entities: command.entities });
         if (command.entities.index !== undefined) {
           const taskIndex = command.entities.index - 1;
+          console.log('🗑️ Delete by index:', taskIndex, 'tasks.length:', tasks.length);
           if (taskIndex >= 0 && taskIndex < tasks.length) {
-            deleteTask(tasks[taskIndex].id);
+            const taskId = tasks[taskIndex].id;
+            console.log('🗑️ Deleting task:', taskId, tasks[taskIndex].title);
+            setTasks(prev => prev.filter(t => t.id !== taskId));
+          }
+        } else if (command.entities.title) {
+          console.log('🗑️ Delete by title:', command.entities.title);
+          // Нечёткое сравнение: ищем по включению (contains), а не точному совпадению
+          const task = tasks.find(t =>
+            t.title.toLowerCase().includes(command.entities.title!.toLowerCase()) ||
+            command.entities.title!.toLowerCase().includes(t.title.toLowerCase())
+          );
+          if (task) {
+            console.log('🗑️ Deleting task:', task.id, task.title);
+            setTasks(prev => prev.filter(t => t.id !== task.id));
+          } else {
+            console.log('❌ Task not found by title:', command.entities.title);
           }
         }
         break;
@@ -454,12 +511,16 @@ const App: React.FC = () => {
   const toggleVoiceListening = useCallback(() => {
     if (!voiceService) return;
 
-    if (isVoiceListening) {
+    if (isVoiceListening || voiceStatus === 'listening') {
+      // Stop listening
       voiceService.stopListening();
       setIsVoiceListening(false);
       setVoiceStatus('idle');
       setVoiceTranscript('');
       setVoiceConfidence(undefined);
+      setShowVoiceConfirmation(false); // Close confirmation if open
+      setPendingVoiceCommand(null);
+      console.log('🛑 Voice stopped');
     } else {
       setVoiceStatus('listening');
       setIsVoiceListening(true);
@@ -468,12 +529,17 @@ const App: React.FC = () => {
         (transcript, isFinal, confidence) => {
           setVoiceTranscript(transcript);
 
-          if (confidence !== undefined) {
-            setVoiceConfidence(confidence);
-          }
+          // STT confidence often returns 0 in Chrome — use threshold as fallback
+          const effectiveConfidence = (confidence === undefined || confidence === 0)
+            ? voiceSettings.confidenceThreshold + 0.1 // Default to slightly above threshold
+            : confidence;
+
+          setVoiceConfidence(effectiveConfidence);
+          console.log('🎯 STT Confidence:', effectiveConfidence.toFixed(2), '(raw:', confidence, ') Threshold:', voiceSettings.confidenceThreshold);
 
           if (isFinal && voiceProcessor) {
-            const command = voiceProcessor.parseCommand(transcript);
+            const command = voiceProcessor.parseCommand(transcript, effectiveConfidence);
+            console.log('🎤 Command confidence:', command.confidence.toFixed(2), 'Type:', command.type);
             handleVoiceCommand(command);
             setIsVoiceListening(false);
           }
@@ -665,14 +731,20 @@ const App: React.FC = () => {
 
       const isNewDay = targetDate !== todayStr;
 
-      let message = '';
+      let message;
       if (isNewDay) {
         const tomorrow = new Date(targetDate);
         const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
-        message = `Задача перенесена на ${periodName} завтра (${tomorrow.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })})`;
+        const dateStr = tomorrow.toLocaleDateString(settings.language === 'ru' ? 'ru-RU' : settings.language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short' });
+        message = t.taskTransferredTomorrow
+          .replace('{title}', newTaskTitle)
+          .replace('{period}', periodName)
+          .replace('{date}', dateStr);
       } else {
         const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
-        message = `Задача перенесена на ${periodName} (блок переполнен)`;
+        message = t.taskTransferred
+          .replace('{title}', newTaskTitle)
+          .replace('{period}', periodName) + ' ' + t.blockOverflow;
       }
 
       console.log('✅ Task transferred:', message);
@@ -687,7 +759,7 @@ const App: React.FC = () => {
       console.log('⚠️ All periods full');
       setCapacityNotification({
         type: 'full',
-        message: 'Все временные блоки переполнены! Задача добавлена с превышением лимита.'
+        message: t.allBlocksFull
       });
       setTimeout(() => setCapacityNotification(null), 5000);
     }
@@ -711,7 +783,7 @@ const App: React.FC = () => {
     const restM = rH * 60 + rM;
     const diff = (wakeM + 1440 - restM) % 1440;
     if (diff < 420) {
-      setSettingsError(settings.language === 'en' ? 'Sleep gap must be at least 7 hours.' : 'Сон должен длиться не менее 7 часов.');
+      setSettingsError(t.sleepGapError);
       return;
     }
     setSettings({ ...settings, wakeUpTime: tempWake, restTime: tempRest, language: tempLang, alarm: tempAlarm });
@@ -780,6 +852,7 @@ const App: React.FC = () => {
         confidence={voiceConfidence}
         status={voiceStatus}
         errorMessage={voiceError}
+        language={voiceSettings.language}
       />
 
       {capacityNotification && (
@@ -872,14 +945,20 @@ const App: React.FC = () => {
 
                 const isNewDay = finalDate !== todayStr;
 
-                let message = '';
+                let message;
                 if (isNewDay) {
                   const tomorrow = new Date(finalDate);
                   const periodName = finalPeriods[0] ? periodNames[finalPeriods[0]] : '';
-                  message = `Задача перенесена на ${periodName} завтра (${tomorrow.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })})`;
+                  const dateStr = tomorrow.toLocaleDateString(settings.language === 'ru' ? 'ru-RU' : settings.language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short' });
+                  message = t.taskTransferredTomorrow
+                    .replace('{title}', title)
+                    .replace('{period}', periodName)
+                    .replace('{date}', dateStr);
                 } else {
                   const periodName = finalPeriods[0] ? periodNames[finalPeriods[0]] : '';
-                  message = `Задача перенесена на ${periodName} (блок переполнен)`;
+                  message = t.taskTransferred
+                    .replace('{title}', title)
+                    .replace('{period}', periodName) + ' ' + t.blockOverflow;
                 }
 
                 console.log('✅ FocusPoint task transferred:', message);
@@ -893,7 +972,7 @@ const App: React.FC = () => {
                 console.log('⚠️ FocusPoint: All periods full');
                 setCapacityNotification({
                   type: 'full',
-                  message: 'Все временные блоки переполнены! Задача добавлена с превышением лимита.'
+                  message: t.allBlocksFull
                 });
                 setTimeout(() => setCapacityNotification(null), 5000);
               }

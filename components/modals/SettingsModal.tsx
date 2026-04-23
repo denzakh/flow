@@ -3,6 +3,13 @@ import { X, LogOut, AlertCircle, Mic } from '../../utils/MaterialIcons';
 import { UserSettings, AlarmConfig, Language, VoiceSettings } from '../../types.ts';
 import { TRANSLATIONS, VOICE_TRANSLATIONS } from '../../constants.tsx';
 
+// Language map for Web Speech API
+const LANG_MAP: Record<string, string> = {
+  ru: 'ru-RU',
+  en: 'en-US',
+  es: 'es-ES'
+};
+
 interface SettingsModalProps {
   settings: UserSettings;
   tempWake: string;
@@ -41,7 +48,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const [tempVoiceSettings, setTempVoiceSettings] = useState<VoiceSettings>(
     voiceSettings || {
       enabled: false,
-      language: settings.language === 'ru' ? 'ru' : 'en',
+      language: settings.language as 'ru' | 'en' | 'es',
       autoSubmit: false,
       requireConfirmation: true,
       ttsEnabled: true,
@@ -186,6 +193,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   >
                     {VOICE_TRANSLATIONS[settings.language].english || 'EN'}
                   </button>
+                  <button
+                    onClick={() => {
+                      setTempVoiceSettings(prev => ({ ...prev, language: 'es' }));
+                      onVoiceSettingsChange({ ...tempVoiceSettings, language: 'es' });
+                    }}
+                    className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${
+                      tempVoiceSettings.language === 'es'
+                        ? 'bg-active text-white'
+                        : 'bg-white/10 text-white/60 hover:bg-white/20'
+                    }`}
+                  >
+                    {VOICE_TRANSLATIONS[settings.language].spanish || 'ES'}
+                  </button>
                 </div>
               </div>
 
@@ -264,7 +284,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   >
                     <option value="" className="bg-gray-800">Default</option>
                     {availableVoices
-                      .filter(voice => voice.lang.startsWith(tempVoiceSettings.language === 'ru' ? 'ru' : 'en'))
+                      .filter(voice => voice.lang.startsWith(LANG_MAP[tempVoiceSettings.language]?.split('-')[0] || tempVoiceSettings.language))
                       .map(voice => (
                         <option
                           key={voice.name}

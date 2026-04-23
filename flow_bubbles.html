@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow — Day View Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Google+Sans+Display:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFFBFE;
+    --surface: #F7F2FA;
+    --on-surface: #1C1B1F;
+    --on-surface-muted: #79747E;
+    --outline: #CAC4D0;
+
+    --morning-container: #FFDBC8;
+    --morning-on: #331200;
+    --morning-primary: #8B4513;
+
+    --afternoon-container: #D1E4FF;
+    --afternoon-on: #001D36;
+    --afternoon-primary: #0061A4;
+
+    --evening-container: #EADDFF;
+    --evening-on: #21005D;
+    --evening-primary: #6750A4;
+
+    --night-container: #C5C4F0;
+    --night-on: #0A0A3B;
+    --night-primary: #3F3F6E;
+
+    --quick-color: #1B6B45;
+    --quick-bg: #A8F2C8;
+    --focused-color: #7B5800;
+    --focused-bg: #FFDEA3;
+    --deep-color: #4F378B;
+    --deep-bg: #D0BCFF;
+  }
+
+  .dark {
+    --bg: #1C1B1F;
+    --surface: #211F26;
+    --on-surface: #E6E1E5;
+    --on-surface-muted: #938F99;
+    --outline: #49454F;
+
+    --morning-container: #6E2D00;
+    --morning-on: #FFDBC8;
+    --morning-primary: #FFB68D;
+
+    --afternoon-container: #004880;
+    --afternoon-on: #D1E4FF;
+    --afternoon-primary: #9ECAFF;
+
+    --evening-container: #4F378B;
+    --evening-on: #EADDFF;
+    --evening-primary: #D0BCFF;
+
+    --night-container: #292855;
+    --night-on: #E2E1FF;
+    --night-primary: #C5C4F0;
+
+    --quick-color: #8BD5A8;
+    --quick-bg: #004D25;
+    --focused-color: #EFBF48;
+    --focused-bg: #5A4100;
+    --deep-color: #D0BCFF;
+    --deep-bg: #4F378B;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Google Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--on-surface);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    gap: 12px;
+  }
+  .header-title {
+    font-family: 'Google Sans Display', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+  }
+  .header-date {
+    font-size: 12px;
+    color: var(--on-surface-muted);
+    margin-top: 1px;
+  }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-icon {
+    background: var(--surface);
+    border: none;
+    border-radius: 50px;
+    padding: 7px 14px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 12px;
+    color: var(--on-surface);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    transition: opacity 0.2s;
+  }
+  .btn-icon:hover { opacity: 0.8; }
+
+  /* GRID */
+  .day-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    padding: 0 12px 12px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .block {
+    border-radius: 24px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.2,0,0,1);
+    display: flex;
+    flex-direction: column;
+  }
+  .block:hover { transform: scale(1.015); }
+  .block.morning  { background: var(--morning-container);  color: var(--morning-on); }
+  .block.afternoon{ background: var(--afternoon-container); color: var(--afternoon-on); }
+  .block.evening  { background: var(--evening-container);  color: var(--evening-on); }
+  .block.night    { background: var(--night-container);    color: var(--night-on); }
+
+  .block-header { margin-bottom: 8px; }
+  .block-time { font-size: 10px; opacity: 0.6; letter-spacing: 0.3px; margin-bottom: 2px; }
+  .block-name {
+    font-family: 'Google Sans Display', sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  /* CAPACITY BAR */
+  .capacity-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(0,0,0,0.1);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .dark .capacity-bar { background: rgba(255,255,255,0.1); }
+  .capacity-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .morning  .capacity-fill { background: var(--morning-primary); }
+  .afternoon .capacity-fill { background: var(--afternoon-primary); }
+  .evening  .capacity-fill { background: var(--evening-primary); }
+  .night    .capacity-fill { background: var(--night-primary); }
+
+  /* BUBBLES AREA */
+  .bubbles-area {
+    flex: 1;
+    position: relative;
+    min-height: 80px;
+  }
+
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 500;
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.4s, transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    cursor: pointer;
+    overflow: hidden;
+    text-align: center;
+    padding: 4px;
+    line-height: 1.2;
+  }
+  .bubble.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .bubble.quick   { background: var(--quick-bg);   color: var(--quick-color); }
+  .bubble.focused { background: var(--focused-bg); color: var(--focused-color); }
+  .bubble.deep    { background: var(--deep-bg);    color: var(--deep-color); }
+
+  /* TASK LIST (expanded state) */
+  .task-list {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .task-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.35);
+    font-size: 12px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .dark .task-row { background: rgba(0,0,0,0.2); }
+  .task-row.visible { opacity: 1; transform: translateY(0); }
+  .task-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .task-dot.quick   { background: var(--quick-color); }
+  .task-dot.focused { background: var(--focused-color); }
+  .task-dot.deep    { background: var(--deep-color); }
+  .task-row-name { flex: 1; }
+  .task-badge {
+    font-size: 9px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 10px;
+  }
+  .task-badge.quick   { background: var(--quick-bg);   color: var(--quick-color); }
+  .task-badge.focused { background: var(--focused-bg); color: var(--focused-color); }
+  .task-badge.deep    { background: var(--deep-bg);    color: var(--deep-color); }
+
+  .block-back {
+    display: none;
+    font-size: 11px;
+    opacity: 0.6;
+    margin-bottom: 8px;
+    cursor: pointer;
+    align-items: center;
+    gap: 4px;
+  }
+  .block.expanded .block-back { display: flex; }
+  .block.expanded .block-header { margin-bottom: 4px; }
+  .block.expanded .capacity-bar { display: none; }
+  .block.expanded .bubbles-area { display: none; }
+  .block.expanded .task-list { display: flex; }
+  .block.expanded { cursor: default; }
+  .block.expanded:hover { transform: none; }
+
+  /* VOICE FAB */
+  .voice-fab {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--evening-primary);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    transition: transform 0.2s, background 0.2s;
+    z-index: 100;
+  }
+  .voice-fab:hover { transform: translateX(-50%) scale(1.08); }
+  .voice-fab.listening {
+    background: #B3261E;
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 4px 20px rgba(179,38,30,0.3); }
+    50% { box-shadow: 0 4px 32px rgba(179,38,30,0.6); }
+  }
+  .mic-icon { width: 26px; height: 26px; fill: white; }
+
+  /* ADD PANEL */
+  .add-panel {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--outline);
+    border-radius: 24px 24px 0 0;
+    padding: 20px 20px 32px;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.2,0,0,1);
+    z-index: 200;
+  }
+  .add-panel.open { transform: translateY(0); }
+  .add-panel-title { font-size: 13px; color: var(--on-surface-muted); margin-bottom: 12px; }
+  .add-panel input {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--outline);
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 15px;
+    color: var(--on-surface);
+    outline: none;
+    margin-bottom: 12px;
+  }
+  .add-panel input:focus { border-color: var(--evening-primary); }
+  .weight-picker { display: flex; gap: 8px; margin-bottom: 16px; }
+  .weight-btn {
+    flex: 1;
+    border: 1.5px solid var(--outline);
+    border-radius: 10px;
+    padding: 8px 4px;
+    background: transparent;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 12px;
+    color: var(--on-surface);
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+  .weight-btn.selected.quick   { background: var(--quick-bg);   color: var(--quick-color);   border-color: var(--quick-color); }
+  .weight-btn.selected.focused { background: var(--focused-bg); color: var(--focused-color); border-color: var(--focused-color); }
+  .weight-btn.selected.deep    { background: var(--deep-bg);    color: var(--deep-color);    border-color: var(--deep-color); }
+  .add-btn {
+    width: 100%;
+    background: var(--evening-primary);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .add-btn:hover { opacity: 0.88; }
+
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 150;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">Flow</div>
+    <div class="header-date">воскресенье, 13 апреля</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn-icon" onclick="toggleTheme()">◑ тема</button>
+    <button class="btn-icon" onclick="openAdd()">+ задача</button>
+  </div>
+</div>
+
+<div class="day-grid">
+  <div class="block morning" id="block-morning" onclick="expandBlock('morning', event)">
+    <div class="block-back" onclick="collapseBlock('morning', event)">← назад</div>
+    <div class="block-header">
+      <div class="block-time">06:00 – 12:00</div>
+      <div class="block-name">Утро</div>
+    </div>
+    <div class="capacity-bar"><div class="capacity-fill" id="cap-morning" style="width:0%"></div></div>
+    <div class="bubbles-area" id="bubbles-morning"></div>
+    <div class="task-list" id="tasks-morning"></div>
+  </div>
+
+  <div class="block afternoon" id="block-afternoon" onclick="expandBlock('afternoon', event)">
+    <div class="block-back" onclick="collapseBlock('afternoon', event)">← назад</div>
+    <div class="block-header">
+      <div class="block-time">12:00 – 18:00</div>
+      <div class="block-name">День</div>
+    </div>
+    <div class="capacity-bar"><div class="capacity-fill" id="cap-afternoon" style="width:0%"></div></div>
+    <div class="bubbles-area" id="bubbles-afternoon"></div>
+    <div class="task-list" id="tasks-afternoon"></div>
+  </div>
+
+  <div class="block evening" id="block-evening" onclick="expandBlock('evening', event)">
+    <div class="block-back" onclick="collapseBlock('evening', event)">← назад</div>
+    <div class="block-header">
+      <div class="block-time">18:00 – 22:00</div>
+      <div class="block-name">Вечер</div>
+    </div>
+    <div class="capacity-bar"><div class="capacity-fill" id="cap-evening" style="width:0%"></div></div>
+    <div class="bubbles-area" id="bubbles-evening"></div>
+    <div class="task-list" id="tasks-evening"></div>
+  </div>
+
+  <div class="block night" id="block-night">
+    <div class="block-header">
+      <div class="block-time">22:00 – 06:00</div>
+      <div class="block-name">Ночь</div>
+    </div>
+    <div class="bubbles-area" style="display:flex;align-items:center;justify-content:center;opacity:0.4;font-size:12px;">отдых</div>
+  </div>
+</div>
+
+<button class="voice-fab" id="voiceFab" onclick="toggleVoice()">
+  <svg class="mic-icon" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+</button>
+
+<div class="overlay" id="overlay" onclick="closeAdd()"></div>
+
+<div class="add-panel" id="addPanel">
+  <div class="add-panel-title">Добавить задачу</div>
+  <input type="text" id="taskInput" placeholder="Что нужно сделать?" />
+  <div class="weight-picker">
+    <button class="weight-btn quick selected" onclick="selectWeight('quick', this)">⚡ Quick</button>
+    <button class="weight-btn focused" onclick="selectWeight('focused', this)">◎ Focused</button>
+    <button class="weight-btn deep" onclick="selectWeight('deep', this)">◉ Deep</button>
+  </div>
+  <button class="add-btn" onclick="addTask()">Добавить</button>
+</div>
+
+<script>
+const BLOCKS = ['morning', 'afternoon', 'evening'];
+const WEIGHT_SIZES = { quick: 28, focused: 42, deep: 58 };
+const WEIGHT_POINTS = { quick: 1, focused: 3, deep: 6 };
+const MAX_POINTS = 12;
+
+const tasks = { morning: [], afternoon: [], evening: [] };
+let selectedWeight = 'quick';
+let selectedBlock = 'morning';
+let isDark = false;
+let isListening = false;
+
+const DEMO_TASKS = [
+  { block: 'morning',   title: 'Написать стратегию',  weight: 'deep' },
+  { block: 'morning',   title: 'Ответить на письма',  weight: 'focused' },
+  { block: 'morning',   title: 'Проверить Slack',      weight: 'quick' },
+  { block: 'afternoon', title: 'Созвон с командой',    weight: 'focused' },
+  { block: 'afternoon', title: 'Ревью задач',          weight: 'quick' },
+  { block: 'evening',   title: 'Читать книгу',         weight: 'focused' },
+  { block: 'evening',   title: 'Прогулка',             weight: 'quick' },
+];
+
+function addTaskData(block, title, weight) {
+  tasks[block].push({ title, weight });
+  renderBubbles(block);
+  updateCapacity(block);
+}
+
+function renderBubbles(block) {
+  const area = document.getElementById('bubbles-' + block);
+  const rect = area.getBoundingClientRect();
+  const W = area.offsetWidth || 120;
+  const H = area.offsetHeight || 80;
+  const blockTasks = tasks[block];
+
+  // place bubbles with simple collision-aware layout
+  const positions = [];
+  blockTasks.forEach((t, i) => {
+    const size = WEIGHT_SIZES[t.weight];
+    const r = size / 2;
+    let x, y, tries = 0;
+    do {
+      x = r + Math.random() * Math.max(0, W - size);
+      y = r + Math.random() * Math.max(0, H - size);
+      tries++;
+    } while (tries < 40 && positions.some(p => {
+      const dx = p.x - x, dy = p.y - y;
+      return Math.sqrt(dx*dx + dy*dy) < (p.r + r + 3);
+    }));
+    positions.push({ x, y, r });
+  });
+
+  // rebuild DOM only for new bubble
+  const existing = area.querySelectorAll('.bubble');
+  const idx = blockTasks.length - 1;
+  if (idx < 0) { area.innerHTML = ''; return; }
+
+  if (existing.length < blockTasks.length) {
+    // reposition all
+    existing.forEach((el, i) => {
+      if (positions[i]) {
+        el.style.left = (positions[i].x - positions[i].r) + 'px';
+        el.style.top  = (positions[i].y - positions[i].r) + 'px';
+      }
+    });
+
+    const t = blockTasks[idx];
+    const size = WEIGHT_SIZES[t.weight];
+    const pos = positions[idx];
+    const el = document.createElement('div');
+    el.className = `bubble ${t.weight}`;
+    el.style.width = el.style.height = size + 'px';
+    el.style.left = (pos.x - pos.r) + 'px';
+    el.style.top  = (pos.y - pos.r) + 'px';
+    el.style.fontSize = (size > 40 ? 10 : 8) + 'px';
+    el.title = t.title;
+    area.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('visible'));
+  }
+}
+
+function updateCapacity(block) {
+  const pts = tasks[block].reduce((s, t) => s + WEIGHT_POINTS[t.weight], 0);
+  const pct = Math.min(100, (pts / MAX_POINTS) * 100);
+  document.getElementById('cap-' + block).style.width = pct + '%';
+}
+
+function expandBlock(block, e) {
+  const el = document.getElementById('block-' + block);
+  if (el.classList.contains('expanded')) return;
+  el.classList.add('expanded');
+
+  const list = document.getElementById('tasks-' + block);
+  list.innerHTML = '';
+  tasks[block].forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'task-row';
+    row.innerHTML = `<div class="task-dot ${t.weight}"></div><span class="task-row-name">${t.title}</span><span class="task-badge ${t.weight}">${t.weight}</span>`;
+    list.appendChild(row);
+    setTimeout(() => row.classList.add('visible'), 60 + i * 60);
+  });
+
+  if (tasks[block].length === 0) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'font-size:12px;opacity:0.5;padding:8px 0;';
+    empty.textContent = 'Задач нет';
+    list.appendChild(empty);
+  }
+}
+
+function collapseBlock(block, e) {
+  e.stopPropagation();
+  const el = document.getElementById('block-' + block);
+  el.classList.remove('expanded');
+  // re-render bubbles to restore positions
+  const area = document.getElementById('bubbles-' + block);
+  area.innerHTML = '';
+  const saved = tasks[block].slice();
+  tasks[block] = [];
+  saved.forEach(t => { tasks[block].push(t); renderBubbles(block); });
+}
+
+function openAdd() {
+  document.getElementById('addPanel').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('taskInput').focus();
+}
+
+function closeAdd() {
+  document.getElementById('addPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function selectWeight(w, el) {
+  selectedWeight = w;
+  document.querySelectorAll('.weight-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function addTask() {
+  const input = document.getElementById('taskInput');
+  const title = input.value.trim();
+  if (!title) return;
+
+  // pick least full block as default
+  const block = BLOCKS.reduce((best, b) => {
+    const pts = tasks[b].reduce((s,t) => s + WEIGHT_POINTS[t.weight], 0);
+    const bpts = tasks[best].reduce((s,t) => s + WEIGHT_POINTS[t.weight], 0);
+    return pts < bpts ? b : best;
+  }, 'morning');
+
+  addTaskData(block, title, selectedWeight);
+  input.value = '';
+  closeAdd();
+}
+
+function toggleVoice() {
+  isListening = !isListening;
+  const fab = document.getElementById('voiceFab');
+  fab.classList.toggle('listening', isListening);
+
+  if (isListening) {
+    // simulate voice input after 2s
+    setTimeout(() => {
+      if (!isListening) return;
+      const demos = [
+        { title: 'Написать отчёт', weight: 'deep', block: 'morning' },
+        { title: 'Купить продукты', weight: 'quick', block: 'afternoon' },
+        { title: 'Медитация', weight: 'quick', block: 'evening' },
+        { title: 'Ревью дизайна', weight: 'focused', block: 'morning' },
+        { title: 'Обед с командой', weight: 'quick', block: 'afternoon' },
+      ];
+      const d = demos[Math.floor(Math.random() * demos.length)];
+      addTaskData(d.block, d.title, d.weight);
+      isListening = false;
+      fab.classList.remove('listening');
+    }, 1800);
+  }
+}
+
+function toggleTheme() {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+}
+
+// load demo tasks with stagger
+DEMO_TASKS.forEach((t, i) => {
+  setTimeout(() => addTaskData(t.block, t.title, t.weight), 200 + i * 150);
+});
+</script>
+</body>
+</html>

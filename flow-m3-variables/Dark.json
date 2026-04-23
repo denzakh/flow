@@ -1,0 +1,204 @@
+{
+  "md": {
+    "sys": {
+      "color": {
+        "background": {
+          "$type": "color",
+          "$value": "#1C1B1F"
+        },
+        "surface": {
+          "$type": "color",
+          "$value": "#1C1B1F"
+        },
+        "surface-variant": {
+          "$type": "color",
+          "$value": "#49454F"
+        },
+        "surface-container": {
+          "$type": "color",
+          "$value": "#211F26"
+        },
+        "surface-container-low": {
+          "$type": "color",
+          "$value": "#1E1B23"
+        },
+        "on-surface": {
+          "$type": "color",
+          "$value": "#E6E1E5"
+        },
+        "on-surface-variant": {
+          "$type": "color",
+          "$value": "#CAC4D0"
+        },
+        "outline": {
+          "$type": "color",
+          "$value": "#938F99"
+        },
+        "outline-variant": {
+          "$type": "color",
+          "$value": "#49454F"
+        }
+      }
+    }
+  },
+  "block": {
+    "morning": {
+      "seed": {
+        "$type": "color",
+        "$value": "#C2773A"
+      },
+      "primary": {
+        "$type": "color",
+        "$value": "#FFB68D"
+      },
+      "primary-container": {
+        "$type": "color",
+        "$value": "#6E2D00"
+      },
+      "on-primary-container": {
+        "$type": "color",
+        "$value": "#FFDBC8"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#E7BEAE"
+      },
+      "secondary-container": {
+        "$type": "color",
+        "$value": "#5C3F33"
+      },
+      "on-secondary-container": {
+        "$type": "color",
+        "$value": "#FFDBD1"
+      }
+    },
+    "afternoon": {
+      "seed": {
+        "$type": "color",
+        "$value": "#3A7FC2"
+      },
+      "primary": {
+        "$type": "color",
+        "$value": "#9ECAFF"
+      },
+      "primary-container": {
+        "$type": "color",
+        "$value": "#004880"
+      },
+      "on-primary-container": {
+        "$type": "color",
+        "$value": "#D1E4FF"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#BBC7DB"
+      },
+      "secondary-container": {
+        "$type": "color",
+        "$value": "#3B4858"
+      },
+      "on-secondary-container": {
+        "$type": "color",
+        "$value": "#D7E3F7"
+      }
+    },
+    "evening": {
+      "seed": {
+        "$type": "color",
+        "$value": "#7C5BA6"
+      },
+      "primary": {
+        "$type": "color",
+        "$value": "#D0BCFF"
+      },
+      "primary-container": {
+        "$type": "color",
+        "$value": "#4F378B"
+      },
+      "on-primary-container": {
+        "$type": "color",
+        "$value": "#EADDFF"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#CCC2DC"
+      },
+      "secondary-container": {
+        "$type": "color",
+        "$value": "#4A4458"
+      },
+      "on-secondary-container": {
+        "$type": "color",
+        "$value": "#E8DEF8"
+      }
+    },
+    "night": {
+      "seed": {
+        "$type": "color",
+        "$value": "#3A3A5C"
+      },
+      "primary": {
+        "$type": "color",
+        "$value": "#C5C4F0"
+      },
+      "primary-container": {
+        "$type": "color",
+        "$value": "#292855"
+      },
+      "on-primary-container": {
+        "$type": "color",
+        "$value": "#E2E1FF"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#C4C4DF"
+      },
+      "secondary-container": {
+        "$type": "color",
+        "$value": "#434361"
+      },
+      "on-secondary-container": {
+        "$type": "color",
+        "$value": "#E1E0F9"
+      }
+    }
+  },
+  "weight": {
+    "quick": {
+      "$type": "color",
+      "$value": "#8BD5A8",
+      "on-container": {
+        "$type": "color",
+        "$value": "#A8F2C8"
+      }
+    },
+    "quick-container": {
+      "$type": "color",
+      "$value": "#004D25"
+    },
+    "focused": {
+      "$type": "color",
+      "$value": "#EFBF48",
+      "on-container": {
+        "$type": "color",
+        "$value": "#FFDEA3"
+      }
+    },
+    "focused-container": {
+      "$type": "color",
+      "$value": "#5A4100"
+    },
+    "deep": {
+      "$type": "color",
+      "$value": "#D0BCFF",
+      "on-container": {
+        "$type": "color",
+        "$value": "#EADDFF"
+      }
+    },
+    "deep-container": {
+      "$type": "color",
+      "$value": "#4F378B"
+    }
+  }
+}

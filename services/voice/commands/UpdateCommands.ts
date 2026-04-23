@@ -94,6 +94,54 @@ export const updatePatterns = {
       /отметь\s+(?:задач[а-я]{0,10}\s*)?(\d+)\s+как\s*(важн[а-я]*|высок[а-я]*|средн[а-я]*|низк[а-я]*|важно|высоко|средне|низко)(?:\s+приоритет)?/i,
       /задач[а-я]{0,10}\s+(\d+)\s+приоритет\s*(важн[а-я]*|высок[а-я]*|средн[а-я]*|низк[а-я]*|важно|высоко|средне|низко)/i,
     ]
+  },
+  es: {
+    changeWeight: [
+      // Con números
+      /(?:cambia|haz|pon)\s+(?:tarea\s+)?(\d+)\s+(?:a\s+)?(rápida|enfocada|profunda)/i,
+      /(?:tarea\s+)?(\d+)\s+(?:es|debe\s+ser)\s+(rápida|enfocada|profunda)/i,
+
+      // Con números textuales
+      /(?:cambia|haz|pon)\s+(?:tarea\s+)?(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:a\s+)?(rápida|enfocada|profunda)/i,
+      /(?:tarea\s+)?(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:es|debe\s+ser)\s+(rápida|enfocada|profunda)/i,
+
+      // Formulaciones naturales
+      /(?:marca|pon)\s+(?:tarea\s+)?(\d+)\s+como\s+(rápida|enfocada|profunda)/i,
+      /tarea\s+(\d+)\s+(?:peso|prioridad)\s+(?:es\s+)?(rápida|enfocada|profunda)/i,
+
+      // Formas interrogativas
+      /puedes\s+(?:tú\s+)?(?:cambiar|hacer)\s+(?:tarea\s+)?(\d+)\s+(rápida|enfocada|profunda)/i,
+      /pon\s+(?:tarea\s+)?(\d+)\s+a\s+(rápida|enfocada|profunda)\s+prioridad/i
+    ],
+    changePeriod: [
+      // Con números
+      /(?:mueve|cambia|pon)\s+(?:tarea\s+)?(\d+)\s+(?:a\s+)?(mañana|tarde|noche)/i,
+      /(?:tarea\s+)?(\d+)\s+(?:va|va\s+a)\s+(mañana|tarde|noche)/i,
+
+      // Con números textuales
+      /(?:mueve|cambia|pon)\s+(?:tarea\s+)?(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:a\s+)?(mañana|tarde|noche)/i,
+      /(?:tarea\s+)?(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:va|va\s+a)\s+(mañana|tarde|noche)/i,
+
+      // Formulaciones naturales
+      /(?:pon|coloca)\s+(?:tarea\s+)?(\d+)\s+en\s+(mañana|tarde|noche)/i,
+      /tarea\s+(\d+)\s+(?:para|en)\s+(?:la\s+)?(mañana|tarde|noche)/i,
+
+      // Formas interrogativas
+      /puedes\s+(?:tú\s+)?(?:mover|cambiar)\s+(?:tarea\s+)?(\d+)\s+a\s+(mañana|tarde|noche)/i
+    ],
+    changePriority: [
+      // Sin "prioridad" obligatorio - formas cortas
+      /(?:cambia|haz)\s+(?:tarea\s+)?(\d+)\s+(?:a\s+)?(importante|alta|media|baja)(?:\s+prioridad)?/i,
+      /(?:tarea\s+)?(\d+)\s+(?:es|debe\s+ser)\s+(importante|alta|media|baja)(?:\s+prioridad)?/i,
+
+      // Con números textuales - sin "prioridad" obligatorio
+      /(?:cambia|haz)\s+(?:tarea\s+)?(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:a\s+)?(importante|alta|media|baja)(?:\s+prioridad)?/i,
+      /(?:tarea\s+)?(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(?:es|debe\s+ser)\s+(importante|alta|media|baja)(?:\s+prioridad)?/i,
+
+      // Formulaciones naturales
+      /(?:marca|pon)\s+(?:tarea\s+)?(\d+)\s+como\s+(importante|alta|media|baja)(?:\s+prioridad)?/i,
+      /tarea\s+(\d+)\s+prioridad\s+(?:es\s+)?(importante|alta|media|baja)/i
+    ]
   }
 };
 
@@ -123,7 +171,19 @@ export const numberMapping: Record<string, number> = {
   'семь': 7,
   'восемь': 8,
   'девять': 9,
-  'десять': 10
+  'десять': 10,
+  // Spanish
+  'uno': 1,
+  'una': 1,
+  'dos': 2,
+  'tres': 3,
+  'cuatro': 4,
+  'cinco': 5,
+  'seis': 6,
+  'siete': 7,
+  'ocho': 8,
+  'nueve': 9,
+  'diez': 10
 };
 
 // Карта соответствия текстовых значений к типам
@@ -136,13 +196,18 @@ export const weightMapping = {
   ru: {
     'быструю': 'quick',
     'быстрый': 'quick',
-    'quick': 'quick',
     'фокусированную': 'focused',
     'фокусированный': 'focused',
-    'focused': 'focused',
     'глубокую': 'deep',
-    'глубокий': 'deep',
-    'deep': 'deep'
+    'глубокий': 'deep'
+  },
+  es: {
+    'rápida': 'quick',
+    'rápido': 'quick',
+    'enfocada': 'focused',
+    'enfocado': 'focused',
+    'profunda': 'deep',
+    'profundo': 'deep'
   }
 };
 
@@ -160,6 +225,11 @@ export const periodMapping = {
     'днем': 'afternoon',
     'вечер': 'evening',
     'вечером': 'evening'
+  },
+  es: {
+    'mañana': 'morning',
+    'tarde': 'afternoon',
+    'noche': 'evening'
   }
 };
 
@@ -180,6 +250,18 @@ export const priorityMapping = {
     'medium': 'medium',
     'низкая': 'low',
     'низкий': 'low',
+    'low': 'low'
+  },
+  es: {
+    'importante': 'high',
+    'alta': 'high',
+    'alto': 'high',
+    'high': 'high',
+    'media': 'medium',
+    'medio': 'medium',
+    'medium': 'medium',
+    'baja': 'low',
+    'bajo': 'low',
     'low': 'low'
   }
 };

@@ -195,6 +195,104 @@ export const navigationPatterns = {
       /хочу\s+видеть\s+год/i,
       /открой\s+год/i
     ]
+  },
+  es: {
+    nextDay: [
+      // Comandos directos
+      /(?:siguiente|ir\s+a|adelante)\s+(?:día|mañana)/i,
+      /muestra\s+el\s+siguiente\s+día/i,
+
+      // Formulaciones naturales
+      /qué\s+(?:pasa|está\s+programado)\s+mañana/i,
+      /ir\s+a\s+mañana/i,
+      /muestra\s+mañana/i
+    ],
+    prevDay: [
+      // Comandos directos
+      /(?:anterior|prev|ir\s+a|atrás)\s+(?:día|ayer)/i,
+      /muestra\s+día\s+anterior/i,
+      /volver\s+un\s+día/i,
+
+      // Formulaciones naturales
+      /qué\s+(?:pasó|estaba\s+programado)\s+ayer/i,
+      /ir\s+a\s+ayer/i,
+      /muestra\s+ayer/i
+    ],
+    today: [
+      // Comandos directos - más específicos
+      /^hoy$/i,
+      /^ahora$/i,
+      /ir\s+a\s+hoy/i,
+      /muestra\s+hoy/i,
+      /muestra\s+el\s+día\s+actual/i,
+
+      // Formulaciones naturales
+      /qué\s+(?:pasa|está\s+programado)\s+hoy/i,
+      /muestra\s+me\s+hoy/i,
+      /volver\s+a\s+hoy/i
+    ],
+    goToWeek: [
+      // Comandos directos
+      /(?:muestra|ir\s+a|cambiar\s+a)\s+(?:a\s+)?semana/i,
+      /muestra\s+vista\s+semanal/i,
+      /vista\s+semanal/i,
+      /a\s+semana/i,
+
+      // Formulaciones naturales
+      /muestra\s+me\s+esta\s+semana/i,
+      /qué\s+hay\s+esta\s+semana/i,
+
+      // Formulaciones conversacionales
+      /quiero\s+ver\s+semana/i,
+      /abrir\s+semana/i,
+      /semana/i
+    ],
+    goToMonth: [
+      // Comandos directos
+      /(?:muestra|ir\s+a|cambiar\s+a)\s+(?:a\s+)?mes/i,
+      /muestra\s+vista\s+mensual/i,
+      /vista\s+mensual/i,
+      /a\s+mes/i,
+
+      // Formulaciones naturales
+      /muestra\s+me\s+este\s+mes/i,
+      /qué\s+hay\s+este\s+mes/i,
+
+      // Formulaciones conversacionales
+      /quiero\s+ver\s+mes/i,
+      /abrir\s+mes/i,
+      /mes/i
+    ],
+    goToDay: [
+      // Comandos directos
+      /(?:muestra|ir\s+a|cambiar\s+a)\s+(?:a\s+)?día/i,
+      /muestra\s+vista\s+diaria/i,
+      /vista\s+diaria/i,
+      /a\s+día/i,
+
+      // Formulaciones naturales
+      /muestra\s+me\s+este\s+día/i,
+      /día\s+resumen/i,
+
+      // Formulaciones conversacionales
+      /quiero\s+ver\s+día/i,
+      /abrir\s+día/i,
+      /volver\s+a\s+día/i
+    ],
+    goToYear: [
+      // Comandos directos
+      /(?:muestra|ir\s+a|cambiar\s+a)\s+año/i,
+      /muestra\s+vista\s+anual/i,
+      /vista\s+anual/i,
+
+      // Formulaciones naturales
+      /muestra\s+me\s+este\s+año/i,
+      /año\s+resumen/i,
+
+      // Formulaciones conversacionales
+      /quiero\s+ver\s+año/i,
+      /abrir\s+año/i
+    ]
   }
 };
 
@@ -209,5 +307,10 @@ export const relativeDateSynonyms = {
     завтра: 'next',
     вчера: 'prev',
     сегодня: 'today'
+  },
+  es: {
+    mañana: 'next',
+    ayer: 'prev',
+    hoy: 'today'
   }
 };

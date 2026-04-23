@@ -1,0 +1,292 @@
+FLOW CALENDAR — NEW FEATURES SPECIFICATION
+
+FEATURE 1: HOBBIES (ХОББИ)
+
+CONCEPT
+Hobbies are optional, gentle activities that the user wants to do regularly but without pressure.
+They are NOT tasks and have NO deadlines.
+Flow uses them as preferences to suggest suitable activities in free slots.
+
+GOALS
+Add a "life balance" element to Flow.
+Help user maintain hobbies without stress.
+Use circadian rhythms for gentle recommendations.
+
+ENTITY STRUCTURE
+TypeScript:
+Hobby {
+  id: string
+  title: string
+  preferredPeriods: TimePeriod[]  // MORNING | AFTERNOON | EVENING | NIGHT
+  minFrequency?: number  // optional, e.g. 2 times per week
+  mood?: "calm" | "creative" | "active"  // optional, for future AI
+  createdAt: string
+}
+
+LOGIC
+User creates hobby (e.g. "drawing", "reading", "yoga").
+Specifies preferred time blocks.
+Flow:
+
+- shows hobbies as small cards in appropriate blocks
+- suggests hobbies when block is free
+- considers Recovery Mode (hobbies as recovery)
+- DOES NOT create mandatory tasks
+
+UI BEHAVIOR
+Hobbies displayed as "gentle suggestions", not tasks.
+Can "insert hobby into block" with one tap → creates QUICK task.
+In Recovery Mode, hobbies shown more often.
+
+WHY IT MATTERS
+Strengthens wellness positioning of Flow.
+Makes app feel "alive" and caring.
+Does not overload interface.
+
+---
+
+FEATURE 2: COMMITMENTS (ПОСТОЯННЫЕ ВИДЫ ДЕЯТЕЛЬНОСТИ)
+
+CONCEPT
+Commitments are structural life elements that occupy fixed blocks of the day:
+work, study, childcare, training, rehearsals, etc.
+
+These are NOT tasks and NOT habits.
+This is activity that affects capacity and planning.
+
+GOALS
+Make Flow a realistic calendar.
+Account for real user constraints.
+Prevent task planning in occupied blocks.
+
+ENTITY STRUCTURE
+TypeScript:
+Commitment {
+  id: string
+  title: string
+  periods: TimePeriod[]  // one or multiple blocks
+  days: "weekdays" | "weekends" | "daily" | CustomDays[]
+  flexible: boolean  // can it be moved
+  color?: string  // for UI
+  createdAt: string
+}
+
+LOGIC
+User creates commitment (e.g. "work 9-17").
+Selects days of week and blocks.
+Flow:
+
+- blocks corresponding blocks
+- reduces capacity of those blocks
+- does not suggest tasks there
+- considers commitments when transferring tasks
+- displays them as "occupied", not as tasks
+
+UI BEHAVIOR
+Commitment displayed as semi-transparent block in calendar.
+Can toggle visibility on/off.
+In edit mode, can change blocks and days.
+
+WHY IT MATTERS
+Flow starts accounting for user's real life.
+Planning becomes more accurate.
+Capacity system works correctly.
+
+---
+
+HOW THEY FIT INTO FLOW PHILOSOPHY
+
+HOBBIES
+→ enhance wellness, gentleness, embodiment, rhythms.
+
+COMMITMENTS
+→ make Flow realistic and applicable to everyday life.
+
+Both functions do not overload the app because:
+- created rarely
+- do not require complex logic
+- use existing TimePeriod and capacity
+- do not turn Flow into Motion or Reclaim
+
+---
+
+IMPLEMENTATION PRIORITY
+
+PHASE 1 - COMMITMENTS (higher priority)
+- Create Commitment type in types.ts
+- Add commitments CRUD to App.tsx
+- Store in flow_commitments in localStorage
+- Display in TimeBlockList as semi-transparent overlays
+- Integrate with adjustTaskPeriods() to reduce capacity
+- Add CommitmentModal for creation/editing
+
+PHASE 2 - HOBBIES
+- Create Hobby type in types.ts
+- Add hobbies CRUD to App.tsx
+- Store in flow_hobbies in localStorage
+- Display as small cards in available blocks
+- Add "Insert as task" button (creates QUICK task)
+- Add HobbyModal for creation/editing
+- Enhance Recovery Mode to show hobbies more often
+
+PHASE 3 - AI INTEGRATION (future)
+- Smart hobby suggestions based on mood and time
+- Auto-scheduling hobbies around commitments
+- Motivational messages that reference hobbies
+- Analytics: hobby consistency tracking
+
+---
+
+CODE EXAMPLES
+
+TYPES TO ADD (types.ts)
+export interface Hobby {
+  id: string;
+  title: string;
+  preferredPeriods: TimePeriod[];
+  minFrequency?: number;
+  mood?: 'calm' | 'creative' | 'active';
+  createdAt: string;
+}
+
+export interface Commitment {
+  id: string;
+  title: string;
+  periods: TimePeriod[];
+  days: 'weekdays' | 'weekends' | 'daily' | number[];
+  flexible: boolean;
+  color?: string;
+  createdAt: string;
+}
+
+STATE TO ADD (App.tsx)
+const [hobbies, setHobbies] = useState<Hobby[]>(() => {
+  const saved = localStorage.getItem('flow_hobbies');
+  return saved ? JSON.parse(saved) : [];
+});
+
+const [commitments, setCommitments] = useState<Commitment[]>(() => {
+  const saved = localStorage.getItem('flow_commitments');
+  return saved ? JSON.parse(saved) : [];
+});
+
+CAPACITY ADJUSTMENT (taskOptimizer.ts)
+export const calculatePeriodPoints = (
+  tasks: Task[],
+  period: TimePeriod,
+  date: string,
+  commitments?: Commitment[]
+): number => {
+  const taskPoints = tasks
+    .filter(task => task.periods.includes(period) && task.dueDate === date)
+    .reduce((sum, task) => sum + WEIGHT_CONFIG[task.weight].points, 0);
+
+  // Subtract commitment capacity (e.g. 12 points for full block)
+  const commitmentReduction = commitments
+    ?.filter(c => c.periods.includes(period) && isActiveOnDay(c, date))
+    .reduce((sum, c) => sum + 12, 0) || 0;
+
+  return Math.max(0, taskPoints - commitmentReduction);
+};
+
+UI COMPONENTS TO CREATE
+
+components/hobbies/HobbyCard.tsx
+- Small card with hobby title
+- "Insert as task" button
+- Mood indicator (calm/creative/active)
+
+components/commitments/CommitmentBlock.tsx
+- Semi-transparent overlay in TimeBlock
+- Shows commitment title and time
+- Edit button on hover
+
+components/modals/HobbyModal.tsx
+- Create/edit hobby form
+- Preferred periods multi-select
+- Mood selector
+- Frequency input
+
+components/modals/CommitmentModal.tsx
+- Create/edit commitment form
+- Days selector (weekday/weekend/daily/custom)
+- Periods multi-select
+- Flexible toggle
+- Color picker
+
+---
+
+INTEGRATION WITH EXISTING FEATURES
+
+WITH CAPACITY SYSTEM
+Commitments reduce available points in blocks.
+Example: Work commitment 9-17 in Morning + Afternoon → those blocks show reduced capacity.
+
+WITH TASK TRANSFER
+adjustTaskPeriods() now checks commitments:
+- If target period blocked by commitment → skip to next available
+- Respects commitment flexibility (if flexible=true, can move)
+
+WITH RECOVERY MODE
+Hobbies shown more prominently during recovery.
+Suggest calm hobbies in wind-down period.
+
+WITH VOICE COMMANDS
+Future: "Добавь хобби рисование" → creates hobby
+Future: "Добавь обязательство работа" → creates commitment
+
+---
+
+PROMPT FOR AI ASSISTANT (ready to use)
+
+Add two new entity types to Flow Calendar: Hobbies and Commitments.
+
+1. HOBBIES
+Optional activities user wants to do regularly without pressure.
+Not tasks, no deadlines.
+Used as gentle recommendations.
+
+Structure:
+Hobby {
+  id: string
+  title: string
+  preferredPeriods: TimePeriod[]
+  minFrequency?: number
+  mood?: "calm" | "creative" | "active"
+  createdAt: string
+}
+
+Logic:
+- Display in appropriate time blocks
+- Suggest when slots free
+- Consider Recovery Mode
+- On selection → create QUICK task
+
+2. COMMITMENTS
+Fixed daily activities that occupy blocks (work, study, childcare).
+Not tasks, not habits.
+Affect capacity and planning.
+
+Structure:
+Commitment {
+  id: string
+  title: string
+  periods: TimePeriod[]
+  days: "weekdays" | "weekends" | "daily" | number[]
+  flexible: boolean
+  color?: string
+  createdAt: string
+}
+
+Logic:
+- Block selected time periods
+- Reduce capacity of those blocks
+- Prevent tasks in blocked blocks
+- Consider when transferring tasks
+
+Both fit Flow philosophy:
+Hobbies → wellness, gentleness, rhythms
+Commitments → realism, everyday life applicability
+
+Store in localStorage (flow_hobbies, flow_commitments).
+Do not overload interface - keep simple.

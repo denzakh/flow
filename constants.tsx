@@ -91,6 +91,11 @@ export const TRANSLATIONS = {
     rec_weekly: "Every Week",
     rec_monthly: "Every Month",
     rec_all_blocks: "3x / Day",
+    taskTransferred: 'Task "{title}" transferred to {period}',
+    taskTransferredTomorrow: 'Task "{title}" transferred to {period} tomorrow ({date})',
+    allBlocksFull: "All blocks are full! Task added with exceeded limit.",
+    blockOverflow: "(block overflow)",
+    sleepGapError: "Sleep gap must be at least 7 hours."
   },
   ru: {
     today: "Ваш поток",
@@ -139,6 +144,11 @@ export const TRANSLATIONS = {
     rec_weekly: "Еженедельно",
     rec_monthly: "Ежемесячно",
     rec_all_blocks: "3 раза в день",
+    taskTransferred: 'Задача "{title}" перенесена на {period}',
+    taskTransferredTomorrow: 'Задача "{title}" перенесена на {period} завтра ({date})',
+    allBlocksFull: "Все блоки переполнены! Задача добавлена с превышением лимита.",
+    blockOverflow: "(блок переполнен)",
+    sleepGapError: "Сон должен длиться не менее 7 часов."
   },
   es: {
     today: "Tu Flujo",
@@ -187,6 +197,11 @@ export const TRANSLATIONS = {
     rec_weekly: "Semanal",
     rec_monthly: "Mensual",
     rec_all_blocks: "3x / Día",
+    taskTransferred: 'Tarea "{title}" transferida a {period}',
+    taskTransferredTomorrow: 'Tarea "{title}" transferida a {period} mañana ({date})',
+    allBlocksFull: "¡Todos los bloques están llenos! Tarea añadida con límite excedido.",
+    blockOverflow: "(bloque desbordado)",
+    sleepGapError: "El período de sueño debe ser de al menos 7 horas."
   }
 };
 
@@ -214,7 +229,8 @@ export const VOICE_TRANSLATIONS = {
     enableTTS: 'Voice Feedback',
     confidenceThreshold: 'Recognition Confidence',
     russian: 'Russian',
-    english: 'English'
+    english: 'English',
+    spanish: 'Spanish'
   },
   ru: {
     listening: 'Слушаю...',
@@ -239,7 +255,34 @@ export const VOICE_TRANSLATIONS = {
     enableTTS: 'Голосовая обратная связь',
     confidenceThreshold: 'Уверенность распознавания',
     russian: 'Русский',
-    english: 'Английский'
+    english: 'Английский',
+    spanish: 'Испанский'
+  },
+  es: {
+    listening: 'Escuchando...',
+    processing: 'Procesando...',
+    error: 'Lo siento, no entendí',
+    confirmAdd: '¿Añadir tarea "{title}"?',
+    confirmDelete: '¿Eliminar esta tarea?',
+    confirmToggle: '¿Marcar tarea como completada?',
+    taskAdded: 'Tarea añadida',
+    taskDeleted: 'Tarea eliminada',
+    taskCompleted: 'Tarea completada',
+    taskUpdated: 'Tarea actualizada',
+    navigated: 'Hecho',
+    viewChanged: 'Vista cambiada',
+    noMicrophone: 'Micrófono no disponible',
+    permissionDenied: 'Permiso de micrófono denegado',
+    voiceSettings: 'Control por voz',
+    enableVoice: 'Activar control por voz',
+    voiceLanguage: 'Idioma de voz',
+    autoSubmit: 'Envío automático de comandos',
+    requireConfirmation: 'Requerir confirmación',
+    enableTTS: 'Comentarios de voz',
+    confidenceThreshold: 'Confianza de reconocimiento',
+    russian: 'Ruso',
+    english: 'Inglés',
+    spanish: 'Español'
   }
 };
 

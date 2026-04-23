@@ -81,6 +81,7 @@ export interface CommandEntities {
   index?: number;
   weight?: TaskWeight;
   period?: TimePeriod;
+  priority?: Priority;
   date?: Date;
   direction?: 'next' | 'prev' | 'today';
   viewMode?: 'day' | 'week' | 'month' | 'year';
@@ -92,11 +93,12 @@ export interface VoiceCommand {
   entities: CommandEntities;
   confidence: number;
   rawText: string;
+  silent?: boolean;
 }
 
 export interface VoiceSettings {
   enabled: boolean;
-  language: 'ru' | 'en';
+  language: 'ru' | 'en' | 'es';
   autoSubmit: boolean;
   requireConfirmation: boolean;
   ttsEnabled: boolean;

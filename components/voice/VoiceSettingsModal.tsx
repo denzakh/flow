@@ -6,6 +6,13 @@ import React, { useEffect, useState } from 'react';
 import { VoiceSettings } from '../../types';
 import { TRANSLATIONS, VOICE_TRANSLATIONS } from '../../constants';
 
+// Language map for Web Speech API
+const LANG_MAP: Record<string, string> = {
+  ru: 'ru-RU',
+  en: 'en-US',
+  es: 'es-ES'
+};
+
 interface VoiceSettingsModalProps {
   settings: VoiceSettings;
   onSave: (settings: VoiceSettings) => void;
@@ -107,6 +114,16 @@ const VoiceSettingsModal: React.FC<VoiceSettingsModalProps> = ({
               >
                 {t.english}
               </button>
+              <button
+                onClick={() => setTempSettings(prev => ({ ...prev, language: 'es' }))}
+                className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${
+                  tempSettings.language === 'es'
+                    ? 'bg-active text-white'
+                    : 'bg-white/10 text-white/60 hover:bg-white/20'
+                }`}
+              >
+                {t.spanish}
+              </button>
             </div>
           </div>
 
@@ -174,7 +191,7 @@ const VoiceSettingsModal: React.FC<VoiceSettingsModalProps> = ({
               >
                 <option value="" className="bg-gray-800">Default</option>
                 {availableVoices
-                  .filter(voice => voice.lang.startsWith(tempSettings.language === 'ru' ? 'ru' : 'en'))
+                  .filter(voice => voice.lang.startsWith(LANG_MAP[tempSettings.language]?.split('-')[0] || tempSettings.language))
                   .map(voice => (
                     <option
                       key={voice.name}

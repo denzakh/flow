@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { Volume2, VolumeX, AlertCircle, CheckCircle, Loader } from '../../utils/MaterialIcons';
+import { VOICE_TRANSLATIONS } from '../../constants';
 
 type VoiceStatus = 'idle' | 'listening' | 'processing' | 'error' | 'success';
 
@@ -15,6 +16,7 @@ interface VoiceFeedbackProps {
   status: VoiceStatus;
   errorMessage?: string;
   className?: string;
+  language: 'ru' | 'en' | 'es';
 }
 
 const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
@@ -24,7 +26,8 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
   confidence,
   status,
   errorMessage,
-  className = ''
+  className = '',
+  language
 }) => {
   if (status === 'idle' && !isListening && !isProcessing) {
     return null;
@@ -65,15 +68,17 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
   };
 
   const getStatusText = () => {
+    const t = VOICE_TRANSLATIONS[language] || VOICE_TRANSLATIONS.en;
+
     switch (status) {
       case 'listening':
-        return 'Listening...';
+        return t.listening;
       case 'processing':
-        return 'Processing...';
+        return t.processing;
       case 'error':
-        return errorMessage || 'Sorry, I didn\'t catch that';
+        return errorMessage || t.error;
       case 'success':
-        return 'Done!';
+        return t.navigated;
       default:
         return '';
     }

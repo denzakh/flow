@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow × M3 Color System</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Google+Sans+Display:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --md-sys-color-background: #FFFBFE;
+    --md-sys-color-surface: #FFFBFE;
+    --md-sys-color-surface-variant: #E7E0EC;
+    --md-sys-color-surface-container: #F3EDF7;
+    --md-sys-color-surface-container-low: #F7F2FA;
+    --md-sys-color-on-surface: #1C1B1F;
+    --md-sys-color-on-surface-variant: #49454F;
+    --md-sys-color-outline: #79747E;
+    --md-sys-color-outline-variant: #CAC4D0;
+
+    --block-morning-seed: #C2773A;
+    --block-morning-primary: #8B4513;
+    --block-morning-primary-container: #FFDBC8;
+    --block-morning-on-primary-container: #331200;
+    --block-morning-secondary: #77574A;
+    --block-morning-secondary-container: #FFDBD1;
+    --block-morning-on-secondary-container: #2C150E;
+
+    --block-afternoon-seed: #3A7FC2;
+    --block-afternoon-primary: #0061A4;
+    --block-afternoon-primary-container: #D1E4FF;
+    --block-afternoon-on-primary-container: #001D36;
+    --block-afternoon-secondary: #535F70;
+    --block-afternoon-secondary-container: #D7E3F7;
+    --block-afternoon-on-secondary-container: #0F1C2B;
+
+    --block-evening-seed: #7C5BA6;
+    --block-evening-primary: #6750A4;
+    --block-evening-primary-container: #EADDFF;
+    --block-evening-on-primary-container: #21005D;
+    --block-evening-secondary: #625B71;
+    --block-evening-secondary-container: #E8DEF8;
+    --block-evening-on-secondary-container: #1D192B;
+
+    --block-night-seed: #3A3A5C;
+    --block-night-primary: #3F3F6E;
+    --block-night-primary-container: #C5C4F0;
+    --block-night-on-primary-container: #0A0A3B;
+    --block-night-secondary: #5C5C7A;
+    --block-night-secondary-container: #E1E0F9;
+    --block-night-on-secondary-container: #181829;
+
+    --weight-quick: #1B6B45;
+    --weight-quick-container: #A8F2C8;
+    --weight-quick-on-container: #002112;
+    --weight-focused: #7B5800;
+    --weight-focused-container: #FFDEA3;
+    --weight-focused-on-container: #271900;
+    --weight-deep: #6750A4;
+    --weight-deep-container: #EADDFF;
+    --weight-deep-on-container: #21005D;
+  }
+
+  .dark {
+    --md-sys-color-background: #1C1B1F;
+    --md-sys-color-surface: #1C1B1F;
+    --md-sys-color-surface-variant: #49454F;
+    --md-sys-color-surface-container: #211F26;
+    --md-sys-color-surface-container-low: #1E1B23;
+    --md-sys-color-on-surface: #E6E1E5;
+    --md-sys-color-on-surface-variant: #CAC4D0;
+    --md-sys-color-outline: #938F99;
+    --md-sys-color-outline-variant: #49454F;
+
+    --block-morning-primary: #FFB68D;
+    --block-morning-primary-container: #6E2D00;
+    --block-morning-on-primary-container: #FFDBC8;
+    --block-morning-secondary: #E7BEAE;
+    --block-morning-secondary-container: #5C3F33;
+    --block-morning-on-secondary-container: #FFDBD1;
+
+    --block-afternoon-primary: #9ECAFF;
+    --block-afternoon-primary-container: #004880;
+    --block-afternoon-on-primary-container: #D1E4FF;
+    --block-afternoon-secondary: #BBC7DB;
+    --block-afternoon-secondary-container: #3B4858;
+    --block-afternoon-on-secondary-container: #D7E3F7;
+
+    --block-evening-primary: #D0BCFF;
+    --block-evening-primary-container: #4F378B;
+    --block-evening-on-primary-container: #EADDFF;
+    --block-evening-secondary: #CCC2DC;
+    --block-evening-secondary-container: #4A4458;
+    --block-evening-on-secondary-container: #E8DEF8;
+
+    --block-night-primary: #C5C4F0;
+    --block-night-primary-container: #292855;
+    --block-night-on-primary-container: #E2E1FF;
+    --block-night-secondary: #C4C4DF;
+    --block-night-secondary-container: #434361;
+    --block-night-on-secondary-container: #E1E0F9;
+
+    --weight-quick: #8BD5A8;
+    --weight-quick-container: #004D25;
+    --weight-quick-on-container: #A8F2C8;
+    --weight-focused: #EFBF48;
+    --weight-focused-container: #5A4100;
+    --weight-focused-on-container: #FFDEA3;
+    --weight-deep: #D0BCFF;
+    --weight-deep-container: #4F378B;
+    --weight-deep-on-container: #EADDFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Google Sans', system-ui, sans-serif;
+    background: var(--md-sys-color-background);
+    color: var(--md-sys-color-on-surface);
+    padding: 24px;
+    transition: background 0.3s, color 0.3s;
+    min-height: 100vh;
+  }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .app-title {
+    font-family: 'Google Sans Display', sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.3px;
+  }
+
+  .app-subtitle {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+  }
+
+  .theme-toggle {
+    background: var(--md-sys-color-surface-container);
+    border: none;
+    border-radius: 50px;
+    padding: 8px 16px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 13px;
+    color: var(--md-sys-color-on-surface);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+  }
+  .theme-toggle:hover { background: var(--md-sys-color-surface-variant); }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--md-sys-color-outline);
+    margin-bottom: 12px;
+    margin-top: 28px;
+  }
+
+  /* BLOCKS GRID */
+  .blocks-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .block-card {
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .block-card:hover { transform: scale(1.02); }
+  .block-card.active { outline: 3px solid var(--md-sys-color-on-surface); outline-offset: 2px; }
+
+  .block-card.morning { background: var(--block-morning-primary-container); color: var(--block-morning-on-primary-container); }
+  .block-card.afternoon { background: var(--block-afternoon-primary-container); color: var(--block-afternoon-on-primary-container); }
+  .block-card.evening { background: var(--block-evening-primary-container); color: var(--block-evening-on-primary-container); }
+  .block-card.night { background: var(--block-night-primary-container); color: var(--block-night-on-primary-container); }
+
+  .block-time { font-size: 11px; opacity: 0.7; margin-bottom: 4px; letter-spacing: 0.3px; }
+  .block-name { font-family: 'Google Sans Display', sans-serif; font-size: 22px; font-weight: 500; margin-bottom: 12px; }
+
+  .block-tasks { display: flex; flex-direction: column; gap: 6px; }
+
+  .task-chip {
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .morning .task-chip { background: var(--block-morning-secondary-container); color: var(--block-morning-on-secondary-container); }
+  .afternoon .task-chip { background: var(--block-afternoon-secondary-container); color: var(--block-afternoon-on-secondary-container); }
+  .evening .task-chip { background: var(--block-evening-secondary-container); color: var(--block-evening-on-secondary-container); }
+  .night .task-chip { background: var(--block-night-secondary-container); color: var(--block-night-on-secondary-container); }
+
+  .task-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; opacity: 0.7; }
+  .morning .task-dot { background: var(--block-morning-primary); }
+  .afternoon .task-dot { background: var(--block-afternoon-primary); }
+  .evening .task-dot { background: var(--block-evening-primary); }
+  .night .task-dot { background: var(--block-night-primary); }
+
+  .task-name { flex: 1; }
+  .task-weight-badge {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 20px;
+    opacity: 0.9;
+  }
+  .badge-quick { background: var(--weight-quick-container); color: var(--weight-quick-on-container); }
+  .badge-focused { background: var(--weight-focused-container); color: var(--weight-focused-on-container); }
+  .badge-deep { background: var(--weight-deep-container); color: var(--weight-deep-on-container); }
+
+  /* WEIGHTS */
+  .weights-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .weight-card {
+    flex: 1;
+    min-width: 90px;
+    border-radius: 16px;
+    padding: 14px;
+  }
+  .weight-card.quick { background: var(--weight-quick-container); color: var(--weight-quick-on-container); }
+  .weight-card.focused { background: var(--weight-focused-container); color: var(--weight-focused-on-container); }
+  .weight-card.deep { background: var(--weight-deep-container); color: var(--weight-deep-on-container); }
+
+  .weight-icon { font-size: 18px; margin-bottom: 6px; }
+  .weight-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .weight-desc { font-size: 11px; opacity: 0.75; }
+
+  /* COLOR ROLES TABLE */
+  .roles-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .roles-table th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  }
+  .roles-table td {
+    font-size: 12px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    vertical-align: middle;
+  }
+  .roles-table tr:last-child td { border-bottom: none; }
+  .role-swatch { width: 20px; height: 20px; border-radius: 6px; display: inline-block; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.08); }
+  .role-name { font-weight: 500; }
+  .role-source { color: var(--md-sys-color-on-surface-variant); font-size: 11px; }
+
+  .swatch-row { display: flex; align-items: center; gap: 8px; }
+
+  .note {
+    background: var(--md-sys-color-surface-container);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.6;
+    margin-top: 4px;
+  }
+  .note strong { color: var(--md-sys-color-on-surface); }
+
+  /* active block panel */
+  .active-panel {
+    background: var(--md-sys-color-surface-container);
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 12px;
+    transition: all 0.3s;
+  }
+  .active-panel-title { font-size: 13px; font-weight: 500; margin-bottom: 10px; color: var(--md-sys-color-on-surface-variant); }
+
+  .divider { border: none; border-top: 1px solid var(--md-sys-color-outline-variant); margin: 24px 0 0; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <div class="app-title">Flow × Material You</div>
+    <div class="app-subtitle">Dynamic Color по блокам дня</div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+    <span id="themeIcon">◑</span> Dark
+  </button>
+</div>
+
+<div class="section-label">Блоки дня — каждый со своей tonal palette</div>
+<div class="blocks-grid">
+  <div class="block-card morning active" onclick="selectBlock('morning', this)">
+    <div class="block-time">06:00 – 12:00</div>
+    <div class="block-name">Утро</div>
+    <div class="block-tasks">
+      <div class="task-chip"><div class="task-dot"></div><span class="task-name">Написать стратегию</span><span class="task-weight-badge badge-deep">Deep</span></div>
+      <div class="task-chip"><div class="task-dot"></div><span class="task-name">Ответить на письма</span><span class="task-weight-badge badge-focused">Focused</span></div>
+    </div>
+  </div>
+  <div class="block-card afternoon" onclick="selectBlock('afternoon', this)">
+    <div class="block-time">12:00 – 18:00</div>
+    <div class="block-name">День</div>
+    <div class="block-tasks">
+      <div class="task-chip"><div class="task-dot"></div><span class="task-name">Созвон с командой</span><span class="task-weight-badge badge-focused">Focused</span></div>
+      <div class="task-chip"><div class="task-dot"></div><span class="task-name">Проверить задачи</span><span class="task-weight-badge badge-quick">Quick</span></div>
+    </div>
+  </div>
+  <div class="block-card evening" onclick="selectBlock('evening', this)">
+    <div class="block-time">18:00 – 22:00</div>
+    <div class="block-name">Вечер</div>
+    <div class="block-tasks">
+      <div class="task-chip"><div class="task-dot"></div><span class="task-name">Читать / учиться</span><span class="task-weight-badge badge-focused">Focused</span></div>
+      <div class="task-chip"><div class="task-dot"></div><span class="task-name">Прогулка</span><span class="task-weight-badge badge-quick">Quick</span></div>
+    </div>
+  </div>
+  <div class="block-card night" onclick="selectBlock('night', this)">
+    <div class="block-time">22:00 – 06:00</div>
+    <div class="block-name">Ночь</div>
+    <div class="block-tasks">
+      <div class="task-chip"><div class="task-dot"></div><span class="task-name">Время отдыха</span></div>
+      <div class="task-chip"><div class="task-dot"></div><span class="task-name">Задачи не добавляются</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="active-panel" id="activePanel">
+  <div class="active-panel-title" id="activePanelTitle">Утро — tonal palette (seed: #C2773A)</div>
+  <table class="roles-table" id="rolesTable">
+    <thead>
+      <tr>
+        <th>M3 Color Role</th>
+        <th>Используется для</th>
+        <th>Цвет</th>
+      </tr>
+    </thead>
+    <tbody id="rolesBody"></tbody>
+  </table>
+</div>
+
+<hr class="divider">
+
+<div class="section-label">Веса задач — независимые semantic roles</div>
+<div class="weights-row">
+  <div class="weight-card quick">
+    <div class="weight-icon">⚡</div>
+    <div class="weight-title">Quick</div>
+    <div class="weight-desc">Не требует концентрации · зелёный</div>
+  </div>
+  <div class="weight-card focused">
+    <div class="weight-icon">◎</div>
+    <div class="weight-title">Focused</div>
+    <div class="weight-desc">Умеренная концентрация · янтарный</div>
+  </div>
+  <div class="weight-card deep">
+    <div class="weight-icon">◉</div>
+    <div class="weight-title">Deep</div>
+    <div class="weight-desc">Глубокое погружение · фиолетовый</div>
+  </div>
+</div>
+
+<hr class="divider" style="margin-bottom: 16px;">
+
+<div class="note">
+  <strong>Архитектурное решение:</strong> блоки дня используют Dynamic Color — каждый генерирует свою tonal palette из seed-цвета (как M3 из цвета обоев). Веса задач — это отдельный semantic слой с фиксированными ролями (Quick = зелёный всегда), независимо от активного блока. Так цвет несёт двойной смысл: <strong>где</strong> задача и <strong>какая</strong> задача — одновременно, без конфликта.
+</div>
+
+<script>
+const blockData = {
+  morning: {
+    label: 'Утро',
+    seed: '#C2773A',
+    roles: [
+      { role: 'Primary', use: 'Акценты, кнопки, активные элементы', light: '#8B4513', dark: '#FFB68D' },
+      { role: 'Primary Container', use: 'Фон карточки блока', light: '#FFDBC8', dark: '#6E2D00' },
+      { role: 'On Primary Container', use: 'Текст на фоне карточки', light: '#331200', dark: '#FFDBC8' },
+      { role: 'Secondary Container', use: 'Фон чипов задач', light: '#FFDBD1', dark: '#5C3F33' },
+      { role: 'On Secondary Container', use: 'Текст на чипах', light: '#2C150E', dark: '#FFDBD1' },
+    ]
+  },
+  afternoon: {
+    label: 'День',
+    seed: '#3A7FC2',
+    roles: [
+      { role: 'Primary', use: 'Акценты, кнопки, активные элементы', light: '#0061A4', dark: '#9ECAFF' },
+      { role: 'Primary Container', use: 'Фон карточки блока', light: '#D1E4FF', dark: '#004880' },
+      { role: 'On Primary Container', use: 'Текст на фоне карточки', light: '#001D36', dark: '#D1E4FF' },
+      { role: 'Secondary Container', use: 'Фон чипов задач', light: '#D7E3F7', dark: '#3B4858' },
+      { role: 'On Secondary Container', use: 'Текст на чипах', light: '#0F1C2B', dark: '#D7E3F7' },
+    ]
+  },
+  evening: {
+    label: 'Вечер',
+    seed: '#7C5BA6',
+    roles: [
+      { role: 'Primary', use: 'Акценты, кнопки, активные элементы', light: '#6750A4', dark: '#D0BCFF' },
+      { role: 'Primary Container', use: 'Фон карточки блока', light: '#EADDFF', dark: '#4F378B' },
+      { role: 'On Primary Container', use: 'Текст на фоне карточки', light: '#21005D', dark: '#EADDFF' },
+      { role: 'Secondary Container', use: 'Фон чипов задач', light: '#E8DEF8', dark: '#4A4458' },
+      { role: 'On Secondary Container', use: 'Текст на чипах', light: '#1D192B', dark: '#E8DEF8' },
+    ]
+  },
+  night: {
+    label: 'Ночь',
+    seed: '#3A3A5C',
+    roles: [
+      { role: 'Primary', use: 'Акценты, кнопки, активные элементы', light: '#3F3F6E', dark: '#C5C4F0' },
+      { role: 'Primary Container', use: 'Фон карточки блока', light: '#C5C4F0', dark: '#292855' },
+      { role: 'On Primary Container', use: 'Текст на фоне карточки', light: '#0A0A3B', dark: '#E2E1FF' },
+      { role: 'Secondary Container', use: 'Фон чипов задач', light: '#E1E0F9', dark: '#434361' },
+      { role: 'On Secondary Container', use: 'Текст на чипах', light: '#181829', dark: '#E1E0F9' },
+    ]
+  }
+};
+
+let isDark = false;
+let activeBlock = 'morning';
+
+function renderRoles(block) {
+  const data = blockData[block];
+  const tbody = document.getElementById('rolesBody');
+  document.getElementById('activePanelTitle').textContent = `${data.label} — tonal palette (seed: ${data.seed})`;
+  tbody.innerHTML = data.roles.map(r => {
+    const color = isDark ? r.dark : r.light;
+    return `<tr>
+      <td><span class="role-name">${r.role}</span></td>
+      <td><span class="role-source">${r.use}</span></td>
+      <td><div class="swatch-row"><span class="role-swatch" style="background:${color}"></span><span style="font-size:11px;opacity:0.7">${color}</span></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function selectBlock(block, el) {
+  document.querySelectorAll('.block-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeBlock = block;
+  renderRoles(block);
+}
+
+function toggleTheme() {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  document.getElementById('themeBtn').innerHTML = isDark
+    ? '<span>○</span> Light'
+    : '<span>◑</span> Dark';
+  renderRoles(activeBlock);
+}
+
+renderRoles('morning');
+</script>
+</body>
+</html>

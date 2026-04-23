@@ -64,12 +64,21 @@ interface SpeechRecognitionAlternative {
 type VoiceResultCallback = (transcript: string, isFinal: boolean, confidence?: number) => void;
 type VoiceErrorCallback = (error: string) => void;
 
+// Language map for Web Speech API
+const LANG_MAP: Record<string, string> = {
+  ru: 'ru-RU',
+  en: 'en-US',
+  es: 'es-ES'
+};
+
 export class VoiceControlService {
   private recognition: SpeechRecognition | null = null;
   private synthesis: window['speechSynthesis'] | null = null;
   private isListening: boolean = false;
   private isSpeaking: boolean = false;
+  private shouldAutoRestart: boolean = false;
   private settings: VoiceSettings;
+  private ttsCooldownActive: boolean = false;
 
   // Callbacks
   private onResultCallback?: VoiceResultCallback;
@@ -96,13 +105,23 @@ export class VoiceControlService {
       this.recognition = new SpeechRecognitionConstructor();
       this.recognition.continuous = false;
       this.recognition.interimResults = true;
-      this.recognition.lang = this.settings.language === 'ru' ? 'ru-RU' : 'en-US';
+      this.recognition.lang = LANG_MAP[this.settings.language] || 'en-US';
 
       this.recognition.onresult = (event: SpeechRecognitionEvent) => {
         const result = event.results[event.resultIndex];
         const transcript = result[0].transcript;
         const isFinal = result.isFinal;
         const confidence = result[0].confidence;
+
+        // Логируем STT confidence для отладки
+        if (isFinal) {
+          console.log('🎤 STT Result:', {
+            transcript,
+            confidence,
+            confidenceType: typeof confidence,
+            isFinal
+          });
+        }
 
         if (this.onResultCallback) {
           this.onResultCallback(transcript, isFinal, confidence);
@@ -138,6 +157,21 @@ export class VoiceControlService {
 
       this.recognition.onend = () => {
         this.isListening = false;
+
+        // Auto-restart on silence if enabled (but not during TTS cooldown)
+        if (this.shouldAutoRestart && !this.ttsCooldownActive) {
+          setTimeout(() => {
+            try {
+              if (this.shouldAutoRestart && !this.ttsCooldownActive && this.recognition) {
+                this.recognition.start();
+                this.isListening = true;
+                console.log('🔄 Auto-restarted speech recognition');
+              }
+            } catch (error) {
+              console.warn('Failed to auto-restart recognition:', error);
+            }
+          }, 300);
+        }
       };
     }
   }
@@ -186,6 +220,7 @@ export class VoiceControlService {
 
     this.onResultCallback = onResult;
     this.onErrorCallback = onError;
+    this.shouldAutoRestart = true; // Enable auto-restart on silence
 
     try {
       this.recognition?.start();
@@ -200,6 +235,8 @@ export class VoiceControlService {
    * Остановить прослушивание
    */
   stopListening(): void {
+    this.shouldAutoRestart = false; // Disable auto-restart
+
     if (this.recognition && this.isListening) {
       try {
         this.recognition.stop();
@@ -212,10 +249,19 @@ export class VoiceControlService {
 
   /**
    * Произнести текст вслух
+   * Автоматически останавливает распознавание на время речи
+   * и добавляет cooldown после окончания, чтобы избежать захвата TTS микрофоном
    */
   speak(text: string): void {
     if (!this.isSynthesisSupported() || !this.settings.ttsEnabled) {
       return;
+    }
+
+    // Остановить распознавание перед речью (чтобы не слышать себя)
+    const wasListening = this.isListening;
+    if (wasListening) {
+      this.stopListening();
+      console.log('🔇 Paused recognition for TTS');
     }
 
     // Остановить текущую речь
@@ -223,8 +269,11 @@ export class VoiceControlService {
       this.synthesis?.cancel();
     }
 
+    // Установить cooldown (не перезапускать распознавание после TTS)
+    this.ttsCooldownActive = true;
+
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = this.settings.language === 'ru' ? 'ru-RU' : 'en-US';
+    utterance.lang = LANG_MAP[this.settings.language] || 'en-US';
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
@@ -240,15 +289,50 @@ export class VoiceControlService {
 
     utterance.onstart = () => {
       this.isSpeaking = true;
+      console.log('🔊 TTS started:', text);
     };
 
     utterance.onend = () => {
       this.isSpeaking = false;
+      console.log('🔇 TTS ended');
+
+      // Cooldown: не перезапускать распознавание сразу
+      // TTS output might still be in the air
+      setTimeout(() => {
+        this.ttsCooldownActive = false;
+        console.log('✅ TTS cooldown ended, recognition can restart');
+
+        // Если пользователь всё ещё хочет слушать — перезапустить
+        if (this.shouldAutoRestart) {
+          try {
+            if (this.recognition) {
+              this.recognition.start();
+              this.isListening = true;
+              console.log('🔄 Recognition restarted after TTS cooldown');
+            }
+          } catch (error) {
+            console.warn('Failed to restart recognition after TTS:', error);
+          }
+        }
+      }, 1500); // 1.5 секунды cooldown
     };
 
     utterance.onerror = (event) => {
       console.error('Speech synthesis error:', event.error);
       this.isSpeaking = false;
+      this.ttsCooldownActive = false;
+
+      // Если была ошибка TTS — восстановить распознавание
+      if (wasListening && this.shouldAutoRestart) {
+        try {
+          if (this.recognition) {
+            this.recognition.start();
+            this.isListening = true;
+          }
+        } catch (error) {
+          console.warn('Failed to restart recognition after TTS error:', error);
+        }
+      }
     };
 
     this.synthesis?.speak(utterance);
@@ -277,9 +361,9 @@ export class VoiceControlService {
   /**
    * Получить голоса для указанного языка
    */
-  getVoicesForLanguage(language: 'ru' | 'en'): SpeechSynthesisVoice[] {
+  getVoicesForLanguage(language: 'ru' | 'en' | 'es'): SpeechSynthesisVoice[] {
     const allVoices = this.getAvailableVoices();
-    const langCode = language === 'ru' ? 'ru' : 'en';
+    const langCode = LANG_MAP[language]?.split('-')[0] || language;
 
     return allVoices.filter(voice => voice.lang.startsWith(langCode));
   }
@@ -292,7 +376,7 @@ export class VoiceControlService {
 
     // Обновить язык распознавания
     if (this.recognition) {
-      this.recognition.lang = this.settings.language === 'ru' ? 'ru-RU' : 'en-US';
+      this.recognition.lang = LANG_MAP[this.settings.language] || 'en-US';
     }
   }
 
@@ -332,7 +416,7 @@ export class VoiceControlService {
  * Фабрика для создания VoiceControlService с настройками по умолчанию
  */
 export function createVoiceControlService(
-  language: 'ru' | 'en' = 'en',
+  language: 'ru' | 'en' | 'es' = 'en',
   ttsEnabled: boolean = true
 ): VoiceControlService {
   const defaultSettings: VoiceSettings = {
