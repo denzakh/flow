@@ -118,26 +118,25 @@ export class VoiceCommandProcessor {
    * Попытка распознать конкретную команду
    */
   private tryRecognizeCommand(text: string, sttConfidence?: number): VoiceCommand {
-    // Проверка команд навигации
-    const navCommand = this.tryNavigationCommand(text, sttConfidence);
-    if (navCommand) return navCommand;
-
-    // Проверка команд удаления (ПЕРЕД update, чтобы не перехватить "удали задачу")
+    // 1. Сначала DELETE/TOGGLE (самые специфичные)
     const deleteCommand = this.tryDeleteCommand(text, sttConfidence);
     if (deleteCommand) return deleteCommand;
 
-    // Проверка команд переключения задач (ПЕРЕД update)
     const toggleCommand = this.tryToggleCommand(text, sttConfidence);
     if (toggleCommand) return toggleCommand;
 
-    // Проверка команд обновления (ПЕРЕД добавлением, чтобы не перехватить "сделай задачу X")
-    const updateCommand = this.tryUpdateCommand(text, sttConfidence);
-    if (updateCommand) return updateCommand;
+    // 2. Потом UPDATE (период/вес) — ВАЖНО: ДО навигации!
+    // Проверка: если есть "задачу" + "на [период]" → это changePeriod
+    if (text.includes('задачу') && (text.includes('на утро') || text.includes('на день') || text.includes('на вечер'))) {
+      const updateCommand = this.tryUpdateCommand(text, sttConfidence);
+      if (updateCommand) return updateCommand;
+    }
 
-    // Проверка команд изменения вида
-    const viewCommand = this.tryViewCommand(text, sttConfidence);
-    if (viewCommand) return viewCommand;
+    // 3. Только потом навигация
+    const navCommand = this.tryNavigationCommand(text, sttConfidence);
+    if (navCommand) return navCommand;
 
+    // 4. Fallback
     return this.createUnknownCommand(text, sttConfidence);
   }
 

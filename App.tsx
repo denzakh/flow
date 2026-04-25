@@ -389,59 +389,54 @@ const App: React.FC = () => {
         }
         break;
 
-      case CommandType.TOGGLE_TASK:
-        console.log('🔄 UI Update:', { type: command.type, taskId: null, entities: command.entities });
-        if (command.entities.index !== undefined) {
+      case CommandType.UPDATE_TASK:
+        if (command.entities.index && tasks[command.entities.index - 1]) {
           const taskIndex = command.entities.index - 1;
-          console.log('🔄 Toggle by index:', taskIndex, 'tasks.length:', tasks.length);
-          if (taskIndex >= 0 && taskIndex < tasks.length) {
-            const taskId = tasks[taskIndex].id;
-            console.log('🔄 Toggling task:', taskId, tasks[taskIndex].title);
-            setTasks(prev => prev.map(t =>
-              t.id === taskId ? { ...t, completed: !t.completed } : t
-            ));
-          }
+          setTasks(tasks.map((task, idx) => {
+            if (idx === taskIndex) {
+              return {
+                ...task,
+                weight: command.entities.weight ?? task.weight,
+                periods: command.entities.period ? [command.entities.period] : task.periods
+              };
+            }
+            return task;
+          }));
+          console.log('🔄 UI Update: task', command.entities.index, 'updated');
+        }
+        break;
+
+      case CommandType.TOGGLE_TASK:
+        if (command.entities.index && tasks[command.entities.index - 1]) {
+          const taskIndex = command.entities.index - 1;
+          setTasks(tasks.map((task, idx) =>
+            idx === taskIndex ? { ...task, completed: !task.completed } : task
+          ));
+          console.log('✅ UI Update: task', command.entities.index, 'toggled');
         } else if (command.entities.title) {
-          console.log('🔄 Toggle by title:', command.entities.title);
-          // Нечёткое сравнение: ищем по включению (contains), а не точному совпадению
+          // Поиск по названию (нечёткий)
           const task = tasks.find(t =>
-            t.title.toLowerCase().includes(command.entities.title!.toLowerCase()) ||
-            command.entities.title!.toLowerCase().includes(t.title.toLowerCase())
+            t.title.toLowerCase().includes(command.entities.title!.toLowerCase())
           );
           if (task) {
-            console.log('🔄 Toggling task:', task.id, task.title);
-            setTasks(prev => prev.map(t =>
+            setTasks(tasks.map(t =>
               t.id === task.id ? { ...t, completed: !t.completed } : t
             ));
-          } else {
-            console.log('❌ Task not found by title:', command.entities.title);
+            console.log('✅ UI Update: task by title toggled');
           }
         }
         break;
 
       case CommandType.DELETE_TASK:
-        console.log('🗑️ UI Update:', { type: command.type, taskId: null, entities: command.entities });
-        if (command.entities.index !== undefined) {
+        if (command.entities.index && tasks[command.entities.index - 1]) {
           const taskIndex = command.entities.index - 1;
-          console.log('🗑️ Delete by index:', taskIndex, 'tasks.length:', tasks.length);
-          if (taskIndex >= 0 && taskIndex < tasks.length) {
-            const taskId = tasks[taskIndex].id;
-            console.log('🗑️ Deleting task:', taskId, tasks[taskIndex].title);
-            setTasks(prev => prev.filter(t => t.id !== taskId));
-          }
+          setTasks(tasks.filter((_, idx) => idx !== taskIndex));
+          console.log('🗑️ UI Update: task', command.entities.index, 'deleted');
         } else if (command.entities.title) {
-          console.log('🗑️ Delete by title:', command.entities.title);
-          // Нечёткое сравнение: ищем по включению (contains), а не точному совпадению
-          const task = tasks.find(t =>
-            t.title.toLowerCase().includes(command.entities.title!.toLowerCase()) ||
-            command.entities.title!.toLowerCase().includes(t.title.toLowerCase())
-          );
-          if (task) {
-            console.log('🗑️ Deleting task:', task.id, task.title);
-            setTasks(prev => prev.filter(t => t.id !== task.id));
-          } else {
-            console.log('❌ Task not found by title:', command.entities.title);
-          }
+          setTasks(tasks.filter(t =>
+            !t.title.toLowerCase().includes(command.entities.title!.toLowerCase())
+          ));
+          console.log('🗑️ UI Update: task by title deleted');
         }
         break;
 
@@ -463,45 +458,6 @@ const App: React.FC = () => {
       case CommandType.CHANGE_VIEW:
         if (command.entities.viewMode) {
           setViewMode(command.entities.viewMode);
-        }
-        break;
-
-      case CommandType.UPDATE_TASK:
-        console.log('🔄 UPDATE_TASK command:', command);
-        if (command.entities.index !== undefined) {
-          const taskIndex = command.entities.index - 1;
-          console.log('📍 Task index:', taskIndex, '/', tasks.length);
-          if (taskIndex >= 0 && taskIndex < tasks.length) {
-            const task = tasks[taskIndex];
-            console.log('✅ Task:', task.title, 'weight:', task.weight);
-            const updates: Partial<Task> = {};
-
-            if (command.entities.weight) {
-              updates.weight = command.entities.weight;
-              console.log('⚖️ New weight:', command.entities.weight);
-            }
-
-            if (command.entities.period) {
-              updates.periods = [command.entities.period!];
-              console.log('🕐 New period:', command.entities.period);
-            }
-
-            if (command.entities.priority) {
-              updates.priority = command.entities.priority;
-              console.log('🔥 New priority:', command.entities.priority);
-            }
-
-            if (Object.keys(updates).length > 0) {
-              console.log('💾 Updating:', task.id, updates);
-              updateTask(tasks[taskIndex].id, updates);
-            } else {
-              console.log('⚠️ No updates');
-            }
-          } else {
-            console.log('❌ Index out of range');
-          }
-        } else {
-          console.log('❌ No index');
         }
         break;
     }
