@@ -126,8 +126,14 @@ export class VoiceCommandProcessor {
     if (toggleCommand) return toggleCommand;
 
     // 2. Потом UPDATE (период/вес) — ВАЖНО: ДО навигации!
-    // Проверка: если есть "задачу" + "на [период]" → это changePeriod
-    if (text.includes('задачу') && (text.includes('на утро') || text.includes('на день') || text.includes('на вечер'))) {
+    // Проверка: если есть "задачу" + "на [период]" или "задачу" + "[вес/приоритет]" → это update
+    const isUpdateCommand =
+      (text.includes('задачу') || text.includes('задачи') || text.includes('задача')) &&
+      (text.includes('на утро') || text.includes('на день') || text.includes('на вечер') ||
+        text.includes('быстр') || text.includes('фокус') || text.includes('глубок') ||
+        text.includes('важн') || text.includes('высок') || text.includes('средн') || text.includes('низк'));
+
+    if (isUpdateCommand) {
       const updateCommand = this.tryUpdateCommand(text, sttConfidence);
       if (updateCommand) return updateCommand;
     }
@@ -433,8 +439,8 @@ export class VoiceCommandProcessor {
     // Очистить title от ключевых слов команд
     const cleanTitle = this.cleanTitle(title);
 
-    // Используем STT confidence если доступно, иначе 0.75 для fallback
-    const confidence = (sttConfidence !== undefined && sttConfidence > 0) ? sttConfidence * 0.8 : 0.75;
+    // Используем STT confidence напрямую — он уже надёжен, не нужно уменьшать
+    const confidence = (sttConfidence !== undefined && sttConfidence > 0) ? sttConfidence : 0.75;
 
     return this.createCommand(
       CommandType.ADD_TASK,

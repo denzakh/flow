@@ -8,29 +8,41 @@ interface RecoveryBannerProps {
   language: 'en' | 'ru' | 'es';
 }
 
-const RecoveryBanner: React.FC<RecoveryBannerProps> = ({
-  isWindDown,
-  currentTime,
-  language
-}) => {
+const RecoveryBanner: React.FC<RecoveryBannerProps> = ({ isWindDown, currentTime, language }) => {
   const tipIndex = Math.floor(currentTime.getHours() / 5) % 5;
   const tip = RECOVERY_TIPS[language][tipIndex];
 
   return (
-    <div className={`p-6 rounded-[2.5rem] flex items-center gap-5 transition-all duration-[2000ms] ${
-      isWindDown ? 'bg-indigo-500/10 border border-indigo-500/20' : 'bg-emerald-500/10 border border-emerald-500/20'
-    }`}>
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${
-        isWindDown ? 'bg-indigo-500/20 text-white' : 'bg-emerald-500/20 text-white'
-      }`}>
+    <div
+      className="p-6 flex items-center gap-5 transition-all duration-[2000ms]"
+      style={{
+        borderRadius: 'var(--md-sys-shape-corner-extra-large)',
+        background: isWindDown ? 'var(--flow-block-evening-container)' : 'var(--flow-weight-quick-container)',
+        border: `1px solid ${isWindDown ? 'var(--flow-block-evening)' : 'var(--flow-weight-quick)'}`,
+      }}
+    >
+      <div
+        className="w-14 h-14 flex items-center justify-center"
+        style={{
+          borderRadius: 'var(--md-sys-shape-corner-large)',
+          background: isWindDown ? 'var(--flow-block-evening)' : 'var(--flow-weight-quick)',
+          color: '#ffffff',
+        }}
+      >
         {isWindDown ? <BedDouble size={22} /> : <Sparkles size={22} />}
       </div>
       <div className="flex-1">
-        <h3 className="text-sm font-light uppercase tracking-widest mb-1 text-white">
+        <h3
+          className="md-typescale-title-medium mb-1"
+          style={{ color: isWindDown ? 'var(--flow-block-evening-on-container)' : 'var(--flow-weight-quick-on-container)' }}
+        >
           {isWindDown ? 'Good Night' : 'Neural Recovery Active'}
         </h3>
-        <p className="text-[11px] font-bold text-white leading-relaxed italic">
-          "{tip}"
+        <p
+          className="md-typescale-body-medium italic leading-relaxed"
+          style={{ color: isWindDown ? 'var(--flow-block-evening-on-container)' : 'var(--flow-weight-quick-on-container)' }}
+        >
+          &ldquo;{tip}&rdquo;
         </p>
       </div>
     </div>

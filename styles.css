@@ -8,21 +8,21 @@
      COLOR PALETTE
      ═══════════════════════════════════════════════════════════════════════ */
   
-  /* Backgrounds */
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #0f0f0f;
-  --bg-card: #141414;
-  --bg-elevated: #1a1a1a;
-  --bg-glass: rgba(20, 20, 20, 0.7);
-  --bg-glass-card: rgba(30, 30, 30, 0.5);
-  --bg-glass-card-hover: rgba(35, 35, 35, 0.6);
+  /* Backgrounds — light theme defaults */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f5f2;
+  --bg-card: #ffffff;
+  --bg-elevated: #ede9e6;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --bg-glass-card: rgba(255, 255, 255, 0.9);
+  --bg-glass-card-hover: rgba(243, 240, 237, 0.95);
 
   /* Text */
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --text-tertiary: #666666;
-  --text-muted: #444444;
-  --text-disabled: rgba(255, 255, 255, 0.3);
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --text-tertiary: #999693;
+  --text-muted: #b0aea8;
+  --text-disabled: rgba(26, 26, 26, 0.38);
 
   /* Accent Colors - Flow Brand */
   --accent-evening: #d4a574;
@@ -609,8 +609,8 @@
 
 body {
   font-family: var(--font-family);
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: var(--md-sys-color-background, #ffffff);
+  color: var(--md-sys-color-on-surface, var(--text-primary));
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -679,37 +679,10 @@ p {
    BACKGROUND & OVERLAY
    ═══════════════════════════════════════════════════════════════════════ */
 
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-  background-image: url('/assets/images/background dark.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.4;
-}
-
+/* Background image removed — solid surface from M3 tokens */
+body::before,
 body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(10, 10, 10, 0.7) 0%,
-    rgba(10, 10, 10, 0.85) 50%,
-    rgba(10, 10, 10, 0.9) 100%
-  );
+  display: none;
 }
 
 .bg-layer {
@@ -1409,6 +1382,67 @@ button, select, input, .touch-target {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LIGHT / DARK THEME — legacy + glass overrides
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.dark {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #0f0f0f;
+  --bg-card: #141414;
+  --bg-elevated: #1a1a1a;
+  --bg-glass: rgba(20, 20, 20, 0.7);
+  --bg-glass-card: rgba(30, 30, 30, 0.5);
+  --bg-glass-card-hover: rgba(35, 35, 35, 0.6);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-tertiary: #666666;
+  --text-muted: #444444;
+  --text-disabled: rgba(255, 255, 255, 0.3);
+}
+
+html:not(.dark) .glass-2,
+html.light .glass-2,
+html:not(.dark) .glass-header,
+html.light .glass-header,
+html:not(.dark) .glass-card,
+html.light .glass-card,
+html:not(.dark) .glass-container,
+html.light .glass-container {
+  background: var(--md-sys-color-surface-container-low, #f3f0ed);
+  border-color: var(--md-sys-color-outline-variant, #e0ddd8);
+  color: var(--md-sys-color-on-surface, #1a1a1a);
+}
+
+html:not(.dark) .glass-btn,
+html.light .glass-btn {
+  background: var(--md-sys-color-surface-container-high, #e7e4e0);
+  border-color: var(--md-sys-color-outline-variant, #e0ddd8);
+  color: var(--md-sys-color-on-surface, #1a1a1a);
+}
+
+html:not(.dark) .glass-btn:hover,
+html.light .glass-btn:hover {
+  background: var(--md-sys-color-surface-container-highest, #e2dedb);
+  border-color: var(--md-sys-color-outline, #999693);
+}
+
+html:not(.dark) input,
+html:not(.dark) select,
+html:not(.dark) textarea,
+html.light input,
+html.light select,
+html.light textarea {
+  color: var(--md-sys-color-on-surface, #1a1a1a);
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder,
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: var(--md-sys-color-on-surface-variant, #666666);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════

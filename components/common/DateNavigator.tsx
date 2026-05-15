@@ -17,7 +17,7 @@ const DateNavigator: React.FC<DateNavigatorProps> = ({
   todayStr,
   language,
   onNavigate,
-  onToday
+  onToday,
 }) => {
   const t = TRANSLATIONS[language];
 
@@ -43,33 +43,32 @@ const DateNavigator: React.FC<DateNavigatorProps> = ({
     return t.upcoming;
   };
 
+  const btnStyle: React.CSSProperties = {
+    borderRadius: 'var(--md-sys-shape-corner-medium)',
+    background: 'var(--md-sys-color-surface-container-high)',
+    color: 'var(--md-sys-color-on-surface)',
+    minWidth: '40px',
+    minHeight: '40px',
+  };
+
   return (
     <div className="flex items-center justify-between px-2">
       <div className="flex flex-col">
-        <h2 className="text-xl font-light tracking-tight text-white">
+        <h2 className="md-typescale-title-large" style={{ color: 'var(--md-sys-color-on-surface)' }}>
           {getTitle()}
         </h2>
-        <span className="text-[10px] font-black uppercase text-white tracking-widest">
+        <span className="md-typescale-label-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
           {getSubtitle()}
         </span>
       </div>
       <div className="flex gap-1">
-        <button
-          onClick={() => onNavigate(-1)}
-          className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#0a0a0a] text-white transition-all"
-        >
+        <button type="button" onClick={() => onNavigate(-1)} className="md-state-layer md-focus-ring flex items-center justify-center w-10 h-10 transition-all" style={btnStyle}>
           <ChevronLeft size={22} />
         </button>
-        <button
-          onClick={onToday}
-          className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#0a0a0a] text-white transition-all"
-        >
+        <button type="button" onClick={onToday} className="md-state-layer md-focus-ring flex items-center justify-center w-10 h-10 transition-all" style={btnStyle}>
           <RotateCcw size={22} />
         </button>
-        <button
-          onClick={() => onNavigate(1)}
-          className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#0a0a0a] text-white transition-all"
-        >
+        <button type="button" onClick={() => onNavigate(1)} className="md-state-layer md-focus-ring flex items-center justify-center w-10 h-10 transition-all" style={btnStyle}>
           <ChevronRight size={22} />
         </button>
       </div>

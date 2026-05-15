@@ -56,6 +56,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   );
 
+  const [darkTheme, setDarkTheme] = useState(() => localStorage.getItem('flow_theme') === 'dark');
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkTheme);
+    document.documentElement.classList.toggle('light', !darkTheme);
+    localStorage.setItem('flow_theme', darkTheme ? 'dark' : 'light');
+  }, [darkTheme]);
+
   useEffect(() => {
     if ('speechSynthesis' in window) {
       const loadVoices = () => {
@@ -75,57 +83,84 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-end animate-in slide-in-from-bottom duration-500">
-      <div className="w-full glass-2 rounded-t-[3rem] p-8 pb-12 shadow-2xl space-y-10 border-t border-white/5" style={{
-        background: 'rgba(15, 15, 15, 0.95)',
-        borderRadius: '48px 48px 0 0',
-      }}>
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-light text-white tracking-tighter">{t.settings}</h2>
+    <div className="fixed inset-0 z-[110] flex items-end">
+      <button type="button" className="sheet-scrim absolute inset-0" onClick={onClose} aria-label="Close" />
+      <div
+        className="sheet-panel modal-enter modal-enter-active w-full relative p-8 pb-12 space-y-6"
+        style={{
+          background: 'var(--md-sys-color-surface-container-low)',
+          borderRadius: 'var(--md-sys-shape-corner-extra-large) var(--md-sys-shape-corner-extra-large) 0 0',
+          boxShadow: 'var(--md-sys-elevation-5)',
+        }}
+      >
+        <div
+          className="mx-auto mb-2"
+          style={{
+            width: 32,
+            height: 4,
+            borderRadius: 'var(--md-sys-shape-corner-full)',
+            background: 'var(--md-sys-color-outline-variant)',
+          }}
+        />
+
+        <div className="flex items-center justify-between min-h-[56px]">
+          <h2 className="md-typescale-headline-small" style={{ color: 'var(--md-sys-color-on-surface)' }}>
+            {t.settings}
+          </h2>
           <button
             onClick={onClose}
-            className="glass-btn w-10 h-10 flex items-center justify-center"
+            className="md-state-layer md-focus-ring flex items-center justify-center"
+            style={{ color: 'var(--md-sys-color-on-surface-variant)', minWidth: 48, minHeight: 48 }}
           >
             <X size={22} />
           </button>
         </div>
 
-        <div className="space-y-8 max-h-[70vh] overflow-y-auto pr-2">
+        <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+          <div className="flex items-center justify-between min-h-[56px]">
+            <span className="md-typescale-body-large" style={{ color: 'var(--md-sys-color-on-surface)' }}>
+              Dark theme
+            </span>
+            <button
+              type="button"
+              onClick={() => setDarkTheme((v) => !v)}
+              className={`flow-switch ${darkTheme ? 'flow-switch--on' : ''}`}
+              aria-pressed={darkTheme}
+            >
+              <span className="flow-switch-thumb" style={{ left: darkTheme ? 28 : 4 }} />
+            </button>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-white/60 tracking-widest">
-                {t.morning} Start
-              </label>
+              <label className="flow-label">{t.morning} Start</label>
               <input
                 type="time"
                 value={tempWake}
                 onChange={e => onTempWakeChange(e.target.value)}
-                className="w-full p-4 bg-[#0a0a0a] rounded-2xl border border-white/10 font-bold text-white focus:border-white/20 focus:outline-none transition-colors"
+                className="flow-input md-focus-ring"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-white/60 tracking-widest">
-                {t.night} Rest
-              </label>
+              <label className="flow-label">{t.night} Rest</label>
               <input
                 type="time"
                 value={tempRest}
                 onChange={e => onTempRestChange(e.target.value)}
-                className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 font-bold text-white"
+                className="flow-input md-focus-ring"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-white/60 tracking-widest">{t.language}</label>
+            <label className="flow-label">{t.language}</label>
             <div className="grid grid-cols-3 gap-2">
               {(['en', 'ru', 'es'] as Language[]).map(l => (
                 <button
                   key={l}
+                  type="button"
                   onClick={() => onTempLangChange(l)}
-                  className={`py-3 rounded-xl text-[10px] font-black uppercase ${
-                    tempLang === l ? 'bg-[#0a0a0a] text-white' : 'bg-white/5 text-white/40'
-                  }`}
+                  className={`flow-chip ${tempLang === l ? 'flow-chip--selected' : ''}`}
                 >
                   {l}
                 </button>
@@ -135,37 +170,31 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Voice Control Section */}
           {voiceSettings && onVoiceSettingsChange && (
-            <div className="pt-6 border-t border-white/5 space-y-4">
+            <div className="pt-6 border-t flow-divider border-t space-y-4">
               <div className="flex items-center gap-2">
-                <Mic size={18} className="text-white/60" />
-                <label className="text-[10px] font-black uppercase text-white/60 tracking-widest">
+                <Mic size={18} className="flow-text-muted" />
+                <label className="text-[10px] font-black uppercase flow-text-muted tracking-widest">
                   {VOICE_TRANSLATIONS[settings.language].voiceSettings || 'Voice Control'}
                 </label>
               </div>
 
               {/* Enable Voice Control */}
               <div className="flex items-center justify-between">
-                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].enableVoice || 'Enable Voice'}</label>
+                <label className="text-sm flow-text-muted">{VOICE_TRANSLATIONS[settings.language].enableVoice || 'Enable Voice'}</label>
                 <button
                   onClick={() => {
                     handleVoiceToggle('enabled');
                     onVoiceSettingsChange({ ...tempVoiceSettings, enabled: !tempVoiceSettings.enabled });
                   }}
-                  className={`w-12 h-6 rounded-full transition-colors ${
-                    tempVoiceSettings.enabled ? 'bg-active' : 'bg-white/20'
-                  }`}
+                  className={`flow-switch ${tempVoiceSettings.enabled ? 'flow-switch--on' : ''}`}
                 >
-                  <div
-                    className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                      tempVoiceSettings.enabled ? 'translate-x-6' : 'translate-x-0.5'
-                    }`}
-                  />
+                  <span className="flow-switch-thumb" style={{ left: tempVoiceSettings.enabled ? 28 : 4 }} />
                 </button>
               </div>
 
               {/* Voice Language */}
               <div className="space-y-2">
-                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].voiceLanguage || 'Language'}</label>
+                <label className="text-sm flow-text-muted">{VOICE_TRANSLATIONS[settings.language].voiceLanguage || 'Language'}</label>
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
@@ -174,8 +203,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     }}
                     className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${
                       tempVoiceSettings.language === 'ru'
-                        ? 'bg-active text-white'
-                        : 'bg-white/10 text-white/60 hover:bg-white/20'
+                        ? 'flow-chip flow-chip--selected'
+                        : 'flow-chip'
                     }`}
                   >
                     {VOICE_TRANSLATIONS[settings.language].russian || 'RU'}
@@ -187,8 +216,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     }}
                     className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${
                       tempVoiceSettings.language === 'en'
-                        ? 'bg-active text-white'
-                        : 'bg-white/10 text-white/60 hover:bg-white/20'
+                        ? 'flow-chip flow-chip--selected'
+                        : 'flow-chip'
                     }`}
                   >
                     {VOICE_TRANSLATIONS[settings.language].english || 'EN'}
@@ -200,8 +229,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     }}
                     className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${
                       tempVoiceSettings.language === 'es'
-                        ? 'bg-active text-white'
-                        : 'bg-white/10 text-white/60 hover:bg-white/20'
+                        ? 'flow-chip flow-chip--selected'
+                        : 'flow-chip'
                     }`}
                   >
                     {VOICE_TRANSLATIONS[settings.language].spanish || 'ES'}
@@ -211,68 +240,50 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
               {/* Auto Submit */}
               <div className="flex items-center justify-between">
-                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].autoSubmit || 'Auto Submit'}</label>
+                <label className="text-sm flow-text-muted">{VOICE_TRANSLATIONS[settings.language].autoSubmit || 'Auto Submit'}</label>
                 <button
                   onClick={() => {
                     handleVoiceToggle('autoSubmit');
                     onVoiceSettingsChange({ ...tempVoiceSettings, autoSubmit: !tempVoiceSettings.autoSubmit });
                   }}
-                  className={`w-12 h-6 rounded-full transition-colors ${
-                    tempVoiceSettings.autoSubmit ? 'bg-active' : 'bg-white/20'
-                  }`}
+                  className={`flow-switch ${tempVoiceSettings.autoSubmit ? 'flow-switch--on' : ''}`}
                 >
-                  <div
-                    className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                      tempVoiceSettings.autoSubmit ? 'translate-x-6' : 'translate-x-0.5'
-                    }`}
-                  />
+                  <span className="flow-switch-thumb" style={{ left: tempVoiceSettings.autoSubmit ? 28 : 4 }} />
                 </button>
               </div>
 
               {/* Require Confirmation */}
               <div className="flex items-center justify-between">
-                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].requireConfirmation || 'Require Confirmation'}</label>
+                <label className="text-sm flow-text-muted">{VOICE_TRANSLATIONS[settings.language].requireConfirmation || 'Require Confirmation'}</label>
                 <button
                   onClick={() => {
                     handleVoiceToggle('requireConfirmation');
                     onVoiceSettingsChange({ ...tempVoiceSettings, requireConfirmation: !tempVoiceSettings.requireConfirmation });
                   }}
-                  className={`w-12 h-6 rounded-full transition-colors ${
-                    tempVoiceSettings.requireConfirmation ? 'bg-active' : 'bg-white/20'
-                  }`}
+                  className={`flow-switch ${tempVoiceSettings.requireConfirmation ? 'flow-switch--on' : ''}`}
                 >
-                  <div
-                    className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                      tempVoiceSettings.requireConfirmation ? 'translate-x-6' : 'translate-x-0.5'
-                    }`}
-                  />
+                  <span className="flow-switch-thumb" style={{ left: tempVoiceSettings.requireConfirmation ? 28 : 4 }} />
                 </button>
               </div>
 
               {/* TTS Feedback */}
               <div className="flex items-center justify-between">
-                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].enableTTS || 'Voice Feedback'}</label>
+                <label className="text-sm flow-text-muted">{VOICE_TRANSLATIONS[settings.language].enableTTS || 'Voice Feedback'}</label>
                 <button
                   onClick={() => {
                     handleVoiceToggle('ttsEnabled');
                     onVoiceSettingsChange({ ...tempVoiceSettings, ttsEnabled: !tempVoiceSettings.ttsEnabled });
                   }}
-                  className={`w-12 h-6 rounded-full transition-colors ${
-                    tempVoiceSettings.ttsEnabled ? 'bg-active' : 'bg-white/20'
-                  }`}
+                  className={`flow-switch ${tempVoiceSettings.ttsEnabled ? 'flow-switch--on' : ''}`}
                 >
-                  <div
-                    className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                      tempVoiceSettings.ttsEnabled ? 'translate-x-6' : 'translate-x-0.5'
-                    }`}
-                  />
+                  <span className="flow-switch-thumb" style={{ left: tempVoiceSettings.ttsEnabled ? 28 : 4 }} />
                 </button>
               </div>
 
               {/* Voice Selection for TTS */}
               {tempVoiceSettings.ttsEnabled && availableVoices.length > 0 && (
                 <div className="space-y-2">
-                  <label className="text-sm text-white/80">Voice</label>
+                  <label className="text-sm flow-text-muted">Voice</label>
                   <select
                     value={tempVoiceSettings.ttsVoice || ''}
                     onChange={(e) => {
@@ -280,7 +291,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       setTempVoiceSettings(newSettings);
                       onVoiceSettingsChange(newSettings);
                     }}
-                    className="w-full bg-white/10 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-active"
+                    className="flow-input md-focus-ring text-sm"
                   >
                     <option value="" className="bg-gray-800">Default</option>
                     {availableVoices
@@ -300,7 +311,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
               {/* Confidence Threshold */}
               <div className="space-y-2">
-                <label className="text-sm text-white/80">{VOICE_TRANSLATIONS[settings.language].confidenceThreshold || 'Confidence Threshold'}</label>
+                <label className="text-sm flow-text-muted">{VOICE_TRANSLATIONS[settings.language].confidenceThreshold || 'Confidence Threshold'}</label>
                 <div className="flex items-center gap-4">
                   <input
                     type="range"
@@ -318,7 +329,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     }}
                     className="flex-1"
                   />
-                  <span className="text-sm text-white/80 w-12 text-right">
+                  <span className="text-sm flow-text-muted w-12 text-right">
                     {Math.round(tempVoiceSettings.confidenceThreshold * 100)}%
                   </span>
                 </div>
@@ -326,16 +337,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           )}
 
-          <div className="pt-6 border-t border-white/5 flex flex-col gap-3">
+          <div className="pt-6 border-t flow-divider border-t flex flex-col gap-3">
             <button
               onClick={onSave}
-              className="glass-btn w-full py-5 text-white rounded-3xl font-black shadow-xl active:scale-95 transition-all"
+              className="md-state-layer md-focus-ring w-full py-5 rounded-3xl font-black shadow-xl active:scale-95 transition-all flow-text"
+              style={{ background: 'var(--md-sys-color-primary)', color: 'var(--md-sys-color-on-primary)', minHeight: 48 }}
             >
               {t.save}
             </button>
             <button
               onClick={onLogout}
-              className="w-full py-5 text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500/10 rounded-3xl transition-all flex items-center justify-center gap-2 glass-btn"
+              className="w-full py-5 text-[10px] font-black uppercase tracking-widest rounded-3xl transition-all flex items-center justify-center gap-2 md-state-layer"
+              style={{ color: 'var(--md-sys-color-error)', minHeight: 48 }}
             >
               <LogOut size={14} /> {t.rhythm === 'Your Rhythm' ? 'Log Out' : t.rhythm}
             </button>

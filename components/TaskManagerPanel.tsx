@@ -33,21 +33,24 @@ const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({
         className="w-full glass-2 p-4 rounded-2xl flex items-center justify-between gap-4 hover-lift transition-all group"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#0a0a0a] flex items-center justify-center">
-            <AlertCircle size={20} className="text-white/60" />
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ background: 'var(--md-sys-color-surface-container-high)' }}
+          >
+            <AlertCircle size={20} className="flow-text-muted" />
           </div>
           <div className="text-left">
-            <div className="text-[10px] font-black uppercase text-white/40 tracking-widest">
+            <div className="text-[10px] font-black uppercase flow-text-muted tracking-widest">
               {t.tasks} / {t.taskManagement}
             </div>
-            <div className="text-sm font-bold text-white">
+            <div className="text-sm font-bold flow-text">
               {stats.total} {stats.total === 1 ? 'задача' : 'задач'}
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <div className="text-right">
-            <div className="text-[10px] font-black uppercase text-white/40 tracking-widest">
+            <div className="text-[10px] font-black uppercase flow-text-muted tracking-widest">
               {stats.completed} выполнено
             </div>
             <div className="text-sm font-bold text-emerald-400">
@@ -62,16 +65,19 @@ const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({
   return (
     <div className="glass-2 rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-white/10 flex items-center justify-between">
+      <div className="p-4 border-b flow-divider border-b flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#0a0a0a] flex items-center justify-center">
-            <AlertCircle size={20} className="text-white/60" />
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ background: 'var(--md-sys-color-surface-container-high)' }}
+          >
+            <AlertCircle size={20} className="flow-text-muted" />
           </div>
           <div>
-            <div className="text-[10px] font-black uppercase text-white/40 tracking-widest">
+            <div className="text-[10px] font-black uppercase flow-text-muted tracking-widest">
               {t.tasks} / {t.taskManagement}
             </div>
-            <div className="text-sm font-bold text-white">
+            <div className="text-sm font-bold flow-text">
               Всего: {stats.total}
             </div>
           </div>
@@ -86,17 +92,17 @@ const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({
 
       {/* Stats */}
       <div className="px-4 py-3 grid grid-cols-3 gap-3 text-center">
-        <div className="bg-[#0a0a0a] rounded-xl p-3">
-          <div className="text-2xl font-bold text-white">{stats.total}</div>
-          <div className="text-[8px] font-black uppercase text-white/40 tracking-widest">Всего</div>
+        <div className="rounded-xl p-3" style={{ background: 'var(--md-sys-color-surface-container-high)' }}>
+          <div className="text-2xl font-bold flow-text">{stats.total}</div>
+          <div className="text-[8px] font-black uppercase flow-text-muted tracking-widest">Всего</div>
         </div>
-        <div className="bg-[#0a0a0a] rounded-xl p-3">
+        <div className="rounded-xl p-3" style={{ background: 'var(--md-sys-color-surface-container-high)' }}>
           <div className="text-2xl font-bold text-emerald-400">{stats.active}</div>
-          <div className="text-[8px] font-black uppercase text-white/40 tracking-widest">Активных</div>
+          <div className="text-[8px] font-black uppercase flow-text-muted tracking-widest">Активных</div>
         </div>
-        <div className="bg-[#0a0a0a] rounded-xl p-3">
-          <div className="text-2xl font-bold text-white/40">{stats.completed}</div>
-          <div className="text-[8px] font-black uppercase text-white/40 tracking-widest">Выполнено</div>
+        <div className="rounded-xl p-3" style={{ background: 'var(--md-sys-color-surface-container-high)' }}>
+          <div className="text-2xl font-bold flow-text-muted">{stats.completed}</div>
+          <div className="text-[8px] font-black uppercase flow-text-muted tracking-widest">Выполнено</div>
         </div>
       </div>
 
@@ -105,7 +111,8 @@ const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({
         {stats.completed > 0 && (
           <button
             onClick={() => setShowConfirm('completed')}
-            className="w-full py-3 px-4 rounded-xl bg-[#0a0a0a] text-white/60 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 rounded-xl flow-text-muted text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+            style={{ background: 'var(--md-sys-color-surface-container-high)' }}
           >
             <CheckCircle size={16} />
             Удалить выполненные ({stats.completed})
@@ -125,10 +132,10 @@ const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({
       {showConfirm && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
           <div className="glass-2 rounded-2xl p-6 max-w-sm w-full animate-in fade-in zoom-in duration-200">
-            <h3 className="text-lg font-bold text-white mb-2">
+            <h3 className="text-lg font-bold flow-text mb-2">
               {showConfirm === 'all' ? 'Удалить все задачи?' : 'Удалить выполненные задачи?'}
             </h3>
-            <p className="text-sm text-white/60 mb-6">
+            <p className="text-sm flow-text-muted mb-6">
               {showConfirm === 'all'
                 ? 'Это действие удалит все задачи без возможности восстановления.'
                 : `Это действие удалит ${stats.completed} выполненн${stats.completed === 1 ? 'ую' : 'ые'} задачи.`}
@@ -136,7 +143,8 @@ const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirm(null)}
-                className="flex-1 py-3 rounded-xl bg-[#0a0a0a] text-white/60 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all"
+                className="flex-1 py-3 rounded-xl flow-text-muted text-[10px] font-black uppercase tracking-widest transition-all"
+                style={{ background: 'var(--md-sys-color-surface-container-high)' }}
               >
                 Отмена
               </button>
@@ -150,7 +158,7 @@ const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({
                   setShowConfirm(null);
                   setIsExpanded(false);
                 }}
-                className="flex-1 py-3 rounded-xl bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 transition-all"
+                className="flex-1 py-3 rounded-xl bg-rose-500 flow-text text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 transition-all"
               >
                 Удалить
               </button>

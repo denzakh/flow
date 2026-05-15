@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Repeat, Check, Clock, Plus, Zap, Target, Layers } from '../../utils/MaterialIcons';
+import { Repeat, Check, Clock, Zap, Target, Layers } from '../../utils/MaterialIcons';
+import { Plus } from 'lucide-react';
 import { TimePeriod, TaskWeight, Recurrence, Language } from '../../types.ts';
 import { WEIGHT_CONFIG, TRANSLATIONS } from '../../constants.tsx';
 import { suggestWeight } from '../../services/taskOptimizer.ts';
@@ -27,14 +28,13 @@ const FocusPoint: React.FC<FocusPointProps> = ({
   onPeriodToggle,
   onRecurrenceChange,
   onInputFocusChange,
-  language
+  language,
 }) => {
   const t = TRANSLATIONS[language];
   const [taskTitle, setTaskTitle] = useState('');
   const [isRecurrenceMenuOpen, setIsRecurrenceMenuOpen] = useState(false);
   const taskInputRef = useRef<HTMLInputElement>(null);
 
-  // Автоматическая рекомендация веса задачи на основе эвристик
   useEffect(() => {
     const currentTitle = taskTitle.trim();
     if (currentTitle.length > 3) {
@@ -47,9 +47,10 @@ const FocusPoint: React.FC<FocusPointProps> = ({
     e.preventDefault();
     if (!taskTitle.trim()) return;
 
-    const periodsToUse = selectedRecurrence === 'all-blocks'
-      ? [TimePeriod.MORNING, TimePeriod.AFTERNOON, TimePeriod.EVENING]
-      : selectedPeriods;
+    const periodsToUse =
+      selectedRecurrence === 'all-blocks'
+        ? [TimePeriod.MORNING, TimePeriod.AFTERNOON, TimePeriod.EVENING]
+        : selectedPeriods;
 
     onTaskAdd(taskTitle, periodsToUse, selectedRecurrence, selectedWeight);
     setTaskTitle('');
@@ -60,17 +61,23 @@ const FocusPoint: React.FC<FocusPointProps> = ({
   const weights = ['quick', 'focused', 'deep'] as TaskWeight[];
 
   return (
-    <div className="glass-2 mb-6" style={{
-      borderRadius: '40px',
-      padding: '24px',
-    }}>
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <div className="px-2 mb-4">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">{t.addPoint}</h3>
-        </div>
-      
+    <div
+      className="mb-6"
+      style={{
+        background: 'var(--md-sys-color-surface-container-low)',
+        borderRadius: 'var(--md-sys-shape-corner-extra-large)',
+        padding: '24px',
+        boxShadow: 'var(--md-sys-elevation-1)',
+      }}
+    >
+      <div className="px-2 mb-4">
+        <h3 className="md-typescale-label-large" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+          {t.addPoint}
+        </h3>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className={`relative group ${isInputFocused ? 'input-gradient-focus' : 'input-gradient'}`}>
+        <div className="relative">
           <input
             ref={taskInputRef}
             type="text"
@@ -79,28 +86,70 @@ const FocusPoint: React.FC<FocusPointProps> = ({
             onFocus={() => onInputFocusChange(true)}
             onBlur={() => onInputFocusChange(false)}
             placeholder="What's next?"
-            className="w-full bg-[#0a0a0a] border-0 rounded-[24px] py-5 pl-6 pr-[110px] text-sm font-bold text-white placeholder:text-white shadow-sm focus:ring-0 focus:outline-none transition-all outline-none"
-            style={{ height: '66px' }}
+            className={`md-typescale-body-large w-full md-focus-ring transition-all duration-md-short3 ease-md-standard ${
+              isInputFocused ? 'pt-6 pb-3' : 'py-4'
+            }`}
+            style={{
+              background: 'var(--md-sys-color-surface-container-highest)',
+              color: 'var(--md-sys-color-on-surface)',
+              borderRadius: `${isInputFocused ? 'var(--md-sys-shape-corner-extra-small)' : 'var(--md-sys-shape-corner-extra-small)'} ${isInputFocused ? 'var(--md-sys-shape-corner-extra-small)' : 'var(--md-sys-shape-corner-extra-small)'} 0 0`,
+              border: 'none',
+              borderBottom: `2px solid ${isInputFocused ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)'}`,
+              paddingLeft: '16px',
+              paddingRight: '110px',
+            }}
           />
+          {isInputFocused && (
+            <label
+              className="md-typescale-label-small absolute left-4 top-2 pointer-events-none"
+              style={{ color: 'var(--md-sys-color-primary)' }}
+            >
+              What's next?
+            </label>
+          )}
+
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 z-10">
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsRecurrenceMenuOpen(!isRecurrenceMenuOpen)}
-                className="w-[46px] h-[46px] rounded-[16px] flex items-center justify-center transition-all bg-transparent text-white hover:bg-white/5"
+                className="md-state-layer md-focus-ring w-10 h-10 flex items-center justify-center transition-colors duration-md-short4"
+                style={{
+                  borderRadius: 'var(--md-sys-shape-corner-large)',
+                  color: 'var(--md-sys-color-on-surface-variant)',
+                  minWidth: '40px',
+                  minHeight: '40px',
+                }}
               >
                 <Repeat size={22} />
               </button>
               {isRecurrenceMenuOpen && (
-                <div className="absolute bottom-full right-0 mb-3 w-48 glass-container rounded-3xl overflow-hidden py-3 shadow-2xl z-30">
-                  {(['none', 'daily', 'weekly', 'monthly', 'all-blocks'] as Recurrence[]).map(r => (
+                <div
+                  className="absolute bottom-full right-0 mb-3 w-48 py-2 z-30"
+                  style={{
+                    background: 'var(--md-sys-color-surface-container-high)',
+                    borderRadius: 'var(--md-sys-shape-corner-large)',
+                    boxShadow: 'var(--md-sys-elevation-3)',
+                  }}
+                >
+                  {(['none', 'daily', 'weekly', 'monthly', 'all-blocks'] as Recurrence[]).map((r) => (
                     <button
                       key={r}
                       type="button"
-                      onClick={() => { onRecurrenceChange(r); setIsRecurrenceMenuOpen(false); }}
-                      className={`w-full text-left px-5 py-3 text-xs font-black flex items-center justify-between transition-colors ${
-                        selectedRecurrence === r ? 'text-emerald-400 bg-emerald-500/10' : 'text-white/60 hover:bg-white/5'
-                      }`}
+                      onClick={() => {
+                        onRecurrenceChange(r);
+                        setIsRecurrenceMenuOpen(false);
+                      }}
+                      className="md-state-layer w-full text-left px-5 py-3 md-typescale-body-medium flex items-center justify-between transition-colors duration-md-short4"
+                      style={{
+                        minHeight: '48px',
+                        color:
+                          selectedRecurrence === r
+                            ? 'var(--md-sys-color-primary)'
+                            : 'var(--md-sys-color-on-surface-variant)',
+                        background:
+                          selectedRecurrence === r ? 'var(--md-sys-color-primary-container)' : 'transparent',
+                      }}
                     >
                       {t[`rec_${r === 'all-blocks' ? 'all_blocks' : r}` as keyof typeof t]}
                       {selectedRecurrence === r && <Check size={14} />}
@@ -111,8 +160,16 @@ const FocusPoint: React.FC<FocusPointProps> = ({
             </div>
             <button
               type="submit"
-              className="w-[46px] h-[46px] bg-[#000000] text-white rounded-[16px] shadow-lg active:scale-90 transition-all flex items-center justify-center"
-              style={{ boxShadow: '0 0 5px 0 #45556C inset' }}
+              className="md-state-layer md-focus-ring flex items-center justify-center transition-shadow duration-md-medium2 ease-md-decelerate hover:shadow-[var(--md-sys-elevation-4)]"
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: 'var(--md-sys-shape-corner-large)',
+                background: 'var(--md-sys-color-primary)',
+                color: 'var(--md-sys-color-on-primary)',
+                boxShadow: 'var(--md-sys-elevation-3)',
+              }}
+              aria-label="Add task"
             >
               <Plus size={22} />
             </button>
@@ -120,12 +177,12 @@ const FocusPoint: React.FC<FocusPointProps> = ({
         </div>
 
         <div className="space-y-3 px-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Effort Weight</span>
-          </div>
-          
-          <div className="flex gap-2">
-            {weights.map(w => {
+          <span className="md-typescale-label-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+            Effort Weight
+          </span>
+
+          <div className="flex gap-2 flex-wrap">
+            {weights.map((w) => {
               const info = WEIGHT_CONFIG[w];
               const Icon = info.icon;
               const isSelected = selectedWeight === w;
@@ -134,14 +191,24 @@ const FocusPoint: React.FC<FocusPointProps> = ({
                   key={w}
                   type="button"
                   onClick={() => onWeightChange(w)}
-                  className={`glass-btn flex-1 py-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${
-                    isSelected ? 'shadow-md' : 'opacity-60'
+                  className={`md-state-layer md-focus-ring inline-flex items-center gap-2 h-8 px-3 md-typescale-label-large transition-all duration-md-short4 ${
+                    isSelected ? '' : ''
                   }`}
+                  style={{
+                    borderRadius: 'var(--md-sys-shape-corner-full)',
+                    minHeight: '32px',
+                    background: isSelected
+                      ? 'var(--md-sys-color-primary-container)'
+                      : 'transparent',
+                    color: isSelected
+                      ? 'var(--md-sys-color-on-primary-container)'
+                      : 'var(--md-sys-color-on-surface-variant)',
+                    border: isSelected ? 'none' : '1px solid var(--md-sys-color-outline-variant)',
+                  }}
                 >
-                  <Icon size={22} style={{ color: isSelected ? '#ffffff' : 'inherit' }} />
-                  <span className="text-[9px] font-black uppercase tracking-tighter" style={{ color: isSelected ? '#ffffff' : 'inherit' }}>
-                    {info.label} ({info.points})
-                  </span>
+                  {isSelected && <Check size={14} />}
+                  <Icon size={18} />
+                  {info.label} ({info.points})
                 </button>
               );
             })}
@@ -151,29 +218,40 @@ const FocusPoint: React.FC<FocusPointProps> = ({
         {selectedRecurrence !== 'all-blocks' && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Clock size={12} className="text-white/30" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Target Flow Blocks</span>
+              <Clock size={12} style={{ color: 'var(--md-sys-color-on-surface-variant)' }} />
+              <span className="md-typescale-label-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+                Target Flow Blocks
+              </span>
             </div>
             <div className="flex gap-2">
-              {[TimePeriod.MORNING, TimePeriod.AFTERNOON, TimePeriod.EVENING].map(p => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => onPeriodToggle(p)}
-                  className={`glass-btn flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                    selectedPeriods.includes(p)
-                      ? 'text-white'
-                      : 'text-white/40'
-                  }`}
-                >
-                  {t[p as keyof typeof t]}
-                </button>
-              ))}
+              {[TimePeriod.MORNING, TimePeriod.AFTERNOON, TimePeriod.EVENING].map((p) => {
+                const selected = selectedPeriods.includes(p);
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => onPeriodToggle(p)}
+                    className="md-state-layer md-focus-ring flex-1 py-3 md-typescale-label-large transition-all duration-md-short4"
+                    style={{
+                      borderRadius: 'var(--md-sys-shape-corner-full)',
+                      minHeight: '32px',
+                      background: selected
+                        ? 'var(--md-sys-color-primary-container)'
+                        : 'transparent',
+                      color: selected
+                        ? 'var(--md-sys-color-on-primary-container)'
+                        : 'var(--md-sys-color-on-surface-variant)',
+                      border: selected ? 'none' : '1px solid var(--md-sys-color-outline-variant)',
+                    }}
+                  >
+                    {t[p as keyof typeof t]}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
       </form>
-      </div>
     </div>
   );
 };

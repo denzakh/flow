@@ -112,7 +112,7 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
       {/* Заголовок статуса */}
       <div className="flex items-center gap-2 mb-2">
         {getStatusIcon()}
-        <span className="text-sm font-medium text-white">
+        <span className="md-typescale-body-medium flow-text font-medium">
           {getStatusText()}
         </span>
       </div>
@@ -120,7 +120,13 @@ const VoiceFeedback: React.FC<VoiceFeedbackProps> = ({
       {/* Транскрипция распознанного текста */}
       {transcript && (
         <div className="voice-transcript mb-2">
-          <p className="text-sm text-white bg-black/30 rounded-lg p-2">
+          <p
+            className="md-typescale-body-medium rounded-lg p-2"
+            style={{
+              color: 'var(--md-sys-color-on-surface)',
+              background: 'var(--md-sys-color-surface-container-high)',
+            }}
+          >
             "{transcript}"
           </p>
         </div>

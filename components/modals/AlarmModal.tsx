@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Bell, ChevronDown } from '../../utils/MaterialIcons';
-import { UserSettings, AlarmConfig, Language } from '../../types.ts';
+import { UserSettings, AlarmConfig } from '../../types.ts';
 import { TRANSLATIONS, ALARM_SOUNDS } from '../../constants.tsx';
 
 interface AlarmModalProps {
@@ -16,83 +16,162 @@ const AlarmModal: React.FC<AlarmModalProps> = ({
   tempAlarm,
   onSave,
   onClose,
-  onTempAlarmChange
+  onTempAlarmChange,
 }) => {
   const t = TRANSLATIONS[settings.language];
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-end animate-in slide-in-from-bottom duration-500">
-      <div className="w-full glass-2 rounded-t-[3rem] p-8 pb-12 shadow-2xl space-y-10 border-t border-white/5" style={{
-        background: 'rgba(15, 15, 15, 0.95)',
-        borderRadius: '48px 48px 0 0',
-      }}>
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-light text-white tracking-tighter">{t.alarm}</h2>
+    <div className="fixed inset-0 z-[110] flex items-end">
+      <button type="button" className="sheet-scrim absolute inset-0" onClick={onClose} aria-label="Close" />
+      <div
+        className="sheet-panel modal-enter modal-enter-active w-full relative p-8 pb-12 space-y-8"
+        style={{
+          background: 'var(--md-sys-color-surface-container-low)',
+          borderRadius: 'var(--md-sys-shape-corner-extra-large) var(--md-sys-shape-corner-extra-large) 0 0',
+          boxShadow: 'var(--md-sys-elevation-5)',
+          minWidth: '280px',
+          maxWidth: '560px',
+          margin: '0 auto',
+        }}
+      >
+        <div
+          className="mx-auto mb-2"
+          style={{
+            width: 32,
+            height: 4,
+            borderRadius: 'var(--md-sys-shape-corner-full)',
+            background: 'var(--md-sys-color-outline-variant)',
+          }}
+        />
+
+        <div className="flex items-center justify-between min-h-[56px]">
+          <h2 className="md-typescale-headline-small" style={{ color: 'var(--md-sys-color-on-surface)' }}>
+            {t.alarm}
+          </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="glass-btn w-10 h-10 flex items-center justify-center"
+            className="md-state-layer md-focus-ring flex items-center justify-center"
+            style={{ color: 'var(--md-sys-color-on-surface-variant)', minWidth: 48, minHeight: 48 }}
           >
             <X size={22} />
           </button>
         </div>
 
         <div className="space-y-8">
-          <div className="flex items-center justify-between p-6 glass-2 rounded-[2.5rem]">
+          <div
+            className="flex items-center justify-between p-6 min-h-[56px]"
+            style={{
+              background: 'var(--md-sys-color-surface-container)',
+              borderRadius: 'var(--md-sys-shape-corner-extra-large)',
+            }}
+          >
             <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
-                tempAlarm.enabled ? 'bg-[#0a0a0a] text-white shadow-lg' : 'bg-white/10 text-white/30'
-              }`}>
+              <div
+                className="w-12 h-12 flex items-center justify-center"
+                style={{
+                  borderRadius: 'var(--md-sys-shape-corner-large)',
+                  background: tempAlarm.enabled
+                    ? 'var(--md-sys-color-primary-container)'
+                    : 'var(--md-sys-color-surface-container-high)',
+                  color: tempAlarm.enabled
+                    ? 'var(--md-sys-color-on-primary-container)'
+                    : 'var(--md-sys-color-on-surface-variant)',
+                }}
+              >
                 <Bell size={22} />
               </div>
               <div>
-                <h3 className="text-sm font-light uppercase tracking-widest">{t.enableAlarm}</h3>
-                <span className="text-[10px] font-bold text-white/40">Smooth wake-up sequence</span>
+                <h3 className="md-typescale-title-medium" style={{ color: 'var(--md-sys-color-on-surface)' }}>
+                  {t.enableAlarm}
+                </h3>
+                <span className="md-typescale-label-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+                  Smooth wake-up sequence
+                </span>
               </div>
             </div>
             <button
+              type="button"
               onClick={() => onTempAlarmChange({ ...tempAlarm, enabled: !tempAlarm.enabled })}
-              className={`w-14 h-8 rounded-full transition-colors relative ${
-                tempAlarm.enabled ? 'bg-[#0a0a0a]' : 'bg-white/10'
-              }`}
+              className="relative w-14 h-8 rounded-full"
+              style={{
+                background: tempAlarm.enabled
+                  ? 'var(--md-sys-color-primary)'
+                  : 'var(--md-sys-color-outline-variant)',
+              }}
             >
-              <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${
-                tempAlarm.enabled ? 'left-7' : 'left-1'
-              } shadow-sm`} />
+              <span
+                className="absolute top-1 w-6 h-6 rounded-full transition-all duration-md-short4"
+                style={{
+                  background: 'var(--md-sys-color-on-primary)',
+                  left: tempAlarm.enabled ? 28 : 4,
+                }}
+              />
             </button>
           </div>
 
           <div className="grid grid-cols-2 gap-6 items-center">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Wake Time</label>
+              <label className="md-typescale-label-large" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+                Wake Time
+              </label>
               <input
                 type="time"
                 value={tempAlarm.time}
-                onChange={e => onTempAlarmChange({ ...tempAlarm, time: e.target.value })}
-                className="w-full p-4 bg-[#0a0a0a] rounded-2xl border border-white/10 font-black text-2xl text-white focus:border-white/20 focus:outline-none transition-colors"
+                onChange={(e) => onTempAlarmChange({ ...tempAlarm, time: e.target.value })}
+                className="md-focus-ring w-full p-4 md-typescale-title-large"
+                style={{
+                  background: 'var(--md-sys-color-surface-container-highest)',
+                  border: '1px solid var(--md-sys-color-outline-variant)',
+                  borderRadius: 'var(--md-sys-shape-corner-large)',
+                  color: 'var(--md-sys-color-on-surface)',
+                  minHeight: '48px',
+                }}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.sound}</label>
-              <div className="relative group">
+              <label className="md-typescale-label-large" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+                {t.sound}
+              </label>
+              <div className="relative">
                 <select
                   value={tempAlarm.sound}
-                  onChange={e => onTempAlarmChange({ ...tempAlarm, sound: e.target.value })}
-                  className="w-full p-4 bg-[#0a0a0a] rounded-2xl border border-white/10 font-bold text-white appearance-none focus:border-white/20 transition-colors outline-none"
+                  onChange={(e) => onTempAlarmChange({ ...tempAlarm, sound: e.target.value })}
+                  className="md-focus-ring w-full p-4 md-typescale-body-large appearance-none"
+                  style={{
+                    background: 'var(--md-sys-color-surface-container-highest)',
+                    border: '1px solid var(--md-sys-color-outline-variant)',
+                    borderRadius: 'var(--md-sys-shape-corner-large)',
+                    color: 'var(--md-sys-color-on-surface)',
+                    minHeight: '48px',
+                  }}
                 >
-                  {ALARM_SOUNDS.map(s => (
+                  {ALARM_SOUNDS.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.label[settings.language as keyof typeof s.label]}
                     </option>
                   ))}
                 </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
+                <ChevronDown
+                  size={16}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{ color: 'var(--md-sys-color-on-surface-variant)' }}
+                />
               </div>
             </div>
           </div>
 
           <button
+            type="button"
             onClick={onSave}
-            className="glass-btn w-full py-5 text-white rounded-3xl font-black shadow-xl active:scale-95 transition-all"
+            className="md-state-layer md-focus-ring w-full py-4 md-typescale-label-large transition-all duration-md-short4"
+            style={{
+              borderRadius: 'var(--md-sys-shape-corner-extra-large)',
+              minHeight: '48px',
+              background: 'var(--md-sys-color-primary)',
+              color: 'var(--md-sys-color-on-primary)',
+              boxShadow: 'var(--md-sys-elevation-2)',
+            }}
           >
             {t.save}
           </button>

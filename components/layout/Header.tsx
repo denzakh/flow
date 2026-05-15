@@ -11,7 +11,6 @@ interface HeaderProps {
   onSettingsClick: () => void;
   onAlarmClick: () => void;
   language: keyof typeof TRANSLATIONS;
-  // Voice control props
   isVoiceListening?: boolean;
   isVoiceSupported?: boolean;
   onVoiceClick?: () => void;
@@ -29,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({
   isVoiceListening = false,
   isVoiceSupported = false,
   onVoiceClick,
-  isVoiceEnabled = false
+  isVoiceEnabled = false,
 }) => {
   const t = TRANSLATIONS[language];
 
@@ -44,46 +43,81 @@ const Header: React.FC<HeaderProps> = ({
   const formattedDate = currentTime.toLocaleDateString(language, {
     weekday: 'long',
     day: 'numeric',
-    month: 'short'
+    month: 'short',
   });
 
   return (
-    <header className="glass-header mb-6">
-      <div className="flex items-center justify-between" style={{ position: 'relative', zIndex: 1 }}>
+    <header
+      className="mb-6 p-4"
+      style={{
+        background: 'var(--md-sys-color-surface-container)',
+        borderRadius: 'var(--md-sys-shape-corner-large)',
+        boxShadow: 'var(--md-sys-elevation-1)',
+      }}
+    >
+      <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-black uppercase text-white tracking-[0.2em]">
-              {formattedDate}
-            </span>
-          </div>
-          <h1 className="text-3xl font-light text-white tracking-tighter">
+          <span
+            className="md-typescale-label-medium mb-1"
+            style={{ color: 'var(--md-sys-color-on-surface-variant)' }}
+          >
+            {formattedDate}
+          </span>
+          <h1 className="md-typescale-headline-medium" style={{ color: 'var(--md-sys-color-on-surface)' }}>
             {getGreeting()}, {user?.name.split(' ')[0]}
           </h1>
         </div>
         <div className="flex gap-2">
-          {/* Voice Control Button */}
           {isVoiceSupported && onVoiceClick && isVoiceEnabled && (
             <button
+              type="button"
               onClick={onVoiceClick}
-              className={`glass-btn w-12 h-12 flex items-center justify-center ${
+              className={`md-state-layer md-focus-ring flex items-center justify-center w-12 h-12 ${
                 isVoiceListening ? 'voice-listening' : ''
               }`}
+              style={{
+                borderRadius: 'var(--md-sys-shape-corner-full)',
+                background: 'var(--md-sys-color-surface-container-high)',
+                color: 'var(--md-sys-color-on-surface)',
+                minWidth: '48px',
+                minHeight: '48px',
+              }}
               title={isVoiceListening ? 'Stop listening' : 'Start voice control'}
             >
               <Mic size={22} className={isVoiceListening ? 'voice-icon-active' : ''} />
             </button>
           )}
           <button
+            type="button"
             onClick={onAlarmClick}
-            className={`glass-btn w-12 h-12 flex items-center justify-center ${
+            className={`md-state-layer md-focus-ring flex items-center justify-center w-12 h-12 ${
               alarmEnabled ? 'alarm-active' : ''
             }`}
+            style={{
+              borderRadius: 'var(--md-sys-shape-corner-full)',
+              background: alarmEnabled
+                ? 'var(--md-sys-color-primary-container)'
+                : 'var(--md-sys-color-surface-container-high)',
+              color: alarmEnabled
+                ? 'var(--md-sys-color-on-primary-container)'
+                : 'var(--md-sys-color-on-surface)',
+              minWidth: '48px',
+              minHeight: '48px',
+            }}
           >
             <Bell size={22} className={alarmEnabled ? 'animate-swing' : ''} />
           </button>
           <button
+            type="button"
             onClick={onSettingsClick}
-            className="glass-btn w-12 h-12 flex items-center justify-center"
+            className="md-state-layer md-focus-ring flex items-center justify-center w-12 h-12"
+            style={{
+              borderRadius: 'var(--md-sys-shape-corner-full)',
+              background: 'var(--md-sys-color-surface-container-high)',
+              color: 'var(--md-sys-color-on-surface)',
+              minWidth: '48px',
+              minHeight: '48px',
+            }}
           >
             <Settings size={22} />
           </button>

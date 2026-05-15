@@ -1,7 +1,7 @@
 import React from 'react';
 import { LayoutGrid, Plus, AlertCircle } from '../../utils/MaterialIcons';
-import { TimeBlockConfig, TimePeriod, Task, TaskWeight, Language } from '../../types.ts';
-import { WEIGHT_CONFIG, BLOCK_CAPACITY, TRANSLATIONS } from '../../constants.tsx';
+import { TimeBlockConfig, TimePeriod, Task, Language } from '../../types.ts';
+import { BLOCK_CAPACITY, TRANSLATIONS } from '../../constants.tsx';
 import TaskItem from '../TaskItem.tsx';
 import { getIcon } from '../../constants.tsx';
 
@@ -21,6 +21,13 @@ interface TimeBlockProps {
   language: Language;
 }
 
+const BLOCK_BG: Record<TimePeriod, string> = {
+  [TimePeriod.MORNING]: 'var(--flow-block-morning)',
+  [TimePeriod.AFTERNOON]: 'var(--flow-block-afternoon)',
+  [TimePeriod.EVENING]: 'var(--flow-block-evening)',
+  [TimePeriod.NIGHT]: 'var(--flow-block-night)',
+};
+
 const TimeBlock: React.FC<TimeBlockProps> = ({
   block,
   isActive,
@@ -34,63 +41,109 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
   onToggle,
   onDelete,
   onUpdate,
-  language
+  language,
 }) => {
   const t = TRANSLATIONS[language];
+  const isOverloaded = totalPoints > 10;
+  const blockBg = BLOCK_BG[block.id];
 
   return (
-    <section 
-      className={`glass-2 transition-all duration-700 relative p-6`}
-      style={{ 
-        opacity: 1, 
-        transform: 'scale(1)', 
-        zIndex: 10,
-        borderRadius: '40px',
-        padding: '24px',
-        border: isActive 
-          ? '1px solid rgba(212, 165, 116, 0.4)' 
-          : isNight 
-            ? 'none'
-            : '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: isActive
-          ? '0 0 40px rgba(212, 165, 116, 0.15)'
-          : isNight
-            ? '-4px -4px 10px 0 rgba(129, 177, 213, 0.30) inset, 4px 4px 15px 0 rgba(160, 123, 78, 0.40)'
-            : undefined,
-        background: isNight ? 'rgba(1, 1, 1, 0.05)' : undefined,
-        backdropFilter: isNight ? 'none' : undefined,
-        WebkitBackdropFilter: isNight ? 'none' : undefined,
+    <section
+      className={`block-card md-state-layer relative p-6 transition-shadow duration-md-medium2 ease-md-standard ${
+        isActive ? 'border-l-[3px] border-l-white/90' : ''
+      }`}
+      style={{
+        borderRadius: 'var(--md-sys-shape-corner-extra-large)',
+        background: blockBg,
+        boxShadow: isActive ? 'var(--md-sys-elevation-3)' : 'var(--md-sys-elevation-1)',
+        color: '#ffffff',
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive) {
+          (e.currentTarget as HTMLElement).style.boxShadow = 'var(--md-sys-elevation-2)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.boxShadow = isActive
+          ? 'var(--md-sys-elevation-3)'
+          : 'var(--md-sys-elevation-1)';
       }}
     >
       {isOverCapacity && (
-        <div className="absolute top-0 left-0 w-full h-full border-2 border-amber-500/20 rounded-[2.5rem] pointer-events-none animate-pulse" style={{ borderRadius: '40px' }} />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            borderRadius: 'var(--md-sys-shape-corner-extra-large)',
+            border: '2px solid var(--flow-capacity-overload)',
+            opacity: 0.35,
+          }}
+        />
       )}
-      
-      <div className="flex items-center justify-between mb-4 px-2 relative" style={{ zIndex: 1 }}>
+
+      <div className="flex items-center justify-between mb-4 px-2 relative z-[1]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-[#0a0a0a] text-white">
+          <div
+            className="w-10 h-10 flex items-center justify-center"
+            style={{
+              borderRadius: 'var(--md-sys-shape-corner-full)',
+              background: 'color-mix(in srgb, var(--md-sys-color-surface-container) 40%, transparent)',
+            }}
+          >
             {getIcon(block.icon, 'w-[22px] h-[22px]')}
           </div>
           <div>
-            <h2 className="text-sm font-light uppercase tracking-[0.2em] text-white">{block.label}</h2>
-            <span className="text-[10px] font-bold text-white/60 tracking-tighter">{block.startTime} — {block.endTime}</span>
+            <h2 className="md-typescale-title-large text-white">{block.label}</h2>
+            <span className="md-typescale-label-medium text-white/70">
+              {block.startTime} — {block.endTime}
+            </span>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-3">
           {!isNight && (
-            <div className="flex flex-col items-end gap-1">
-              <span className={`text-[10px] font-black uppercase tracking-tighter ${isOverCapacity ? 'text-amber-400' : 'text-white/20'}`}>
+            <div className="flex flex-col items-end gap-1 min-w-[4rem]">
+              <span
+                className={`md-typescale-label-small ${
+                  isOverCapacity ? 'text-[var(--flow-capacity-overload)]' : 'text-white/80'
+                }`}
+              >
                 {totalPoints} / {BLOCK_CAPACITY}
               </span>
-              <div className="w-16 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div className={`h-full transition-all duration-1000 ${isOverCapacity ? 'bg-amber-400' : 'bg-emerald-400'}`} style={{ width: `${capacityPercent}%` }} />
+              <div
+                className="w-full h-1 overflow-hidden"
+                style={{
+                  borderRadius: 'var(--md-sys-shape-corner-full)',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                }}
+              >
+                <div
+                  className="h-full transition-all duration-md-medium2 ease-md-standard"
+                  style={{
+                    width: `${Math.min(capacityPercent, 100)}%`,
+                    borderRadius: 'var(--md-sys-shape-corner-full)',
+                    background: isOverloaded
+                      ? 'var(--flow-capacity-overload)'
+                      : 'rgba(255, 255, 255, 0.8)',
+                  }}
+                />
               </div>
             </div>
           )}
-          
+
           {!isNight && !isPast && (
-            <button onClick={onQuickAdd} className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#0a0a0a] text-white transition-all">
+            <button
+              type="button"
+              onClick={onQuickAdd}
+              className="md-state-layer md-focus-ring w-10 h-10 flex items-center justify-center transition-opacity duration-md-short4 ease-md-standard"
+              style={{
+                borderRadius: 'var(--md-sys-shape-corner-full)',
+                background: 'rgba(255, 255, 255, 0.15)',
+                color: '#ffffff',
+                minWidth: '40px',
+                minHeight: '40px',
+              }}
+              aria-label={t.addPoint}
+            >
               <Plus size={22} />
             </button>
           )}
@@ -98,9 +151,16 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
       </div>
 
       {isOverCapacity && (
-        <div className="mb-4 p-3 bg-amber-500/10 rounded-2xl flex items-start gap-3 border border-amber-500/20 animate-in slide-in-from-top-2 duration-500">
-          <AlertCircle size={14} className="text-amber-400 mt-0.5" />
-          <p className="text-[10px] font-bold text-amber-200/80 leading-tight">
+        <div
+          className="mb-4 p-3 flex items-start gap-3"
+          style={{
+            borderRadius: 'var(--md-sys-shape-corner-medium)',
+            background: 'rgba(255, 255, 255, 0.12)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+          }}
+        >
+          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+          <p className="md-typescale-label-medium leading-tight text-white/90">
             Your {block.label.toLowerCase()} looks a bit crowded. Remember to leave space for yourself.
           </p>
         </div>
@@ -108,25 +168,45 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
 
       <div className="space-y-3">
         {tasks.length > 0 ? (
-          tasks.map(task => (
-            <TaskItem key={task.id} task={task} lang={language} onToggle={onToggle} onDelete={onDelete} onUpdate={onUpdate} />
+          tasks.map((task, index) => (
+            <div key={task.id} className="task-enter task-enter-active">
+              <TaskItem
+                task={task}
+                index={index + 1}
+                lang={language}
+                onToggle={onToggle}
+                onDelete={onDelete}
+                onUpdate={onUpdate}
+              />
+            </div>
           ))
         ) : (
           <button
-            onClick={() => !isNight && !isPast ? onQuickAdd() : null}
-            className={`w-full py-8 rounded-[2.5rem] flex flex-col items-center justify-center gap-2 transition-all group ${
-              isNight ? 'night-block-inner' : 'border-2 border-dashed border-white/20 hover:bg-white/5'
+            type="button"
+            onClick={() => (!isNight && !isPast ? onQuickAdd() : undefined)}
+            className={`md-state-layer w-full py-8 flex flex-col items-center justify-center gap-2 transition-colors duration-md-short4 ease-md-standard group ${
+              isNight ? '' : 'border-2 border-dashed hover:bg-white/[0.08]'
             }`}
+            style={{
+              borderRadius: 'var(--md-sys-shape-corner-extra-large)',
+              borderColor: isNight ? undefined : 'rgba(255, 255, 255, 0.25)',
+              minHeight: '48px',
+            }}
           >
             {isNight ? (
               <>
                 <img src="/assets/images/Background+Border+Shadow.png" alt="Rest" className="w-8 h-8 opacity-80" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-white">Rest Phase</span>
+                <span className="md-typescale-label-medium text-white">Rest Phase</span>
               </>
             ) : (
               <>
-                <LayoutGrid size={24} className={`transition-transform ${!isNight && !isPast && 'group-hover:scale-110'} ${isActive ? 'text-emerald-400/40' : 'text-white/10'}`} />
-                <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? 'text-emerald-400/40' : 'text-white/40'}`}>
+                <LayoutGrid
+                  size={24}
+                  className={`transition-transform duration-md-short4 ${
+                    !isPast ? 'group-hover:scale-110' : ''
+                  } ${isActive ? 'text-white/50' : 'text-white/25'}`}
+                />
+                <span className={`md-typescale-label-medium ${isActive ? 'text-white/60' : 'text-white/50'}`}>
                   {isPast ? 'Wrapped' : isActive ? 'Open Flow' : 'Free Space'}
                 </span>
               </>
