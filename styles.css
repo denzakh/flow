@@ -8,78 +8,78 @@
      COLOR PALETTE
      ═══════════════════════════════════════════════════════════════════════ */
   
-  /* Backgrounds — light theme defaults */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f7f5f2;
-  --bg-card: #ffffff;
-  --bg-elevated: #ede9e6;
-  --bg-glass: rgba(255, 255, 255, 0.85);
-  --bg-glass-card: rgba(255, 255, 255, 0.9);
-  --bg-glass-card-hover: rgba(243, 240, 237, 0.95);
+  /* Backgrounds — now using M3 tokens */
+  --bg-primary: var(--md-sys-color-background);
+  --bg-secondary: var(--md-sys-color-surface-container-low);
+  --bg-card: var(--md-sys-color-surface-container);
+  --bg-elevated: var(--md-sys-color-surface-container-high);
+  --bg-glass: color-mix(in srgb, var(--md-sys-color-surface-container) 85%, transparent);
+  --bg-glass-card: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 90%, transparent);
+  --bg-glass-card-hover: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 95%, transparent);
 
-  /* Text */
-  --text-primary: #1a1a1a;
-  --text-secondary: #666666;
-  --text-tertiary: #999693;
-  --text-muted: #b0aea8;
-  --text-disabled: rgba(26, 26, 26, 0.38);
+  /* Text - now using M3 tokens */
+  --text-primary: var(--md-sys-color-on-surface);
+  --text-secondary: var(--md-sys-color-on-surface-variant);
+  --text-tertiary: var(--md-sys-color-outline);
+  --text-muted: var(--md-sys-color-outline);
+  --text-disabled: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
 
-  /* Accent Colors - Flow Brand */
-  --accent-evening: #d4a574;
-  --accent-evening-glow: rgba(212, 165, 116, 0.3);
-  --accent-morning: #ffffff;
-  --accent-night: #6b7280;
-  --accent-active: #10b981;
-  --accent-active-glow: rgba(16, 185, 129, 0.3);
+  /* Accent Colors - Flow Brand using M3 tokens */
+  --accent-evening: var(--flow-block-evening-bg);
+  --accent-evening-glow: none; /* Removed glow, will use box-shadow instead */
+  --accent-morning: var(--flow-block-morning-bg);
+  --accent-night: var(--flow-block-night-bg);
+  --accent-active: var(--md-sys-color-primary);
+  --accent-active-glow: color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent);
 
   /* Task Weights */
-  --weight-quick: #34d399;
-  --weight-quick-bg: rgba(52, 211, 153, 0.1);
-  --weight-quick-border: rgba(52, 211, 153, 0.3);
-  --weight-focused: #60a5fa;
-  --weight-focused-bg: rgba(96, 165, 250, 0.1);
-  --weight-focused-border: rgba(96, 165, 250, 0.3);
-  --weight-deep: #a78bfa;
-  --weight-deep-bg: rgba(167, 139, 250, 0.1);
-  --weight-deep-border: rgba(167, 139, 250, 0.3);
+  --weight-quick: var(--flow-weight-quick-color);
+  --weight-quick-bg: color-mix(in srgb, var(--flow-weight-quick-color) 10%, transparent);
+  --weight-quick-border: color-mix(in srgb, var(--flow-weight-quick-color) 30%, transparent);
+  --weight-focused: var(--flow-weight-focused-color);
+  --weight-focused-bg: color-mix(in srgb, var(--flow-weight-focused-color) 10%, transparent);
+  --weight-focused-border: color-mix(in srgb, var(--flow-weight-focused-color) 30%, transparent);
+  --weight-deep: var(--flow-weight-deep-color);
+  --weight-deep-bg: color-mix(in srgb, var(--flow-weight-deep-color) 10%, transparent);
+  --weight-deep-border: color-mix(in srgb, var(--flow-weight-deep-color) 30%, transparent);
 
   /* Time Periods */
-  --period-morning: #fef3c7;
-  --period-afternoon: #fde68a;
-  --period-evening: #d4a574;
-  --period-evening-glow: rgba(212, 165, 116, 0.15);
-  --period-night: #6b7280;
+  --period-morning: var(--flow-block-morning-bg);
+  --period-afternoon: var(--flow-block-afternoon-bg);
+  --period-evening: var(--flow-block-evening-bg);
+  --period-evening-glow: color-mix(in srgb, var(--flow-block-evening-bg) 15%, transparent);
+  --period-night: var(--flow-block-night-bg);
 
   /* Priority */
-  --priority-high: #f87171;
-  --priority-high-bg: rgba(248, 113, 113, 0.1);
-  --priority-high-border: rgba(248, 113, 113, 0.3);
-  --priority-medium: #fbbf24;
-  --priority-medium-bg: rgba(251, 191, 36, 0.1);
-  --priority-low: #60a5fa;
-  --priority-low-bg: rgba(96, 165, 250, 0.1);
+  --priority-high: var(--md-sys-color-error);
+  --priority-high-bg: color-mix(in srgb, var(--md-sys-color-error) 10%, transparent);
+  --priority-high-border: color-mix(in srgb, var(--md-sys-color-error) 30%, transparent);
+  --priority-medium: var(--md-sys-color-secondary);
+  --priority-medium-bg: color-mix(in srgb, var(--md-sys-color-secondary) 10%, transparent);
+  --priority-low: var(--md-sys-color-tertiary);
+  --priority-low-bg: color-mix(in srgb, var(--md-sys-color-tertiary) 10%, transparent);
 
   /* Borders */
-  --border-default: rgba(255, 255, 255, 0.08);
-  --border-dashed: rgba(255, 255, 255, 0.3);
-  --border-evening: rgba(212, 165, 116, 0.4);
-  --border-hover: rgba(255, 255, 255, 0.15);
-  --border-focus: rgba(255, 255, 255, 0.2);
-  --border-active: rgba(255, 255, 255, 0.25);
+  --border-default: var(--md-sys-color-outline-variant);
+  --border-dashed: color-mix(in srgb, var(--md-sys-color-outline) 30%, transparent);
+  --border-evening: color-mix(in srgb, var(--flow-block-evening-bg) 40%, transparent);
+  --border-hover: color-mix(in srgb, var(--md-sys-color-outline) 15%, transparent);
+  --border-focus: color-mix(in srgb, var(--md-sys-color-outline) 20%, transparent);
+  --border-active: color-mix(in srgb, var(--md-sys-color-outline) 25%, transparent);
 
   /* States */
-  --state-hover: rgba(255, 255, 255, 0.05);
-  --state-active: rgba(255, 255, 255, 0.1);
-  --state-disabled: rgba(255, 255, 255, 0.02);
-  --state-selected: rgba(16, 185, 129, 0.15);
-  --state-error: rgba(248, 113, 113, 0.15);
-  --state-success: rgba(16, 185, 129, 0.15);
+  --state-hover: var(--md-sys-state-hover-opacity);
+  --state-active: var(--md-sys-state-pressed-opacity);
+  --state-disabled: var(--md-sys-state-disabled-opacity);
+  --state-selected: color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent);
+  --state-error: color-mix(in srgb, var(--md-sys-color-error) 15%, transparent);
+  --state-success: color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent);
 
   /* Gradients */
-  --gradient-input: linear-gradient(0deg, rgba(43, 72, 172, 0.60) -50.01%, rgba(140, 110, 50, 0.60) 189.97%, rgba(172, 169, 0, 0.60) 289.14%, rgba(255, 255, 255, 0.60) 348.64%);
-  --gradient-input-focus: linear-gradient(57deg, rgba(0, 0, 0, 0.00) 40.89%, #72AAC5 94.84%), linear-gradient(65deg, #FFFEC4 4.43%, rgba(6, 25, 47, 0.00) 45.35%), linear-gradient(110deg, #000 52.9%, #846757 96.98%);
-  --gradient-alarm: linear-gradient(57deg, rgba(0, 0, 0, 0.00) 40.89%, #72AAC5 94.84%), linear-gradient(65deg, #FFFEC4 4.43%, rgba(6, 25, 47, 0.00) 45.35%), linear-gradient(110deg, #000 52.9%, #846757 96.98%);
-  --gradient-top-bar: linear-gradient(to right, rgba(16, 185, 129, 0.3), rgba(212, 165, 116, 0.3));
+  --gradient-input: linear-gradient(0deg, color-mix(in srgb, var(--md-sys-color-primary) 60%, black) -50.01%, color-mix(in srgb, var(--flow-block-evening-bg) 60%, black) 189.97%, color-mix(in srgb, var(--flow-block-morning-bg) 60%, black) 289.14%, color-mix(in srgb, var(--md-sys-color-background) 60%, white) 348.64%);
+  --gradient-input-focus: linear-gradient(57deg, color-mix(in srgb, black 0%, transparent) 40.89%, var(--md-sys-color-secondary) 94.84%), linear-gradient(65deg, color-mix(in srgb, var(--flow-weight-focused-color) 4.43%, transparent) 4.43%, color-mix(in srgb, var(--md-sys-color-inverse-surface) 0%, transparent) 45.35%), linear-gradient(110deg, var(--md-sys-color-inverse-surface) 52.9%, var(--flow-block-afternoon-bg) 96.98%);
+  --gradient-alarm: linear-gradient(57deg, color-mix(in srgb, black 0%, transparent) 40.89%, var(--md-sys-color-secondary) 94.84%), linear-gradient(65deg, color-mix(in srgb, var(--flow-weight-focused-color) 4.43%, transparent) 4.43%, color-mix(in srgb, var(--md-sys-color-inverse-surface) 0%, transparent) 45.35%), linear-gradient(110deg, var(--md-sys-color-inverse-surface) 52.9%, var(--flow-block-afternoon-bg) 96.98%);
+  --gradient-top-bar: linear-gradient(to right, color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent), color-mix(in srgb, var(--flow-block-evening-bg) 30%, transparent));
 
   /* ═══════════════════════════════════════════════════════════════════════
      SPACING SYSTEM (8px base unit)
@@ -152,21 +152,21 @@
      SHADOWS & GLOWS
      ═══════════════════════════════════════════════════════════════════════ */
   
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, black 30%, transparent);
+  --shadow-md: 0 4px 6px -1px color-mix(in srgb, black 10%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, black 10%, transparent);
+  --shadow-xl: 0 20px 25px -5px color-mix(in srgb, black 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, black 25%, transparent);
   
-  --shadow-card: 0 4px 24px 0 rgba(0, 0, 0, 0.3);
-  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 4px 24px 0 color-mix(in srgb, black 30%, transparent);
+  --shadow-inner: inset 0 2px 4px 0 color-mix(in srgb, black 6%, transparent);
   
-  --glow-evening: 0 0 40px rgba(212, 165, 116, 0.15);
-  --glow-subtle: 0 0 20px rgba(255, 255, 255, 0.05);
-  --glow-active: 0 0 30px rgba(16, 185, 129, 0.2);
+  --glow-evening: 0 0 40px color-mix(in srgb, var(--flow-block-evening-bg) 15%, transparent);
+  --glow-subtle: 0 0 20px color-mix(in srgb, white 5%, transparent);
+  --glow-active: 0 0 30px color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
 
-  --shadow-night-block: -4px -4px 10px 0 rgba(129, 177, 213, 0.30) inset, 4px 4px 15px 0 rgba(160, 123, 78, 0.40);
-  --shadow-halo: -4px -4px 10px 0 rgba(129, 177, 213, 0.30) inset, 4px 4px 15px 0 rgba(160, 123, 78, 0.40);
+  --shadow-night-block: -4px -4px 10px 0 color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent) inset, 4px 4px 15px 0 color-mix(in srgb, var(--flow-block-evening-bg) 40%, transparent);
+  --shadow-halo: -4px -4px 10px 0 color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent) inset, 4px 4px 15px 0 color-mix(in srgb, var(--flow-block-evening-bg) 40%, transparent);
 
   /* ═══════════════════════════════════════════════════════════════════════
      TRANSITIONS & ANIMATIONS
@@ -223,103 +223,6 @@
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   DESIGN SYSTEM 2.0 — GLASSMORPHISM COMPONENTS
-   ────────────────────────────────────────────────────────────────────────── */
-
-/* Glass 2.0 Base — с noise texture и inner highlight */
-.glass-2 {
-  background: rgba(20, 20, 20, 0.65);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-2xl);
-  position: relative;
-}
-
-/* Noise texture overlay */
-.glass-2::before,
-.glass-card-2::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.04;
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-/* Inner highlight (top border glow) */
-.glass-2::after,
-.glass-card-2::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  border-radius: inherit;
-}
-
-/* Glass variants */
-.glass-2-elevated {
-  background: rgba(26, 26, 26, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: var(--glow-subtle);
-}
-
-.glass-2-active {
-  background: rgba(20, 20, 20, 0.7);
-  border: 1px solid rgba(212, 165, 116, 0.4);
-  box-shadow: var(--glow-evening);
-}
-
-.glass-2-dashed {
-  background: transparent;
-  border: 2px dashed rgba(255, 255, 255, 0.3);
-  box-shadow: none;
-}
-
-/* Glass Header */
-.glass-header {
-  background: rgba(20, 20, 20, 0.5);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-3xl);
-  padding: var(--space-xl) var(--space-2xl);
-  position: relative;
-}
-
-.glass-header::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.04;
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-/* Glass buttons */
-.glass-btn {
-  background: rgba(10, 10, 10, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-xl);
-  transition: all var(--duration-normal) var(--easing-default);
-}
-
-.glass-btn:hover {
-  background: rgba(10, 10, 10, 0.9);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.glass-btn:active {
-  transform: scale(0.96);
-}
 
 /* ──────────────────────────────────────────────────────────────────────────
    HOVER LIFT EFFECT
@@ -361,11 +264,7 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(0deg, 
-    rgba(43, 72, 172, 0.60) -50.01%, 
-    rgba(140, 110, 50, 0.60) 189.97%, 
-    rgba(172, 169, 0, 0.60) 289.14%, 
-    rgba(255, 255, 255, 0.60) 348.64%);
+  background: var(--gradient-input);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -438,39 +337,39 @@
 
 /* Badge variants */
 .badge-quick {
-  background: rgba(52, 211, 153, 0.1);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.3);
+  background: var(--weight-quick-bg);
+  color: var(--weight-quick);
+  border: 1px solid var(--weight-quick-border);
 }
 
 .badge-focused {
-  background: rgba(96, 165, 250, 0.1);
-  color: #60a5fa;
-  border: 1px solid rgba(96, 165, 250, 0.3);
+  background: var(--weight-focused-bg);
+  color: var(--weight-focused);
+  border: 1px solid var(--weight-focused-border);
 }
 
 .badge-deep {
-  background: rgba(167, 139, 250, 0.1);
-  color: #a78bfa;
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  background: var(--weight-deep-bg);
+  color: var(--weight-deep);
+  border: 1px solid var(--weight-deep-border);
 }
 
 .badge-high {
-  background: rgba(248, 113, 113, 0.1);
-  color: #f87171;
-  border: 1px solid rgba(248, 113, 113, 0.3);
+  background: var(--priority-high-bg);
+  color: var(--priority-high);
+  border: 1px solid var(--priority-high-border);
 }
 
 .badge-medium {
-  background: rgba(251, 191, 36, 0.1);
-  color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: var(--priority-medium-bg);
+  color: var(--priority-medium);
+  border: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .badge-low {
-  background: rgba(96, 165, 250, 0.1);
-  color: #60a5fa;
-  border: 1px solid rgba(96, 165, 250, 0.3);
+  background: var(--priority-low-bg);
+  color: var(--priority-low);
+  border: 1px solid var(--md-sys-color-outline-variant);
 }
 
 /* Badge animation */
@@ -528,18 +427,17 @@
 
 /* Night block with original effect */
 .night-block {
-  background: rgba(1, 1, 1, 0.05);
+  background: color-mix(in srgb, black 5%, transparent);
   border-radius: var(--radius-4xl);
   border: none;
-  box-shadow: -4px -4px 10px 0 rgba(129, 177, 213, 0.30) inset, 
-              4px 4px 15px 0 rgba(160, 123, 78, 0.40);
+  box-shadow: var(--shadow-night-block);
   position: relative;
 }
 
 .night-block-inner {
   position: relative;
   z-index: 1;
-  background: #000000;
+  background: black;
   border-radius: var(--radius-4xl);
 }
 
@@ -547,14 +445,14 @@
 .card-active-evening {
   background: var(--bg-card);
   border-radius: var(--radius-2xl);
-  border: 1px solid rgba(212, 165, 116, 0.4);
-  box-shadow: 0 0 40px rgba(212, 165, 116, 0.15);
+  border: 1px solid var(--border-evening);
+  box-shadow: var(--glow-evening);
 }
 
 /* Dashed card for empty states */
 .card-dashed {
   background: transparent;
-  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border: 2px dashed var(--border-dashed);
   border-radius: var(--radius-2xl);
 }
 
@@ -609,8 +507,8 @@
 
 body {
   font-family: var(--font-family);
-  background: var(--md-sys-color-background, #ffffff);
-  color: var(--md-sys-color-on-surface, var(--text-primary));
+  background: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-surface);
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -751,7 +649,7 @@ body::after {
   position: relative;
   border-radius: var(--radius-4xl);
   opacity: 1;
-  background: rgba(1, 1, 1, 0.05);
+  background: color-mix(in srgb, black 5%, transparent);
   border: none;
   box-shadow: var(--shadow-night-block);
 }
@@ -921,10 +819,10 @@ button, select, input, .touch-target {
 /* Glow animation */
 @keyframes glow {
   0%, 100% { 
-    box-shadow: 0 0 20px rgba(212, 165, 116, 0.1); 
+    box-shadow: 0 0 20px var(--accent-evening-glow); 
   }
   50% { 
-    box-shadow: 0 0 30px rgba(212, 165, 116, 0.2); 
+    box-shadow: 0 0 30px color-mix(in srgb, var(--flow-block-evening-bg) 20%, transparent); 
   }
 }
 
@@ -989,7 +887,7 @@ button, select, input, .touch-target {
    ═══════════════════════════════════════════════════════════════════════ */
 
 ::selection {
-  background: var(--accent-evening-glow);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent);
   color: var(--text-primary);
 }
 
@@ -1093,10 +991,10 @@ button, select, input, .touch-target {
 
 @keyframes voice-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-active) 70%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent-active) 0%, transparent);
   }
 }
 
@@ -1116,7 +1014,7 @@ button, select, input, .touch-target {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--border-dashed);
   border-radius: 50%;
   animation: voice-wave-expand 2s ease-out infinite;
 }
@@ -1219,7 +1117,7 @@ button, select, input, .touch-target {
 
 .voice-feedback-listening {
   border-color: var(--accent-active);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent-active) 30%, transparent);
 }
 
 .voice-feedback-processing {
@@ -1228,12 +1126,12 @@ button, select, input, .touch-target {
 
 .voice-feedback-error {
   border-color: #ef4444;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 20px color-mix(in srgb, #ef4444 30%, transparent);
 }
 
 .voice-feedback-success {
   border-color: var(--accent-active);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent-active) 50%, transparent);
 }
 
 /* Voice Status Icons */
@@ -1269,7 +1167,7 @@ button, select, input, .touch-target {
 
 /* Voice Transcript */
 .voice-transcript p {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
   line-height: 1.5;
   word-break: break-word;
 }
@@ -1389,45 +1287,20 @@ button, select, input, .touch-target {
    ═══════════════════════════════════════════════════════════════════════ */
 
 .dark {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #0f0f0f;
-  --bg-card: #141414;
-  --bg-elevated: #1a1a1a;
-  --bg-glass: rgba(20, 20, 20, 0.7);
-  --bg-glass-card: rgba(30, 30, 30, 0.5);
-  --bg-glass-card-hover: rgba(35, 35, 35, 0.6);
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --text-tertiary: #666666;
-  --text-muted: #444444;
-  --text-disabled: rgba(255, 255, 255, 0.3);
+  --bg-primary: var(--md-sys-color-background);
+  --bg-secondary: var(--md-sys-color-surface-container-low);
+  --bg-card: var(--md-sys-color-surface-container);
+  --bg-elevated: var(--md-sys-color-surface-container-high);
+  --bg-glass: color-mix(in srgb, var(--md-sys-color-surface-container) 70%, transparent);
+  --bg-glass-card: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 50%, transparent);
+  --bg-glass-card-hover: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 60%, transparent);
+  --text-primary: var(--md-sys-color-on-surface);
+  --text-secondary: var(--md-sys-color-on-surface-variant);
+  --text-tertiary: var(--md-sys-color-outline);
+  --text-muted: var(--md-sys-color-outline);
+  --text-disabled: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
 }
 
-html:not(.dark) .glass-2,
-html.light .glass-2,
-html:not(.dark) .glass-header,
-html.light .glass-header,
-html:not(.dark) .glass-card,
-html.light .glass-card,
-html:not(.dark) .glass-container,
-html.light .glass-container {
-  background: var(--md-sys-color-surface-container-low, #f3f0ed);
-  border-color: var(--md-sys-color-outline-variant, #e0ddd8);
-  color: var(--md-sys-color-on-surface, #1a1a1a);
-}
-
-html:not(.dark) .glass-btn,
-html.light .glass-btn {
-  background: var(--md-sys-color-surface-container-high, #e7e4e0);
-  border-color: var(--md-sys-color-outline-variant, #e0ddd8);
-  color: var(--md-sys-color-on-surface, #1a1a1a);
-}
-
-html:not(.dark) .glass-btn:hover,
-html.light .glass-btn:hover {
-  background: var(--md-sys-color-surface-container-highest, #e2dedb);
-  border-color: var(--md-sys-color-outline, #999693);
-}
 
 html:not(.dark) input,
 html:not(.dark) select,
@@ -1435,14 +1308,14 @@ html:not(.dark) textarea,
 html.light input,
 html.light select,
 html.light textarea {
-  color: var(--md-sys-color-on-surface, #1a1a1a);
+  color: var(--md-sys-color-on-surface);
 }
 
 html:not(.dark) input::placeholder,
 html:not(.dark) textarea::placeholder,
 html.light input::placeholder,
 html.light textarea::placeholder {
-  color: var(--md-sys-color-on-surface-variant, #666666);
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════

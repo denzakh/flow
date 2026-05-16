@@ -472,3 +472,214 @@ Fully client-side. `localStorage` only. No auth, no sync, AI proxy planned via V
 2. **Next**: Supabase auth + cross-device task sync
 3. **Future**: Push notifications, health integrations, GCal two-way sync
 **Trigger for Phase 2**: Second real user or painful data loss. Avoid premature complexity.
+
+---
+
+## New UI Concept — Day View Redesign
+
+### Core idea
+Replace the central input field with a 4-quadrant Day View where tasks are
+visualized as physics bubbles. Voice becomes the primary input method;
+text input moves to a secondary FAB-triggered bottom sheet.
+
+### Layout
+- Day View splits into 4 equal quadrants: Morning / Afternoon / Evening / Night
+- Night block is rest-only, no tasks, no bubbles
+- Each block has its own M3 tonal palette (see flow_m3.html)
+
+### Bubble visualization
+- Each task = one bubble inside its block
+- Bubble SIZE encodes weight: Quick = small (r:14), Focused = medium (r:21), Deep = large (r:30)
+- Bubble COLOR encodes weight: Quick = mint, Focused = lemon, Deep = rose
+- Bubble SHAPE encodes priority (see Shape System below)
+- Color + size + shape = triple accessibility marker (not color-only) ✅ WCAG
+
+### Transition: bubbles → task list
+- Tap on block → physics pauses, bubbles fade out → task rows animate in (staggered)
+- Each row: weight dot + task name + weight badge
+- "← back" button returns to bubble view
+
+### Voice input
+- Primary input: FAB microphone button (fixed bottom center)
+- FAB pulses red while listening
+- On voice command → new bubble appears in correct block with physics
+- Secondary input: "+ task" button → bottom sheet with text input + weight/block picker
+
+### Physics implementation
+- Library: Matter.js (cdnjs)
+- Engine per block, SVG render layer (not Canvas)
+- Gravity: slightly upward (−0.18) — bubbles float like balloons
+- New bubble spawns at bottom, floats up
+- Settings: restitution 0.72, frictionAir 0.007, density 0.00035
+- Gentle random drift force every few frames — bubbles stay alive
+- Squash & stretch on velocity — rubber/balloon feel
+
+### Reference files
+- flow_final.html — working physics prototype (Matter.js + SVG, airy bubbles, no tails)
+- flow_m3.html — M3 color system with light/dark toggle
+- flow_palette.html — color palette comparison with contrast ratios
+
+### Components to create
+- DayView.tsx — 4-quadrant grid
+- BubbleBlock.tsx — single block with Matter.js SVG layer + task list state
+- PhysicsEngine.ts — Matter.js setup, addBubble(), destroyEngine()
+- VoiceFAB.tsx — floating mic button, listening state, pulse animation
+- TaskSheet.tsx — bottom sheet for manual task input
+
+---
+
+## Shape System — Priority Visualization
+
+### Concept
+Task priority communicated through SHAPE of the bubble:
+- SIZE → weight (Quick=small, Focused=medium, Deep=large)
+- COLOR → weight (Mint/Lemon/Rose)
+- SHAPE → priority (Circle/Rhomb/Star)
+
+Three independent visual channels — none relies on color alone. ✅ WCAG
+Inspired by M3 MaterialShapes library (Android/Compose).
+
+### Shape → Priority Mapping
+| Priority | Shape         | M3 Reference  | Why                                      |
+|----------|---------------|---------------|------------------------------------------|
+| Low      | Circle        | Circle        | Soft, no edges, unobtrusive              |
+| Medium   | Rounded rhomb | Clover4       | More defined, noticeable                 |
+| High     | Burst / Star  | Burst4/Star6  | Sharp edges = urgency, demands attention |
+
+### Web Implementation (SVG + Matter.js)
+- SVG clipPath per shape
+- CSS clip-path: polygon() for simpler shapes
+- Matter.js Bodies.fromVertices() — physics with arbitrary polygons
+
+### Physics Bonus
+- Circle (Low) — rolls smoothly, settles easily
+- Rhomb (Medium) — tips and settles on corner
+- Star (High) — bounces unpredictably, hard to stack → physical metaphor for urgency
+
+### Accessibility
+- prefers-reduced-motion → all shapes become circles
+- forced-colors → shape is the ONLY differentiator, must be preserved
+- Screen readers → aria-label: "Write strategy, Deep, High priority"
+
+### Files to create/modify
+- src/styles/shapes.ts — SVG paths + Matter.js vertex arrays per priority shape
+- BubbleBlock.tsx — shape based on task.priority
+- PhysicsEngine.ts — Bodies.fromVertices() for Medium/High priority
+
+---
+
+## UX Edge Cases & Planned Features
+
+### 1. Overloaded Block
+- adjustTaskPeriods() auto-transfers tasks ✅ (already implemented)
+- Still needed: visual signal — bubbles press together, amber border, soft message
+- Tone: supportive, never alarming. Amber = care, never red
+
+### 2. Burnout Mode / Reset Flow
+- Detect 3+ days of low completion from workHistory
+- Offer "Reset Flow": keep only high-priority, archive rest
+- Message: "Looks like a heavy week. Want to keep only the essentials?"
+
+### 3. Time Collision
+- Flow works with blocks, not exact times — by design
+- On conflict: suggest shifting wakeUpTime or reassigning block
+- Timed tasks as separate entity — not MVP
+
+### 4. Empty State
+- Warm text: "Your flow is clear. What's the first task for today?"
+- Voice variant: empty block offers to listen immediately
+- Bubbles slowly "breathe" — CSS anticipation animation
+
+### 5. Travel / Timezone
+- "Adapt blocks to current time" — one tap
+- Auto-detect timezone change → suggest recalculation
+- Temporary travel mode without changing core settings
+
+### 6. Cycle Mode (Female biorhythms) — Far Future
+- Fully optional, user explicitly enables
+- No medical terms in UI
+- Extend Recovery Mode, not a separate module
+
+### General Principles
+- Tone: always supportive, never judgmental
+- All smart hints optional — can be disabled in Settings
+- Accessibility first: visual feedback benefits all users
+
+---
+
+## Idea Bank — UX Concept
+
+### Input Philosophy
+Input feels like a familiar messenger — simple, conversational, low friction.
+Voice is primary; text input mimics chat interface pattern.
+
+### UI Pattern
+- Chat-like input at bottom of Idea Bank screen
+- Ideas appear as bubbles in a feed (no periods, no weights)
+- Voice: tap mic → speak → idea appears as new message bubble
+- Text: type in chat input → send → same result
+
+### Entity
+```ts
+Idea: { id: string; text: string; createdAt: string; tags?: string[]; convertedToTask?: boolean; }
+```
+- Storage: flow_ideas in localStorage
+- New CommandType: ADD_IDEA
+- Trigger phrases: "идея: ..." / "idea: ..." / "guardar idea: ..."
+
+### AI Phase (future)
+- Cluster related ideas → suggest goals
+- One-tap conversion: idea → task with auto weight/period
+
+---
+
+## Material M3 — Rules for AI Implementation
+
+### Reference Sources
+- Design system: https://m3.material.io
+- Accessible components: https://react-spectrum.adobe.com/react-aria/
+
+### Button Semantics
+- Filled → ONE primary action per screen
+- Tonal → secondary actions
+- Outlined → alternative actions
+- Text → least important / navigation
+- FAB → most important persistent action (voice mic)
+- Extended FAB → only if label needed
+
+### Navigation
+- Bottom bar: 3–5 destinations
+- Tab bar: same-level switching (Day/Week/Month/Year)
+
+### Cards
+- Elevated → default
+- Filled → surface-variant
+- Outlined → outline border
+- Never mix types in same list
+
+### Sheets & Dialogs
+- Bottom sheet → contextual actions
+- Dialog → requires decision before proceeding
+- Snackbar → confirmation (task added/moved/deleted)
+- Never use dialog for simple confirmations
+
+### Typography Mapping
+- Headline L/M → page titles
+- Headline S / Title L → block names (Morning, Afternoon...)
+- Title M/S → task titles
+- Body L/M → descriptions
+- Body S / Label → timestamps, capacity, captions
+- Label L → button labels
+- Label M/S → weight badges, chips
+
+### Custom Components — DO NOT apply M3 rules
+- DayView 4-quadrant grid
+- BubbleBlock with Matter.js physics
+- Capacity visualization via bubbles
+- VoiceFAB pulse animation
+- Shape-based priority system (M3 inspired, web-native)
+
+## Theme Files
+- `src/theme/material-theme.json` — M3 theme export with Inter typography, 
+  seed #7B3FC4, includes all color schemes (light/dark/high-contrast) 
+  and full type scale

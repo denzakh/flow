@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './src/styles/tokens.css';
-import './src/styles/motion.css';
+import "./src/theme/tokens.css";
 import './styles.css';
 import App from './App.tsx';
 
