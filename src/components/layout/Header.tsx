@@ -1,5 +1,5 @@
 import React from 'react';
-import FAB from '../../src/components/ui/FAB';
+import FAB from '../ui/FAB';
 import { Mic } from 'lucide-react';
 import { Bell, Settings } from '../../utils/MaterialIcons';
 import { UserSettings } from '../../types.ts';

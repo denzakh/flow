@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { colors, spacing, radius, shadows } from '../../design-tokens';
+import { colors, spacing, radius, shadows } from '../../theme/design-tokens';
 
 /* ──────────────────────────────────────────────────────────────────────────
    GLASS CARD 2.0

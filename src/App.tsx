@@ -21,9 +21,9 @@ import VoiceFeedback from './components/voice/VoiceFeedback.tsx';
 import restIcon from './assets/images/Background+Border+Shadow.png';
 import { AnimatePresence } from 'framer-motion';
 import TaskManagerPanel from './components/TaskManagerPanel.tsx';
-import RecoveryBanner from './components/RecoveryBanner.tsx';
-import FocusPoint from './components/FocusPoint.tsx';
-import VoiceSettingsModal from './components/modals/VoiceSettingsModal.tsx';
+import RecoveryBanner from './components/blocks/RecoveryBanner.tsx';
+import FocusPoint from './components/blocks/FocusPoint.tsx';
+import VoiceSettingsModal from './components/voice/VoiceSettingsModal.tsx';
 
 type ViewMode = 'day' | 'week' | 'month' | 'year';
 

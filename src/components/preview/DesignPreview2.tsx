@@ -10,7 +10,7 @@ import {
   Star, Bell
 } from '../../utils/MaterialIcons';
 import { TaskWeight, TimePeriod, Priority } from '../../types';
-import { colors, spacing, radius, typography, shadows } from '../../design-tokens';
+import { colors, spacing, radius, typography, shadows } from '../../theme/design-tokens';
 
 /* ──────────────────────────────────────────────────────────────────────────
    КОМПОНЕНТЫ 2.0

@@ -3,7 +3,7 @@
  * Централизованная система дизайн-токенов для консистентности UI
  */
 
-import { TaskWeight, TimePeriod, OptimizationStrategy } from './types';
+import { TaskWeight, TimePeriod, OptimizationStrategy } from '../types';
 
 /* ──────────────────────────────────────────────────────────────────────────
    COLOR PALETTE

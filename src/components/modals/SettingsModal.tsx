@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, LogOut, AlertCircle, Mic } from '../../utils/MaterialIcons';
 import { UserSettings, AlarmConfig, Language, VoiceSettings } from '../../types.ts';
 import { TRANSLATIONS, VOICE_TRANSLATIONS } from '../../constants.tsx';
-import { Button } from '../../src/components/ui/Button';
+import { Button } from '../ui/Button';
 
 // Language map for Web Speech API
 const LANG_MAP: Record<string, string> = {

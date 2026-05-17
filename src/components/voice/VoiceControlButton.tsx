@@ -5,7 +5,7 @@
 import React from 'react';
 import { Mic, MicOff } from '../../utils/MaterialIcons';
 import { Language } from '../../types';
-import FAB from '../../src/components/ui/FAB';
+import FAB from '../ui/FAB';
 
 interface VoiceControlButtonProps {
   isListening: boolean;

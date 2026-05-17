@@ -3,7 +3,7 @@
  * Хуки и helper-функции для применения дизайн-токенов в компонентах
  */
 
-import { colors, spacing, radius, typography, shadows, transitions, icons } from './design-tokens';
+import { colors, spacing, radius, typography, shadows, transitions, icons } from '../theme/design-tokens';
 import { TaskWeight, TimePeriod, Priority } from '../types';
 
 /* ──────────────────────────────────────────────────────────────────────────

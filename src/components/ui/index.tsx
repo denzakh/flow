@@ -11,8 +11,8 @@ import {
   inputBaseStyles,
   getTouchTargetStyles,
   transitionsPresets,
-} from '../utils/design-utils';
-import { colors, radius, spacing, typography } from '../design-tokens';
+} from '../../utils/design-utils';
+import { colors, radius, spacing, typography } from '../../theme/design-tokens';
 
 /* ──────────────────────────────────────────────────────────────────────────
    BUTTON COMPONENTS
