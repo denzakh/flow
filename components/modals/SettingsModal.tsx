@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, LogOut, AlertCircle, Mic } from '../../utils/MaterialIcons';
 import { UserSettings, AlarmConfig, Language, VoiceSettings } from '../../types.ts';
 import { TRANSLATIONS, VOICE_TRANSLATIONS } from '../../constants.tsx';
+import { Button } from '../../src/components/ui/Button';
 
 // Language map for Web Speech API
 const LANG_MAP: Record<string, string> = {
@@ -201,11 +202,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       setTempVoiceSettings(prev => ({ ...prev, language: 'ru' }));
                       onVoiceSettingsChange({ ...tempVoiceSettings, language: 'ru' });
                     }}
-                    className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${
-                      tempVoiceSettings.language === 'ru'
-                        ? 'flow-chip flow-chip--selected'
-                        : 'flow-chip'
-                    }`}
+                    className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${tempVoiceSettings.language === 'ru'
+                      ? 'flow-chip flow-chip--selected'
+                      : 'flow-chip'
+                      }`}
                   >
                     {VOICE_TRANSLATIONS[settings.language].russian || 'RU'}
                   </button>
@@ -214,11 +214,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       setTempVoiceSettings(prev => ({ ...prev, language: 'en' }));
                       onVoiceSettingsChange({ ...tempVoiceSettings, language: 'en' });
                     }}
-                    className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${
-                      tempVoiceSettings.language === 'en'
-                        ? 'flow-chip flow-chip--selected'
-                        : 'flow-chip'
-                    }`}
+                    className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${tempVoiceSettings.language === 'en'
+                      ? 'flow-chip flow-chip--selected'
+                      : 'flow-chip'
+                      }`}
                   >
                     {VOICE_TRANSLATIONS[settings.language].english || 'EN'}
                   </button>
@@ -227,11 +226,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       setTempVoiceSettings(prev => ({ ...prev, language: 'es' }));
                       onVoiceSettingsChange({ ...tempVoiceSettings, language: 'es' });
                     }}
-                    className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${
-                      tempVoiceSettings.language === 'es'
-                        ? 'flow-chip flow-chip--selected'
-                        : 'flow-chip'
-                    }`}
+                    className={`flex-1 py-2 px-4 rounded-lg text-sm transition-all ${tempVoiceSettings.language === 'es'
+                      ? 'flow-chip flow-chip--selected'
+                      : 'flow-chip'
+                      }`}
                   >
                     {VOICE_TRANSLATIONS[settings.language].spanish || 'ES'}
                   </button>
@@ -338,13 +336,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           )}
 
           <div className="pt-6 border-t flow-divider border-t flex flex-col gap-3">
-            <button
-              onClick={onSave}
-              className="md-state-layer md-focus-ring w-full py-5 rounded-3xl font-black shadow-xl active:scale-95 transition-all flow-text"
-              style={{ background: 'var(--md-sys-color-primary)', color: 'var(--md-sys-color-on-primary)', minHeight: 48 }}
-            >
+            <Button variant="filled" onPress={onSave}>
               {t.save}
-            </button>
+            </Button>
             <button
               onClick={onLogout}
               className="w-full py-5 text-[10px] font-black uppercase tracking-widest rounded-3xl transition-all flex items-center justify-center gap-2 md-state-layer"
