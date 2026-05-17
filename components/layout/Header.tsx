@@ -1,5 +1,7 @@
 import React from 'react';
-import { Bell, Settings, Mic } from '../../utils/MaterialIcons';
+import FAB from '../../src/components/ui/FAB';
+import { Mic } from 'lucide-react';
+import { Bell, Settings } from '../../utils/MaterialIcons';
 import { UserSettings } from '../../types.ts';
 import { TRANSLATIONS } from '../../constants.tsx';
 
@@ -69,30 +71,20 @@ const Header: React.FC<HeaderProps> = ({
         </div>
         <div className="flex gap-2">
           {isVoiceSupported && onVoiceClick && isVoiceEnabled && (
-            <button
-              type="button"
-              onClick={onVoiceClick}
-              className={`md-state-layer md-focus-ring flex items-center justify-center w-12 h-12 ${
-                isVoiceListening ? 'voice-listening' : ''
-              }`}
-              style={{
-                borderRadius: 'var(--md-sys-shape-corner-full)',
-                background: 'var(--md-sys-color-surface-container-high)',
-                color: 'var(--md-sys-color-on-surface)',
-                minWidth: '48px',
-                minHeight: '48px',
-              }}
-              title={isVoiceListening ? 'Stop listening' : 'Start voice control'}
-            >
-              <Mic size={22} className={isVoiceListening ? 'voice-icon-active' : ''} />
-            </button>
+            <FAB
+              size="small"
+              icon={<Mic size={20} />}
+              onPress={onVoiceClick}
+              isListening={isVoiceListening}
+              aria-label={isVoiceListening ? 'Stop listening' : 'Start voice control'}
+              color="surface"
+            />
           )}
           <button
             type="button"
             onClick={onAlarmClick}
-            className={`md-state-layer md-focus-ring flex items-center justify-center w-12 h-12 ${
-              alarmEnabled ? 'alarm-active' : ''
-            }`}
+            className={`md-state-layer md-focus-ring flex items-center justify-center w-12 h-12 ${alarmEnabled ? 'alarm-active' : ''
+              }`}
             style={{
               borderRadius: 'var(--md-sys-shape-corner-full)',
               background: alarmEnabled

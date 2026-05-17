@@ -19,7 +19,7 @@
     color: var(--md-sys-color-on-primary-container, #000);
 
     /* Shadow */
-    box-shadow: var(--md-sys-elevation-shadow-3);
+    box-shadow: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.30);
 
     /* Transition */
     transition: all var(--md-sys-motion-duration-short2, 0.15s) ease;
@@ -32,6 +32,8 @@
 .fab--size-small {
     width: 40px;
     height: 40px;
+    min-width: 40px;
+    min-height: 40px;
     border-radius: var(--md-sys-shape-corner-small, 8px);
 }
 
@@ -137,7 +139,8 @@
 
 /* Listening state */
 .fab--listening {
-    background-color: #B3261E;
+    background-color: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
     animation: pulse 2s infinite;
 }
 
