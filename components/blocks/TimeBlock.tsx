@@ -22,10 +22,10 @@ interface TimeBlockProps {
 }
 
 const BLOCK_BG: Record<TimePeriod, string> = {
-  [TimePeriod.MORNING]: 'var(--flow-block-morning)',
-  [TimePeriod.AFTERNOON]: 'var(--flow-block-afternoon)',
-  [TimePeriod.EVENING]: 'var(--flow-block-evening)',
-  [TimePeriod.NIGHT]: 'var(--flow-block-night)',
+  [TimePeriod.MORNING]: 'var(--flow-block-morning-bg)',
+  [TimePeriod.AFTERNOON]: 'var(--flow-block-afternoon-bg)',
+  [TimePeriod.EVENING]: 'var(--flow-block-evening-bg)',
+  [TimePeriod.NIGHT]: 'var(--flow-block-night-bg)',
 };
 
 const TimeBlock: React.FC<TimeBlockProps> = ({
@@ -49,14 +49,13 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
 
   return (
     <section
-      className={`block-card md-state-layer relative p-6 transition-shadow duration-md-medium2 ease-md-standard ${
-        isActive ? 'border-l-[3px] border-l-white/90' : ''
-      }`}
+      className={`block-card md-state-layer relative p-6 transition-shadow duration-md-medium2 ease-md-standard ${isActive ? 'border-l-[3px] border-l-white/90' : ''
+        }`}
       style={{
         borderRadius: 'var(--md-sys-shape-corner-extra-large)',
         background: blockBg,
         boxShadow: isActive ? 'var(--md-sys-elevation-3)' : 'var(--md-sys-elevation-1)',
-        color: '#ffffff',
+        color: 'var(--md-sys-color-on-surface)',
       }}
       onMouseEnter={(e) => {
         if (!isActive) {
@@ -92,8 +91,8 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
             {getIcon(block.icon, 'w-[22px] h-[22px]')}
           </div>
           <div>
-            <h2 className="md-typescale-title-large text-white">{block.label}</h2>
-            <span className="md-typescale-label-medium text-white/70">
+            <h2 className="md-typescale-title-large" style={{ color: 'var(--md-sys-color-on-surface)' }}>{block.label}</h2>
+            <span className="md-typescale-label-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
               {block.startTime} — {block.endTime}
             </span>
           </div>
@@ -103,9 +102,8 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
           {!isNight && (
             <div className="flex flex-col items-end gap-1 min-w-[4rem]">
               <span
-                className={`md-typescale-label-small ${
-                  isOverCapacity ? 'text-[var(--flow-capacity-overload)]' : 'text-white/80'
-                }`}
+                className={`md-typescale-label-small ${isOverCapacity ? 'text-[var(--flow-capacity-overload)]' : ''}`}
+                style={{ color: isOverCapacity ? undefined : 'color-mix(in srgb, var(--md-sys-color-on-surface) 80%, transparent)' }}
               >
                 {totalPoints} / {BLOCK_CAPACITY}
               </span>
@@ -113,7 +111,7 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
                 className="w-full h-1 overflow-hidden"
                 style={{
                   borderRadius: 'var(--md-sys-shape-corner-full)',
-                  background: 'rgba(255, 255, 255, 0.2)',
+                  background: 'color-mix(in srgb, var(--md-sys-color-on-surface) 20%, transparent)',
                 }}
               >
                 <div
@@ -123,7 +121,7 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
                     borderRadius: 'var(--md-sys-shape-corner-full)',
                     background: isOverloaded
                       ? 'var(--flow-capacity-overload)'
-                      : 'rgba(255, 255, 255, 0.8)',
+                      : 'color-mix(in srgb, var(--md-sys-color-on-surface) 80%, transparent)',
                   }}
                 />
               </div>
@@ -137,8 +135,8 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
               className="md-state-layer md-focus-ring w-10 h-10 flex items-center justify-center transition-opacity duration-md-short4 ease-md-standard"
               style={{
                 borderRadius: 'var(--md-sys-shape-corner-full)',
-                background: 'rgba(255, 255, 255, 0.15)',
-                color: '#ffffff',
+                background: 'color-mix(in srgb, var(--md-sys-color-on-surface) 15%, transparent)',
+                color: 'var(--md-sys-color-on-surface)',
                 minWidth: '40px',
                 minHeight: '40px',
               }}
@@ -155,12 +153,12 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
           className="mb-4 p-3 flex items-start gap-3"
           style={{
             borderRadius: 'var(--md-sys-shape-corner-medium)',
-            background: 'rgba(255, 255, 255, 0.12)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            background: 'color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--md-sys-color-on-surface) 20%, transparent)',
           }}
         >
           <AlertCircle size={14} className="mt-0.5 shrink-0" />
-          <p className="md-typescale-label-medium leading-tight text-white/90">
+          <p className="md-typescale-label-medium leading-tight" style={{ color: 'var(--md-sys-color-on-surface)' }}>
             Your {block.label.toLowerCase()} looks a bit crowded. Remember to leave space for yourself.
           </p>
         </div>
@@ -184,29 +182,27 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
           <button
             type="button"
             onClick={() => (!isNight && !isPast ? onQuickAdd() : undefined)}
-            className={`md-state-layer w-full py-8 flex flex-col items-center justify-center gap-2 transition-colors duration-md-short4 ease-md-standard group ${
-              isNight ? '' : 'border-2 border-dashed hover:bg-white/[0.08]'
-            }`}
+            className={`md-state-layer w-full py-8 flex flex-col items-center justify-center gap-2 transition-colors duration-md-short4 ease-md-standard group ${isNight ? '' : 'border-2 border-dashed hover:bg-white/[0.08]'
+              }`}
             style={{
               borderRadius: 'var(--md-sys-shape-corner-extra-large)',
-              borderColor: isNight ? undefined : 'rgba(255, 255, 255, 0.25)',
+              borderColor: isNight ? undefined : 'color-mix(in srgb, var(--md-sys-color-on-surface) 25%, transparent)',
               minHeight: '48px',
             }}
           >
             {isNight ? (
               <>
                 <img src="/assets/images/Background+Border+Shadow.png" alt="Rest" className="w-8 h-8 opacity-80" />
-                <span className="md-typescale-label-medium text-white">Rest Phase</span>
+                <span className="md-typescale-label-medium" style={{ color: 'var(--md-sys-color-on-surface)' }}>Rest Phase</span>
               </>
             ) : (
               <>
                 <LayoutGrid
                   size={24}
-                  className={`transition-transform duration-md-short4 ${
-                    !isPast ? 'group-hover:scale-110' : ''
-                  } ${isActive ? 'text-white/50' : 'text-white/25'}`}
+                  className="transition-transform duration-md-short4"
+                  style={{ color: isActive ? 'color-mix(in srgb, var(--md-sys-color-on-surface) 50%, transparent)' : 'color-mix(in srgb, var(--md-sys-color-on-surface) 25%, transparent)' }}
                 />
-                <span className={`md-typescale-label-medium ${isActive ? 'text-white/60' : 'text-white/50'}`}>
+                <span className="md-typescale-label-medium" style={{ color: isActive ? 'color-mix(in srgb, var(--md-sys-color-on-surface) 60%, transparent)' : 'color-mix(in srgb, var(--md-sys-color-on-surface) 50%, transparent)' }}>
                   {isPast ? 'Wrapped' : isActive ? 'Open Flow' : 'Free Space'}
                 </span>
               </>
