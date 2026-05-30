@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell } from '../../utils/MaterialIcons';
+import { Bell } from 'lucide-react';
 import { UserSettings } from '../../types.ts';
 import { TRANSLATIONS, RECOVERY_TIPS } from '../../constants.tsx';
 

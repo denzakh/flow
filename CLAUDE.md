@@ -10,8 +10,8 @@ Repo: https://github.com/denzakh/flow
 
 ## Stack
 - **Frontend**: React 19 + TypeScript + Vite
-- **Icons**: Lucide React (package.json) ⚠️ Some components use `utils/MaterialIcons.tsx` (custom SVG icons) — two icon systems coexist
-- **Styling**: Tailwind CSS + inline styles + `styles.css` (CSS variables)
+- **Icons**: Используем строго lucide-react. Кодовая база очищена от альтернативных систем.
+- **Styling**: Tailwind CSS + `src/theme/tokens.css` + `design-tokens.ts` (строго без inline hex-значений)
 - **Storage**: localStorage (all data is client-side)
 - **Voice**: Web Speech API (SpeechRecognition + SpeechSynthesis)
 - **AI (planned)**: Anthropic API via backend proxy
@@ -223,7 +223,10 @@ POST /api/ai
 - **Capacity system**: Each time block has max 12 points (Quick=1, Focused=3, Deep=6). Overflow triggers automatic transfer to next available slot.
 - **Debug logging**: `taskOptimizer.ts` functions now include console.log for debugging capacity issues. Look for 🔍, 📅, ✅, ❌ emojis in console.
 - **Task transfer applies to**: Voice commands, manual input (FocusPoint), and form submit (addTask). All paths use `adjustTaskPeriods()`.
-- ⚠️ **Two icon systems**: `lucide-react` is in package.json AND `utils/MaterialIcons.tsx` has 50+ custom SVG icons. Different components use different sources — be careful when adding icons.
+- ⚠️ **Icon system cleanup complete**: All components now use `lucide-react` exclusively. Legacy file `src/utils/MaterialIcons.tsx` NOT deleted — move to `src/legacy/icons/` for archival after validation.
+
+- ⚠️ **Legacy files pending removal** (manual check required):
+  - `src/utils/MaterialIcons.tsx` — 50+ custom SVG icons (pendant removed, moved to legacy folder)
 - ⚠️ **No src/tests/ directory exists** — tests may be absent or in a different location.
 - ⚠️ **Design tokens (`design-tokens.ts`) define a dark theme only** — the light theme described in the Color System section below is not yet implemented in code/styles.css.
 
@@ -468,6 +471,14 @@ Fully client-side. `localStorage` only. No auth, no sync, AI proxy planned via V
 - Hosting: Vercel
 
 ### Phased Rollout
+
+### Фаза 0: M3 Atoms & Cleanup
+- Создание атомарных M3 компонентов: `Chip.tsx`, `Switch.tsx`
+- Обновление документации (CLAUDE.md)
+- Замена импортов иконок на lucide-react
+- Замена хардкод-стилей на Tailwind M3-классы
+- Legacy-файлы (`MaterialIcons.tsx`) НЕ удаляются автоматически — требуют ручной проверки
+
 1. **Now**: `localStorage` + Vercel AI proxy
 2. **Next**: Supabase auth + cross-device task sync
 3. **Future**: Push notifications, health integrations, GCal two-way sync
@@ -683,3 +694,88 @@ Idea: { id: string; text: string; createdAt: string; tags?: string[]; convertedT
 - `src/theme/material-theme.json` — M3 theme export with Inter typography, 
   seed #7B3FC4, includes all color schemes (light/dark/high-contrast) 
   and full type scale
+
+  ---
+
+## Energy Peak Planner — Feature Spec
+
+### Концепция
+Персонализация биоритмического планирования на основе субъективного пика энергии
+конкретного пользователя. Не усреднённый биоритм — а личный профиль.
+
+Философия: не автоматизация, а умная поддержка решения с уважением к автономии.
+Каждое предложение системы требует явного подтверждения пользователя.
+
+---
+
+### Компонент 1 — Energy Peak Profile (настройки)
+
+Пользователь указывает свой субъективный пик энергии.
+
+**Entity (добавить в UserSettings):**
+```ts
+energyPeak?: {
+  block: TimePeriod          // MORNING | AFTERNOON | EVENING
+  intensity: 'soft' | 'strong'  // насколько выражен пик
+}
+```
+
+**UI:** секция в SettingsModal после wakeUpTime/restTime.
+Выбор через визуальный селектор блоков дня — не абстрактный слайдер,
+а тапы по блокам Morning / Afternoon / Evening с индикатором пика.
+
+**Логика:**
+- По умолчанию пик не задан → система работает как сейчас
+- Если пик задан → влияет на Smart Day Planner и suggestWeight()
+
+---
+
+### Компонент 2 — Smart Day Planner (планирование дня)
+
+Пользователь выбирает дату → система предлагает распределение задач
+из существующего списка по блокам с учётом energyPeak.
+
+**Алгоритм распределения:**
+```
+Deep tasks    → пиковый блок (energyPeak.block)
+Focused tasks → блок до или после пика
+Quick tasks   → оставшиеся блоки (утро или вечер)
+Night block   → всегда пустой (только отдых)
+```
+
+**UX Flow:**
+1. Пользователь нажимает "Распланировать день" (кнопка в DayView или DateNavigator)
+2. Выбирает дату (например, завтра)
+3. Приложение открывает эту дату
+4. Показывает предложения по одному с подтверждением:
+   "Поставить «Написать стратегию» (Deep) в Утро — твой пиковый блок?"
+   [Да, поставить] [Пропустить] [Выбрать другой блок]
+5. После всех подтверждений — день распланирован
+
+**Важно:** пользователь может пропустить любое предложение или выбрать
+другой блок — система не навязывает, а предлагает.
+
+---
+
+### Интеграция с существующим кодом
+
+**suggestWeight() в taskOptimizer.ts:**
+Если energyPeak задан — учитывать при автоматическом предложении веса задачи.
+Deep задачи предлагать планировать на пиковый блок.
+
+**adjustTaskPeriods() в taskOptimizer.ts:**
+При ручном добавлении задачи с весом Deep — если текущий блок не пиковый,
+предлагать переместить в пиковый (мягкая рекомендация, не принудительно).
+
+**Новые компоненты:**
+- `EnergyPeakSelector.tsx` — визуальный выбор пика в настройках
+- `DayPlannerModal.tsx` — модалка с предложениями по распределению
+- `PlannerSuggestion.tsx` — одно предложение с кнопками подтверждения
+
+---
+
+### Приоритет реализации
+**Фаза 1:** Energy Peak Profile в настройках (UserSettings + UI)
+**Фаза 2:** Smart Day Planner — базовый алгоритм + подтверждения
+**Фаза 3:** Интеграция с suggestWeight() и adjustTaskPeriods()
+**Фаза 4 (AI):** Умные предложения через Anthropic API с учётом истории задач

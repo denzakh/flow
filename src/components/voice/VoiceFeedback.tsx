@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { Volume2, VolumeX, AlertCircle, CheckCircle, Loader } from '../../utils/MaterialIcons';
+import { Volume2, VolumeX, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import { VOICE_TRANSLATIONS } from '../../constants';
 
 type VoiceStatus = 'idle' | 'listening' | 'processing' | 'error' | 'success';

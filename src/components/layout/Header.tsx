@@ -1,7 +1,6 @@
 import React from 'react';
 import FAB from '../ui/FAB';
-import { Mic } from 'lucide-react';
-import { Bell, Settings } from '../../utils/MaterialIcons';
+import { Mic, Bell, Settings } from 'lucide-react';
 import { UserSettings } from '../../types.ts';
 import { TRANSLATIONS } from '../../constants.tsx';
 

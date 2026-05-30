@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, LogOut, AlertCircle, Mic } from '../../utils/MaterialIcons';
+import { X, Mic, AlertTriangle, Trash2 } from 'lucide-react';
 import { UserSettings, AlarmConfig, Language, VoiceSettings } from '../../types.ts';
 import { TRANSLATIONS, VOICE_TRANSLATIONS } from '../../constants.tsx';
 import { Button } from '../ui/Button';
@@ -344,13 +344,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               className="w-full py-5 text-[10px] font-black uppercase tracking-widest rounded-3xl transition-all flex items-center justify-center gap-2 md-state-layer"
               style={{ color: 'var(--md-sys-color-error)', minHeight: 48 }}
             >
-              <LogOut size={14} /> {t.rhythm === 'Your Rhythm' ? 'Log Out' : t.rhythm}
+              <Trash2 size={14} /> {t.rhythm === 'Your Rhythm' ? 'Log Out' : t.rhythm}
             </button>
           </div>
 
           {error && (
             <div className="flex items-center gap-2 text-rose-400 text-[10px] font-bold">
-              <AlertCircle size={14} /> {error}
+              <AlertTriangle size={14} /> {error}
             </div>
           )}
         </div>

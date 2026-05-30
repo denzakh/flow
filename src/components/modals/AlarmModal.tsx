@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Bell, ChevronDown } from '../../utils/MaterialIcons';
+import { X, Bell, ChevronDown } from 'lucide-react';
 import { UserSettings, AlarmConfig } from '../../types.ts';
 import { TRANSLATIONS, ALARM_SOUNDS } from '../../constants.tsx';
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, CheckCircle, AlertCircle, X } from '../utils/MaterialIcons';
+import { Trash2, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { Task, Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 

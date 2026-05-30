@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutGrid, Plus, AlertCircle } from '../../utils/MaterialIcons';
+import { Grid, Plus, AlertTriangle } from 'lucide-react';
 import { TimeBlockConfig, TimePeriod, Task, Language } from '../../types.ts';
 import { BLOCK_CAPACITY, TRANSLATIONS } from '../../constants.tsx';
 import TaskItem from '../TaskItem.tsx';
@@ -157,7 +157,7 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
             border: '1px solid color-mix(in srgb, var(--md-sys-color-on-surface) 20%, transparent)',
           }}
         >
-          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+          <AlertTriangle size={14} className="mt-0.5 shrink-0" />
           <p className="md-typescale-label-medium leading-tight" style={{ color: 'var(--md-sys-color-on-surface)' }}>
             Your {block.label.toLowerCase()} looks a bit crowded. Remember to leave space for yourself.
           </p>
@@ -197,7 +197,7 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
               </>
             ) : (
               <>
-                <LayoutGrid
+                <Grid
                   size={24}
                   className="transition-transform duration-md-short4"
                   style={{ color: isActive ? 'color-mix(in srgb, var(--md-sys-color-on-surface) 50%, transparent)' : 'color-mix(in srgb, var(--md-sys-color-on-surface) 25%, transparent)' }}

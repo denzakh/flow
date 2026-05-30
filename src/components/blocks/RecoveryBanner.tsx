@@ -1,5 +1,5 @@
 import React from 'react';
-import { BedDouble, Sparkles } from '../../utils/MaterialIcons';
+import { Moon, Sparkles } from 'lucide-react';
 import { RECOVERY_TIPS } from '../../constants.tsx';
 
 interface RecoveryBannerProps {
@@ -29,7 +29,7 @@ const RecoveryBanner: React.FC<RecoveryBannerProps> = ({ isWindDown, currentTime
           color: '#ffffff',
         }}
       >
-        {isWindDown ? <BedDouble size={22} /> : <Sparkles size={22} />}
+        {isWindDown ? <Moon size={22} /> : <Sparkles size={22} />}
       </div>
       <div className="flex-1">
         <h3

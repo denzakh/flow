@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { Mic, MicOff } from '../../utils/MaterialIcons';
+import { Mic, MicOff } from 'lucide-react';
 import { Language } from '../../types';
 import FAB from '../ui/FAB';
 

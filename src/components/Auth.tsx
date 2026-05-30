@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import {
     Mail,
     Lock,
-    Person,
+    User,
     ChevronRight,
     Chrome,
     ArrowRight,
     UserCircle,
-    Refresh,
-} from '../utils/MaterialIcons';
+    RotateCcw,
+} from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface AuthProps {

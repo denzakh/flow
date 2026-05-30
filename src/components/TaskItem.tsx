@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { Check, Calendar, Edit2, Repeat, Layers, Zap, Target } from '../utils/MaterialIcons';
+import { Check, Calendar, Edit2, Repeat, Layers, Zap, Target } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
 import { Task, TimePeriod, Language, TaskWeight } from '../types.ts';
 import { WEIGHT_CONFIG, TRANSLATIONS } from '../constants.tsx';
@@ -122,9 +122,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, index, lang, onToggle, onDele
           ) : (
             <div className="flex-1 min-w-0 flex flex-col">
               <span
-                className={`task-title md-typescale-body-large truncate transition-colors duration-md-short4 ease-md-standard ${
-                  task.completed ? 'line-through' : ''
-                }`}
+                className={`task-title md-typescale-body-large truncate transition-colors duration-md-short4 ease-md-standard ${task.completed ? 'line-through' : ''
+                  }`}
                 style={{
                   color: task.completed
                     ? 'var(--md-sys-color-on-surface-variant)'
@@ -195,9 +194,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, index, lang, onToggle, onDele
                       key={w.id}
                       type="button"
                       onClick={() => changeWeight(w.id)}
-                      className={`md-state-layer md-focus-ring flex-1 p-2 flex items-center justify-center transition-all duration-md-short4 ${
-                        active ? WEIGHT_CHIP_CLASS[w.id] : ''
-                      }`}
+                      className={`md-state-layer md-focus-ring flex-1 p-2 flex items-center justify-center transition-all duration-md-short4 ${active ? WEIGHT_CHIP_CLASS[w.id] : ''
+                        }`}
                       style={{
                         borderRadius: 'var(--md-sys-shape-corner-medium)',
                         border: active ? 'none' : '1px solid var(--md-sys-color-outline-variant)',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, RotateCcw } from '../../utils/MaterialIcons';
+import { ChevronLeft, ChevronRight, RotateCw } from 'lucide-react';
 import { TRANSLATIONS } from '../../constants.tsx';
 
 interface DateNavigatorProps {
@@ -66,7 +66,7 @@ const DateNavigator: React.FC<DateNavigatorProps> = ({
           <ChevronLeft size={22} />
         </button>
         <button type="button" onClick={onToday} className="md-state-layer md-focus-ring flex items-center justify-center w-10 h-10 transition-all" style={btnStyle}>
-          <RotateCcw size={22} />
+          <RotateCw size={22} />
         </button>
         <button type="button" onClick={() => onNavigate(1)} className="md-state-layer md-focus-ring flex items-center justify-center w-10 h-10 transition-all" style={btnStyle}>
           <ChevronRight size={22} />

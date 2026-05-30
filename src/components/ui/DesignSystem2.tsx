@@ -74,7 +74,7 @@ export const GlassCard2: React.FC<GlassCard2Props> = ({
           borderRadius: radius['2xl'],
         }}
       />
-      
+
       {/* Inner highlight */}
       <div
         style={{
@@ -86,7 +86,7 @@ export const GlassCard2: React.FC<GlassCard2Props> = ({
           background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
         }}
       />
-      
+
       <div style={{ position: 'relative', zIndex: 1 }}>
         {children}
       </div>
@@ -159,7 +159,7 @@ export const Badge2: React.FC<Badge2Props> = ({
    TASK ITEM 2.0 — С HOVER LIFT ЭФФЕКТОМ
    ────────────────────────────────────────────────────────────────────────── */
 
-import { Check, Zap, Target, Layers } from '../../utils/MaterialIcons';
+import { Check, Zap, Target, Layers } from 'lucide-react';
 import { Task, TaskWeight, Priority } from '../../types';
 
 export interface TaskItem2Props {
@@ -238,7 +238,7 @@ export const TaskItem2: React.FC<TaskItem2Props> = ({
       >
         {completed && <Check size={16} color="#fff" strokeWidth={3} />}
       </div>
-      
+
       {/* Content */}
       <div style={{ flex: 1 }}>
         <p
@@ -253,7 +253,7 @@ export const TaskItem2: React.FC<TaskItem2Props> = ({
           {task.title}
         </p>
       </div>
-      
+
       {/* Weight Badge */}
       <div
         style={{
@@ -330,7 +330,7 @@ export const HoverLift: React.FC<HoverLiftProps> = ({
    EMPTY STATE 2.0
    ────────────────────────────────────────────────────────────────────────── */
 
-import { Heart, Calendar, Check } from '../../utils/MaterialIcons';
+import { Heart, Calendar, Check } from 'lucide-react';
 
 export interface EmptyState2Props {
   icon?: React.ReactNode;
@@ -372,7 +372,7 @@ export const EmptyState2: React.FC<EmptyState2Props> = ({
       >
         {icon || <Heart size={32} />}
       </div>
-      
+
       <h3
         style={{
           fontSize: '16px',
@@ -383,7 +383,7 @@ export const EmptyState2: React.FC<EmptyState2Props> = ({
       >
         {title}
       </h3>
-      
+
       {description && (
         <p
           style={{
@@ -395,7 +395,7 @@ export const EmptyState2: React.FC<EmptyState2Props> = ({
           {description}
         </p>
       )}
-      
+
       {action && <div>{action}</div>}
     </div>
   );

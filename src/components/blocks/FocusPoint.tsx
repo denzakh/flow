@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Repeat, Check, Clock, Zap, Target, Layers } from '../../utils/MaterialIcons';
+import { RotateCw, Check, Clock, Zap, Target, Layers } from 'lucide-react';
 import { Plus } from 'lucide-react';
 import { TimePeriod, TaskWeight, Recurrence, Language } from '../../types.ts';
 import { WEIGHT_CONFIG, TRANSLATIONS } from '../../constants.tsx';
@@ -86,9 +86,8 @@ const FocusPoint: React.FC<FocusPointProps> = ({
             onFocus={() => onInputFocusChange(true)}
             onBlur={() => onInputFocusChange(false)}
             placeholder="What's next?"
-            className={`md-typescale-body-large w-full md-focus-ring transition-all duration-md-short3 ease-md-standard ${
-              isInputFocused ? 'pt-6 pb-3' : 'py-4'
-            }`}
+            className={`md-typescale-body-large w-full md-focus-ring transition-all duration-md-short3 ease-md-standard ${isInputFocused ? 'pt-6 pb-3' : 'py-4'
+              }`}
             style={{
               background: 'var(--md-sys-color-surface-container-highest)',
               color: 'var(--md-sys-color-on-surface)',
@@ -121,7 +120,7 @@ const FocusPoint: React.FC<FocusPointProps> = ({
                   minHeight: '40px',
                 }}
               >
-                <Repeat size={22} />
+                <RotateCw size={22} />
               </button>
               {isRecurrenceMenuOpen && (
                 <div
@@ -191,9 +190,8 @@ const FocusPoint: React.FC<FocusPointProps> = ({
                   key={w}
                   type="button"
                   onClick={() => onWeightChange(w)}
-                  className={`md-state-layer md-focus-ring inline-flex items-center gap-2 h-8 px-3 md-typescale-label-large transition-all duration-md-short4 ${
-                    isSelected ? '' : ''
-                  }`}
+                  className={`md-state-layer md-focus-ring inline-flex items-center gap-2 h-8 px-3 md-typescale-label-large transition-all duration-md-short4 ${isSelected ? '' : ''
+                    }`}
                   style={{
                     borderRadius: 'var(--md-sys-shape-corner-full)',
                     minHeight: '32px',

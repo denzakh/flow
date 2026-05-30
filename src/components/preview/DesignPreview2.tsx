@@ -4,11 +4,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Zap, Target, Layers, Sun, SunDim, CloudMoon, Moon,
-  Check, Plus, Repeat, Clock, Heart, Sparkles, Refresh,
+  Check, Plus, RotateCw, Clock, Heart, Sparkles,
   Star, Bell
-} from '../../utils/MaterialIcons';
+} from 'lucide-react';
 import { TaskWeight, TimePeriod, Priority } from '../../types';
 import { colors, spacing, radius, typography, shadows } from '../../theme/design-tokens';
 
@@ -67,7 +67,7 @@ const GlassCard2: React.FC<{
           borderRadius: radius['2xl'],
         }}
       />
-      
+
       {/* Inner highlight */}
       <div
         style={{
@@ -79,7 +79,7 @@ const GlassCard2: React.FC<{
           background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
         }}
       />
-      
+
       <div style={{ position: 'relative', zIndex: 1 }}>
         {children}
       </div>
@@ -109,108 +109,108 @@ const Button2: React.FC<{
   onClick,
   className = '',
 }) => {
-  const [isPressed, setIsPressed] = useState(false);
-  const [ripples, setRipples] = useState<Array<{ x: number; y: number; id: number }>>([]);
+    const [isPressed, setIsPressed] = useState(false);
+    const [ripples, setRipples] = useState<Array<{ x: number; y: number; id: number }>>([]);
 
-  const sizeStyles = {
-    sm: { padding: `${spacing.sm} ${spacing.lg}`, fontSize: typography.fontSize.sm, minHeight: '40px' },
-    md: { padding: `${spacing.md} ${spacing.xl}`, fontSize: typography.fontSize.base, minHeight: '48px' },
-    lg: { padding: `${spacing.lg} ${spacing['2xl']}`, fontSize: typography.fontSize.lg, minHeight: '56px' },
+    const sizeStyles = {
+      sm: { padding: `${spacing.sm} ${spacing.lg}`, fontSize: typography.fontSize.sm, minHeight: '40px' },
+      md: { padding: `${spacing.md} ${spacing.xl}`, fontSize: typography.fontSize.base, minHeight: '48px' },
+      lg: { padding: `${spacing.lg} ${spacing['2xl']}`, fontSize: typography.fontSize.lg, minHeight: '56px' },
+    };
+
+    const variantStyles = {
+      primary: {
+        background: colors.bg.primary,
+        color: colors.accent.evening,
+        border: `1px solid ${colors.accent.evening}`,
+        boxShadow: `inset 0 0 20px ${colors.accent.evening}40`, // Inner glow
+      },
+      secondary: {
+        background: 'transparent',
+        color: colors.text.primary,
+        border: `1px solid ${colors.border.default}`,
+      },
+      ghost: {
+        background: 'transparent',
+        color: colors.text.secondary,
+        border: 'none',
+      },
+      gradient: {
+        background: `linear-gradient(135deg, ${colors.accent.evening} 0%, ${colors.weight.focused} 100%)`,
+        color: colors.text.primary,
+        border: 'none',
+        boxShadow: `inset 0 0 30px rgba(255, 255, 255, 0.2)`,
+      },
+    };
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (onClick && !isLoading && !disabled) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const newRipple = { x, y, id: Date.now() };
+        setRipples(prev => [...prev, newRipple]);
+        setTimeout(() => {
+          setRipples(prev => prev.filter(r => r.id !== newRipple.id));
+        }, 600);
+        onClick();
+      }
+    };
+
+    return (
+      <button
+        className={`btn-2 ${className}`}
+        style={{
+          ...variantStyles[variant as keyof typeof variantStyles],
+          ...sizeStyles[size],
+          borderRadius: radius.xl,
+          fontWeight: typography.fontWeight.bold,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: spacing.sm,
+          cursor: disabled || isLoading ? 'not-allowed' : 'pointer',
+          opacity: disabled || isLoading ? 0.5 : 1,
+          transform: isPressed ? 'scale(0.94)' : 'scale(1)',
+          transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+        onMouseDown={() => setIsPressed(true)}
+        onMouseUp={() => setIsPressed(false)}
+        onMouseLeave={() => setIsPressed(false)}
+        onClick={handleClick}
+        disabled={disabled || isLoading}
+      >
+        {ripples.map(ripple => (
+          <span
+            key={ripple.id}
+            style={{
+              position: 'absolute',
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.3)',
+              width: '100px',
+              height: '100px',
+              left: ripple.x - 50,
+              top: ripple.y - 50,
+              transform: 'scale(0)',
+              animation: 'ripple 0.6s ease-out',
+              pointerEvents: 'none',
+            }}
+          />
+        ))}
+
+        {isLoading ? (
+          <Refresh size={18} className="animate-spin" />
+        ) : (
+          <>
+            {leftIcon && <span style={{ display: 'flex' }}>{leftIcon}</span>}
+            {children}
+            {rightIcon && <span style={{ display: 'flex' }}>{rightIcon}</span>}
+          </>
+        )}
+      </button>
+    );
   };
-
-  const variantStyles = {
-    primary: {
-      background: colors.bg.primary,
-      color: colors.accent.evening,
-      border: `1px solid ${colors.accent.evening}`,
-      boxShadow: `inset 0 0 20px ${colors.accent.evening}40`, // Inner glow
-    },
-    secondary: {
-      background: 'transparent',
-      color: colors.text.primary,
-      border: `1px solid ${colors.border.default}`,
-    },
-    ghost: {
-      background: 'transparent',
-      color: colors.text.secondary,
-      border: 'none',
-    },
-    gradient: {
-      background: `linear-gradient(135deg, ${colors.accent.evening} 0%, ${colors.weight.focused} 100%)`,
-      color: colors.text.primary,
-      border: 'none',
-      boxShadow: `inset 0 0 30px rgba(255, 255, 255, 0.2)`,
-    },
-  };
-
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (onClick && !isLoading && !disabled) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const newRipple = { x, y, id: Date.now() };
-      setRipples(prev => [...prev, newRipple]);
-      setTimeout(() => {
-        setRipples(prev => prev.filter(r => r.id !== newRipple.id));
-      }, 600);
-      onClick();
-    }
-  };
-
-  return (
-    <button
-      className={`btn-2 ${className}`}
-      style={{
-        ...variantStyles[variant as keyof typeof variantStyles],
-        ...sizeStyles[size],
-        borderRadius: radius.xl,
-        fontWeight: typography.fontWeight.bold,
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: spacing.sm,
-        cursor: disabled || isLoading ? 'not-allowed' : 'pointer',
-        opacity: disabled || isLoading ? 0.5 : 1,
-        transform: isPressed ? 'scale(0.94)' : 'scale(1)',
-        transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
-      onClick={handleClick}
-      disabled={disabled || isLoading}
-    >
-      {ripples.map(ripple => (
-        <span
-          key={ripple.id}
-          style={{
-            position: 'absolute',
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.3)',
-            width: '100px',
-            height: '100px',
-            left: ripple.x - 50,
-            top: ripple.y - 50,
-            transform: 'scale(0)',
-            animation: 'ripple 0.6s ease-out',
-            pointerEvents: 'none',
-          }}
-        />
-      ))}
-      
-      {isLoading ? (
-        <Refresh size={18} className="animate-spin" />
-      ) : (
-        <>
-          {leftIcon && <span style={{ display: 'flex' }}>{leftIcon}</span>}
-          {children}
-          {rightIcon && <span style={{ display: 'flex' }}>{rightIcon}</span>}
-        </>
-      )}
-    </button>
-  );
-};
 
 // Input 2.0 с animated gradient border
 const Input2: React.FC<{
@@ -232,126 +232,126 @@ const Input2: React.FC<{
   error,
   className = '',
 }) => {
-  const [isFocused, setIsFocused] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
 
-  return (
-    <div className={`input-2 ${className}`} style={{ position: 'relative', width: '100%' }}>
-      {label && (
-        <label
+    return (
+      <div className={`input-2 ${className}`} style={{ position: 'relative', width: '100%' }}>
+        {label && (
+          <label
+            style={{
+              display: 'block',
+              fontSize: typography.fontSize.xs,
+              fontWeight: typography.fontWeight.bold,
+              letterSpacing: typography.letterSpacing.wide,
+              textTransform: 'uppercase',
+              color: colors.text.secondary,
+              marginBottom: spacing.sm,
+            }}
+          >
+            {label}
+          </label>
+        )}
+
+        <div
+          className="input-gradient-animated"
           style={{
-            display: 'block',
-            fontSize: typography.fontSize.xs,
-            fontWeight: typography.fontWeight.bold,
-            letterSpacing: typography.letterSpacing.wide,
-            textTransform: 'uppercase',
-            color: colors.text.secondary,
-            marginBottom: spacing.sm,
+            position: 'relative',
+            borderRadius: radius['2xl'],
           }}
         >
-          {label}
-        </label>
-      )}
-      
-      <div
-        className="input-gradient-animated"
-        style={{
-          position: 'relative',
-          borderRadius: radius['2xl'],
-        }}
-      >
-        {/* Animated gradient border */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            borderRadius: radius['2xl'],
-            padding: '1px',
-            background: isFocused
-              ? `linear-gradient(45deg, ${colors.accent.evening}, ${colors.weight.focused}, ${colors.weight.deep}, ${colors.accent.active}, ${colors.accent.evening})`
-              : `linear-gradient(0deg, rgba(43, 72, 172, 0.60) -50.01%, rgba(140, 110, 50, 0.60) 189.97%, rgba(172, 169, 0, 0.60) 289.14%, rgba(255, 255, 255, 0.60) 348.64%)`,
-            backgroundSize: isFocused ? '400% 400%' : undefined,
-            animation: isFocused ? 'gradientRotate 8s ease infinite' : undefined,
-            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
-            maskComposite: 'exclude',
-            pointerEvents: 'none',
-            zIndex: 2,
-          }}
-        />
-        
-        <input
-          type="text"
-          value={value}
-          onChange={onChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          placeholder={placeholder}
-          style={{
-            width: '100%',
-            height: '66px',
-            background: colors.bg.primary,
-            border: 'none',
-            borderRadius: radius['2xl'],
-            padding: `0 ${spacing['2xl']}`,
-            paddingLeft: leftIcon ? '56px' : spacing['2xl'],
-            paddingRight: rightIcon ? '56px' : spacing['2xl'],
-            fontSize: typography.fontSize.base,
-            fontWeight: typography.fontWeight.bold,
-            color: colors.text.primary,
-            outline: 'none',
-            position: 'relative',
-            zIndex: 1,
-          }}
-        />
-        
-        {leftIcon && (
+          {/* Animated gradient border */}
           <div
             style={{
               position: 'absolute',
-              left: spacing.lg,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: isFocused ? colors.text.primary : colors.text.tertiary,
-              display: 'flex',
-              alignItems: 'center',
-              transition: 'color 0.2s ease',
+              inset: 0,
+              borderRadius: radius['2xl'],
+              padding: '1px',
+              background: isFocused
+                ? `linear-gradient(45deg, ${colors.accent.evening}, ${colors.weight.focused}, ${colors.weight.deep}, ${colors.accent.active}, ${colors.accent.evening})`
+                : `linear-gradient(0deg, rgba(43, 72, 172, 0.60) -50.01%, rgba(140, 110, 50, 0.60) 189.97%, rgba(172, 169, 0, 0.60) 289.14%, rgba(255, 255, 255, 0.60) 348.64%)`,
+              backgroundSize: isFocused ? '400% 400%' : undefined,
+              animation: isFocused ? 'gradientRotate 8s ease infinite' : undefined,
+              WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              WebkitMaskComposite: 'xor',
+              maskComposite: 'exclude',
+              pointerEvents: 'none',
+              zIndex: 2,
             }}
-          >
-            {leftIcon}
-          </div>
-        )}
-        
-        {rightIcon && (
-          <div
+          />
+
+          <input
+            type="text"
+            value={value}
+            onChange={onChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            placeholder={placeholder}
             style={{
-              position: 'absolute',
-              right: spacing.lg,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: colors.text.tertiary,
-              display: 'flex',
-              alignItems: 'center',
+              width: '100%',
+              height: '66px',
+              background: colors.bg.primary,
+              border: 'none',
+              borderRadius: radius['2xl'],
+              padding: `0 ${spacing['2xl']}`,
+              paddingLeft: leftIcon ? '56px' : spacing['2xl'],
+              paddingRight: rightIcon ? '56px' : spacing['2xl'],
+              fontSize: typography.fontSize.base,
+              fontWeight: typography.fontWeight.bold,
+              color: colors.text.primary,
+              outline: 'none',
+              position: 'relative',
+              zIndex: 1,
+            }}
+          />
+
+          {leftIcon && (
+            <div
+              style={{
+                position: 'absolute',
+                left: spacing.lg,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: isFocused ? colors.text.primary : colors.text.tertiary,
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'color 0.2s ease',
+              }}
+            >
+              {leftIcon}
+            </div>
+          )}
+
+          {rightIcon && (
+            <div
+              style={{
+                position: 'absolute',
+                right: spacing.lg,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: colors.text.tertiary,
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {rightIcon}
+            </div>
+          )}
+        </div>
+
+        {error && (
+          <p
+            style={{
+              fontSize: typography.fontSize.xs,
+              color: colors.priority.high.primary,
+              marginTop: spacing.sm,
             }}
           >
-            {rightIcon}
-          </div>
+            {error}
+          </p>
         )}
       </div>
-      
-      {error && (
-        <p
-          style={{
-            fontSize: typography.fontSize.xs,
-            color: colors.priority.high.primary,
-            marginTop: spacing.sm,
-          }}
-        >
-          {error}
-        </p>
-      )}
-    </div>
-  );
-};
+    );
+  };
 
 // Badge 2.0 — без иконок, только текст (без halo — слишком маленький элемент)
 const Badge2: React.FC<{
@@ -367,44 +367,44 @@ const Badge2: React.FC<{
   animated = false,
   className = '',
 }) => {
-  const colorMap = {
-    quick: { bg: colors.weight.quick.bg, color: colors.weight.quick.primary, border: colors.weight.quick.border },
-    focused: { bg: colors.weight.focused.bg, color: colors.weight.focused.primary, border: colors.weight.focused.border },
-    deep: { bg: colors.weight.deep.bg, color: colors.weight.deep.primary, border: colors.weight.deep.border },
-    high: { bg: colors.priority.high.bg, color: colors.priority.high.primary, border: colors.priority.high.border },
-    medium: { bg: colors.priority.medium.bg, color: colors.priority.medium.primary, border: colors.priority.medium.border },
-    low: { bg: colors.priority.low.bg, color: colors.priority.low.primary, border: colors.priority.low.border },
+    const colorMap = {
+      quick: { bg: colors.weight.quick.bg, color: colors.weight.quick.primary, border: colors.weight.quick.border },
+      focused: { bg: colors.weight.focused.bg, color: colors.weight.focused.primary, border: colors.weight.focused.border },
+      deep: { bg: colors.weight.deep.bg, color: colors.weight.deep.primary, border: colors.weight.deep.border },
+      high: { bg: colors.priority.high.bg, color: colors.priority.high.primary, border: colors.priority.high.border },
+      medium: { bg: colors.priority.medium.bg, color: colors.priority.medium.primary, border: colors.priority.medium.border },
+      low: { bg: colors.priority.low.bg, color: colors.priority.low.primary, border: colors.priority.low.border },
+    };
+
+    const sizeStyles = {
+      sm: { padding: `${spacing.xs} ${spacing.sm}`, fontSize: typography.fontSize.xs },
+      md: { padding: `${spacing.sm} ${spacing.md}`, fontSize: typography.fontSize.sm },
+    };
+
+    const colorsVariant = colorMap[variant];
+
+    return (
+      <span
+        className={className}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          backgroundColor: colorsVariant.bg,
+          color: colorsVariant.color,
+          border: `1px solid ${colorsVariant.border}`,
+          borderRadius: radius.full,
+          fontWeight: typography.fontWeight.bold,
+          ...sizeStyles[size],
+          transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          ...(animated && {
+            animation: 'badgePulse 2s ease-in-out infinite',
+          }),
+        }}
+      >
+        {children}
+      </span>
+    );
   };
-
-  const sizeStyles = {
-    sm: { padding: `${spacing.xs} ${spacing.sm}`, fontSize: typography.fontSize.xs },
-    md: { padding: `${spacing.sm} ${spacing.md}`, fontSize: typography.fontSize.sm },
-  };
-
-  const colorsVariant = colorMap[variant];
-
-  return (
-    <span
-      className={className}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        backgroundColor: colorsVariant.bg,
-        color: colorsVariant.color,
-        border: `1px solid ${colorsVariant.border}`,
-        borderRadius: radius.full,
-        fontWeight: typography.fontWeight.bold,
-        ...sizeStyles[size],
-        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        ...(animated && {
-          animation: 'badgePulse 2s ease-in-out infinite',
-        }),
-      }}
-    >
-      {children}
-    </span>
-  );
-};
 
 // Task Item 2.0 с hover lift
 const TaskItem2: React.FC<{
@@ -474,7 +474,7 @@ const TaskItem2: React.FC<{
       >
         {completed && <Check size={16} color="#fff" strokeWidth={3} />}
       </div>
-      
+
       {/* Content */}
       <div style={{ flex: 1 }}>
         <p
@@ -489,7 +489,7 @@ const TaskItem2: React.FC<{
           {title}
         </p>
       </div>
-      
+
       {/* Weight Badge */}
       <div
         style={{
@@ -591,7 +591,7 @@ const DesignPreview2: React.FC = () => {
           zIndex: 0,
         }}
       />
-      
+
       {/* Content */}
       <div style={{ position: 'relative', zIndex: 1, maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
@@ -620,7 +620,7 @@ const DesignPreview2: React.FC = () => {
               <Sparkles size={32} color="#fff" />
             </div>
           </div>
-          
+
           <h1
             style={{
               fontSize: typography.fontSize['4xl'],
@@ -634,7 +634,7 @@ const DesignPreview2: React.FC = () => {
           >
             Flow Design System 2.0
           </h1>
-          
+
           <p style={{ color: colors.text.secondary, fontSize: typography.fontSize.lg }}>
             Интерактивный preview обновлённых компонентов
           </p>
@@ -899,7 +899,7 @@ const DesignPreview2: React.FC = () => {
               <h2 style={{ fontSize: typography.fontSize['2xl'], marginBottom: spacing.xl, color: colors.text.primary }}>
                 Цветовая палитра
               </h2>
-              
+
               <h3 style={{ fontSize: typography.fontSize.xl, marginBottom: spacing.lg, color: colors.text.secondary }}>
                 Backgrounds
               </h3>
