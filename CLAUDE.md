@@ -1,7 +1,7 @@
 # Flow Calendar — Project Context for Claude
 
 ## What is Flow?
-A productivity calendar app built around circadian rhythms. The day is divided into 4 time blocks (Morning / Afternoon / Evening / Night), dynamically calculated from the user's wake/rest time. Tasks have weights (Quick / Focused / Deep) and can recur. The app supports Recovery Mode, fade-in alarms with ambient sounds, and multilingual UI (EN / RU / ES).
+A productivity calendar app built around circadian rhythms. The day is divided into 4 time blocks (Morning / Afternoon / Evening / Night), dynamically calculated from the user's wake/rest time. Tasks have weights (Quick / Focused / Deep) and can recur. The app supports Recovery Mode, fade-in alarms using synthesized circadian neural drones (Web Audio API), and multilingual UI (EN / RU / ES).
 
 Live: https://flow-nine-xi.vercel.app  
 Repo: https://github.com/denzakh/flow
@@ -15,7 +15,10 @@ Repo: https://github.com/denzakh/flow
 - **Storage**: localStorage (all data is client-side)
 - **Voice**: Web Speech API (SpeechRecognition + SpeechSynthesis)
 - **AI (planned)**: Anthropic API via backend proxy
-
+- **Audio Engine (Web Audio API):** Sound is generated entirely in code using oscillator and filter primitives[cite: 15]. ZERO external audio assets (.mp3, .wav) are used[cite: 15].
+  - **Circadian Drones:** Continuous background layer reflecting the time block (e.g., sine drone with gentle alpha-to-beta motion for Morning, filtered brown noise for Afternoon)[cite: 15].
+  - **UI Interaction:** Synthesized short ticks, clicks, and glides (50-300ms) mapped to task weights[cite: 15]. All sounds must use short fades to avoid clicks and harsh transients[cite: 14].
+  - **Mobile Rules:** Audio context remains strictly muted or suspended until the first explicit user gesture (tap/touchend)[cite: 14].
 ---
 
 ## Architecture
@@ -431,6 +434,11 @@ In dark mode, bubbles become light sources on a dark canvas.
 - Visual notifications setting (for deaf/hard of hearing) → replaces all sound feedback
   with screen flash + persistent visual indicator
   ---
+### Biomechanics (Left-handed Mode)
+- The app relies on a global `isLeftHanded` context.
+- **FAB Positioning:** Mirrored to the bottom-left corner.
+- **Swipe Gestures:** X-axis vectors for delete/move are inverted to match natural wrist extension.
+- **Anti-Occlusion:** Context menus must not open to the right of task cards to prevent palm occlusion.
 
 ## ⚙️ Advanced Capacity Logic (Time-Aware)
 Available capacity reduces proportionally as time passes.
@@ -545,17 +553,19 @@ text input moves to a secondary FAB-triggered bottom sheet.
 Task priority communicated through SHAPE of the bubble:
 - SIZE → weight (Quick=small, Focused=medium, Deep=large)
 - COLOR → weight (Mint/Lemon/Rose)
-- SHAPE → priority (Circle/Rhomb/Star)
+- SHAPE → priority (Circle/Rhomb/"Cookie")
 
 Three independent visual channels — none relies on color alone. ✅ WCAG
 Inspired by M3 MaterialShapes library (Android/Compose).
 
-### Shape → Priority Mapping
-| Priority | Shape         | M3 Reference  | Why                                      |
-|----------|---------------|---------------|------------------------------------------|
-| Low      | Circle        | Circle        | Soft, no edges, unobtrusive              |
-| Medium   | Rounded rhomb | Clover4       | More defined, noticeable                 |
-| High     | Burst / Star  | Burst4/Star6  | Sharp edges = urgency, demands attention |
+
+### Shape → Weight & Priority Mapping (Draft #3)
+Task forms encode weight and physical behavior in Matter.js:
+| Weight  | Shape         | Text? | UI Focus                                 |
+|---------|---------------|-------|------------------------------------------|
+| Quick   | Circle        | NO    | Dark contrast icon strictly centered on pastel background |
+| Focused | Soft Square   | YES   | `rounded-3xl` (squircle)                 |
+| Deep    | "Cookie"      | YES   | Custom organic SVG path with dark contrast outline (`on-container`) |
 
 ### Web Implementation (SVG + Matter.js)
 - SVG clipPath per shape

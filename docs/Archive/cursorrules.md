@@ -12,21 +12,6 @@
 - **Typography:** Strict mapping to M3 typescale (Display, Headline, Title, Body, Label).
 - **State layers:** Every interactive element MUST have enabled / hovered / focused / pressed / disabled states via M3 translucency overlays.
 
-# CORE DIRECTIVE FOR FLOW CALENDAR
-You are building Flow, a circadian-rhythm productivity app. Before writing or modifying ANY component, you MUST silently read and internalize the following architecture documents:
-
-1. `docs/ui-layout-flow.md` - For spacing, hierarchy, and container rules.
-2. `docs/ui-react-aria-flow.md` - For interaction logic, accessibility, and state management.
-3. `CLAUDE.md` - For global project context and M3 token system.
-
-CRITICAL CONSTRAINTS:
-- No inline hex colors or arbitrary values. Use ONLY `tokens.css` and `tailwind.config.ts`.
-- Components MUST separate logic (React Aria hooks) from styling (Tailwind + CSS vars).
-- Do not introduce new CSS files for components.
-- Do not use glassmorphism (backdrop-blur) or non-M3 elevations.
-
-Before outputting code, verify your mental model against the "Проверочные вопросы для ИИ-агента" found in the docs.
-
 ## 3. Empathy & Accessibility (The "Respect" Principle)
 - All interactive targets must be ≥ 48×48px.
 - Use semantic HTML. Accessibility is not an afterthought — it's the core.
