@@ -13,6 +13,16 @@
 - **State layers:** Every interactive element MUST have enabled / hovered / focused / pressed / disabled states via M3 translucency overlays.
 
 # CORE DIRECTIVE FOR FLOW CALENDAR
+# CORE DIRECTIVE FOR FLOW CALENDAR: HYBRID ARCHITECTURE
+You are building Flow, a circadian-rhythm productivity app. We are using a HYBRID UI architecture:
+
+1. STANDARD UI (Modals, Forms, Nav, Settings): Use Material-UI (MUI v5/v6).
+   - CRITICAL: MUI must be strictly themed to consume our CSS variables from `tokens.css` (e.g., `var(--md-sys-color-primary)`). Do not use default MUI colors.
+2. EXPRESSIVE UI (Day Blocks, Task Bubbles, Matter.js canvas): Use Tailwind CSS + React Aria for accessibility.
+   - The 4 circadian blocks and physics-based task bubbles are custom entities and must NOT use MUI wrappers that break DOM physics.
+
+- Do not use glassmorphism.
+- Respect `prefers-reduced-motion` across both MUI and custom components.
 You are building Flow, a circadian-rhythm productivity app. Before writing or modifying ANY component, you MUST silently read and internalize the following architecture documents:
 
 1. `docs/ui-layout-flow.md` - For spacing, hierarchy, and container rules.
@@ -21,7 +31,6 @@ You are building Flow, a circadian-rhythm productivity app. Before writing or mo
 
 CRITICAL CONSTRAINTS:
 - No inline hex colors or arbitrary values. Use ONLY `tokens.css` and `tailwind.config.ts`.
-- Components MUST separate logic (React Aria hooks) from styling (Tailwind + CSS vars).
 - Do not introduce new CSS files for components.
 - Do not use glassmorphism (backdrop-blur) or non-M3 elevations.
 

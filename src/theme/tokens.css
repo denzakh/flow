@@ -1,4 +1,7 @@
+@import "tailwindcss";
+
 /**
+ * Flow Calendar — Material Design 3 Design Tokens
  * Flow Calendar — Material Design 3 Design Tokens
  * Generated from material-theme.json
  * Seed: #7B3FC4
@@ -10,7 +13,6 @@
  * DO NOT hardcode hex values in components — always use these variables.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* ─────────────────────────────────────────
 GLOBAL TYPOGRAPHY & SHAPES (:root)

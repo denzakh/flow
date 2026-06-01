@@ -8,6 +8,7 @@ import {
     ArrowRight,
     UserCircle,
     RotateCcw,
+    RefreshCw,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -73,7 +74,7 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
 
                 <div className='text-center space-y-3'>
                     <div className='w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-white/10'>
-                        <Refresh size={32} className='text-emerald-400' />
+                        <RefreshCw size={32} className='text-emerald-400' />
                     </div>
                     <h2 className='text-4xl font-black text-white tracking-tight leading-none'>
                         {mode === 'login' ? 'Welcome Back' : 'Start Flow'}
@@ -125,7 +126,7 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                     <form onSubmit={handleSubmit} className='space-y-4'>
                         {mode === 'signup' && (
                             <div className='relative group'>
-                                <Person
+                                <User
                                     className='absolute left-5 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-white transition-colors'
                                     size={22}
                                 />
@@ -173,7 +174,7 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
                             className='w-full py-5 bg-[#0a0a0a] text-white rounded-[24px] font-black shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98] mt-4'
                         >
                             {isLoading ? (
-                                <Refresh
+                                <RefreshCw
                                     size={22}
                                     className='animate-spin'
                                 />
@@ -193,25 +194,26 @@ const Auth: React.FC<AuthProps> = ({ onAuth, lang }) => {
 
                 <div className='text-center space-y-6 pt-4'>
                     <button
-                        onClick={() =>
-                            setMode(mode === 'login' ? 'signup' : 'login')
-                        }
-                        className='text-xs font-bold text-white hover:text-white transition-all px-4 py-2'
+                        onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+                        className='w-full py-3 bg-transparent text-white/60 rounded-2xl font-bold hover:text-white transition'
+                        type='button'
                     >
-                        {mode === 'login'
-                            ? "Don't have an account? Sign up"
-                            : 'Already have an account? Log in'}
+                        {mode === 'login' ? "Don't have an account? Create" : 'Already have an account? Sign in'}
                     </button>
-
-                    <div className='h-px bg-white/10 w-1/2 mx-auto' />
 
                     <button
                         onClick={handleGuest}
-                        className='w-full py-2 text-[10px] font-black uppercase tracking-[0.25em] text-white hover:text-white transition-all'
+                        className='w-full py-3 bg-white/5 text-white rounded-2xl font-bold hover:bg-white/10 transition'
+                        type='button'
                     >
                         Continue as Guest
                     </button>
+
+                    <p className='text-white/30 text-xs'>
+                        By continuing, you agree to the Terms and Privacy Policy.
+                    </p>
                 </div>
+
             </div>
         </div>
     );

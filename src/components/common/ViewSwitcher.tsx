@@ -1,4 +1,6 @@
 import React from 'react';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { Calendar, CalendarDays, CalendarRange, CalendarClock } from 'lucide-react';
 import { TRANSLATIONS } from '../../constants.tsx';
 
@@ -10,6 +12,8 @@ interface ViewSwitcherProps {
   language: keyof typeof TRANSLATIONS;
 }
 
+const VIEW_MODES: ViewMode[] = ['day', 'week', 'month', 'year'];
+
 const VIEW_ICONS: Record<ViewMode, React.FC<{ size?: number; strokeWidth?: number }>> = {
   day: Calendar,
   week: CalendarDays,
@@ -20,52 +24,73 @@ const VIEW_ICONS: Record<ViewMode, React.FC<{ size?: number; strokeWidth?: numbe
 const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ viewMode, onModeChange, language }) => {
   const t = TRANSLATIONS[language];
 
+  const handleChange = (_event: React.MouseEvent<HTMLElement>, newMode: ViewMode | null) => {
+    if (newMode !== null) {
+      onModeChange(newMode);
+    }
+  };
+
   return (
-    <nav
-      className="flex justify-between items-center px-2 py-2"
-      style={{
-        height: '80px',
-        background: 'var(--md-sys-color-surface-container)',
-        borderRadius: 'var(--md-sys-shape-corner-large) var(--md-sys-shape-corner-large) 0 0',
-        boxShadow: 'var(--md-sys-elevation-2)',
-      }}
+    <ToggleButtonGroup
+      value={viewMode}
+      exclusive
+      onChange={handleChange}
       aria-label="View mode"
+      sx={{
+        display: 'flex',
+        backgroundColor: 'transparent',
+        borderRadius: '9999px', // ← Pill shape
+        border: '1px solid var(--md-sys-color-outline)',
+        overflow: 'hidden',
+        '& .MuiToggleButtonGroup-grouped': {
+          border: 'none',
+          borderRadius: '0 !important',
+          margin: 0,
+          flex: 1,
+          minHeight: '40px',
+          padding: '0 16px',
+          gap: '6px',
+          color: 'var(--md-sys-color-on-surface)',
+          textTransform: 'none',
+          fontSize: '14px',
+          fontWeight: 500,
+          backgroundColor: 'transparent',
+          '&:not(:last-of-type)': {
+            borderRight: '1px solid var(--md-sys-color-outline)',
+          },
+          '&:first-of-type': {
+            borderRadius: '9999px 0 0 9999px !important', // ← Левый край pill
+          },
+          '&:last-of-type': {
+            borderRadius: '0 9999px 9999px 0 !important', // ← Правый край pill
+          },
+          '&.Mui-selected': {
+            backgroundColor: 'var(--md-sys-color-secondary-container)',
+            color: 'var(--md-sys-color-on-secondary-container)',
+          },
+          '&:hover': {
+            backgroundColor: 'var(--md-sys-color-surface-container)',
+          },
+          '&.Mui-selected:hover': {
+            backgroundColor: 'var(--md-sys-color-secondary-container)',
+          },
+        },
+      }}
     >
-      {(['day', 'week', 'month', 'year'] as ViewMode[]).map((mode) => {
+      {VIEW_MODES.map((mode) => {
         const Icon = VIEW_ICONS[mode];
-        const isActive = viewMode === mode;
         return (
-          <button
+          <ToggleButton
             key={mode}
-            type="button"
-            onClick={() => onModeChange(mode)}
-            className="md-state-layer md-focus-ring relative flex flex-col items-center justify-center gap-1 flex-1 transition-colors duration-md-short4 ease-md-standard"
-            style={{
-              minHeight: '48px',
-              minWidth: '48px',
-              color: isActive
-                ? 'var(--md-sys-color-on-secondary-container)'
-                : 'var(--md-sys-color-on-surface-variant)',
-            }}
+            value={mode}
+            aria-label={t[mode]}
           >
-            {isActive && (
-              <span
-                className="absolute inset-x-auto"
-                style={{
-                  width: '64px',
-                  height: '32px',
-                  borderRadius: 'var(--md-sys-shape-corner-full)',
-                  background: 'var(--md-sys-color-secondary-container)',
-                  zIndex: 0,
-                }}
-              />
-            )}
-            <Icon size={24} className="relative z-[1]" />
-            <span className="md-typescale-label-medium relative z-[1]">{t[mode]}</span>
-          </button>
+            <Icon size={18} />
+            <span>{t[mode]}</span>
+          </ToggleButton>
         );
       })}
-    </nav>
+    </ToggleButtonGroup>
   );
 };
 
