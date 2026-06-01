@@ -36,6 +36,52 @@ CRITICAL CONSTRAINTS:
 
 Before outputting code, verify your mental model against the "Проверочные вопросы для ИИ-агента" found in the docs.
 
+## Tech Stack
+- React 19 + TypeScript + Vite
+- MUI v5 (standard components)
+- Tailwind CSS v4 (utility classes)
+- React Aria (custom components only)
+- CSS variables from tokens.css (single source of truth)
+
+## MUI + Tailwind: Responsibility Boundaries
+
+| What | Where | How |
+|------|-------|-----|
+| Structure, layout | MUI sx | flex, grid, position only |
+| Colors | CSS variables | var(--md-sys-color-*) |
+| Spacing | Tailwind | className="p-4 mt-2" |
+| Typography | MUI theme | variant="body1", "h6" |
+| States | MUI sx | selected, hover, disabled |
+| Shapes (pill, squircle) | MUI sx | borderRadius: '9999px' |
+
+## FORBIDDEN:
+- Hardcoded HEX in sx
+- sx for margin/padding (use Tailwind classes instead)
+- Token duplication (don't define colors in sx if they exist in theme)
+- @tailwind directives (Tailwind v4 uses @import "tailwindcss")
+- Deleting or modifying tokens.css without approval
+- Inline styles in components
+- Using @mui/icons-material (we use lucide-react)
+## Imports:
+- MUI: import Button from '@mui/material/Button'
+- Icons: import { IconName } from 'lucide-react'
+- NEVER: import { Button } from '@mui/material' (deep imports required)
+
+## Backup:
+ALWAYS run .agents/backup.sh pre-edit <file> before editing
+## Theme:
+- MUI theme uses CSS variables (var(--md-sys-color-*))
+- Tailwind uses same CSS variables
+- Both mutate together when .dark/.light class toggles on <html>
+- Flow custom colors: var(--flow-block-*), var(--flow-weight-*)
+
+## Component Rules:
+- Standard UI → MUI (Button, Dialog, TextField, Tabs, BottomNavigation, etc.)
+- Custom physics/bubbles → React + CSS variables (NOT MUI)
+- 4 TimeBlocks, Matter.js bubbles → Custom components
+- ViewSwitcher → MUI ToggleButtonGroup (pill shape, outline border)
+EOF
+
 ## 3. Empathy & Accessibility (The "Respect" Principle)
 - All interactive targets must be ≥ 48×48px.
 - Use semantic HTML. Accessibility is not an afterthought — it's the core.

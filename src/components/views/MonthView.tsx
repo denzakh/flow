@@ -22,7 +22,7 @@ const MonthView: React.FC<MonthViewProps> = ({ viewDate, tasks, todayStr, onDayC
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-7 gap-1">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
           <div key={d} className="md-typescale-label-small text-center py-2 flow-text-muted">
             {d}
           </div>

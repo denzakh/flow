@@ -1,48 +1,17 @@
 import { createTheme } from '@mui/material/styles';
-import themeSpec from './theme-master-spec.json';
 
-const { schemes, coreColors } = themeSpec;
-const light = schemes.light;
-const dark = schemes.dark;
-
-// Flow custom colors from extendedColors
-const getExtendedColor = (name: string) => {
-    const color = themeSpec.extendedColors.find(c => c.name === name);
-    return color?.color || '#000000';
-};
-
+// Flow custom colors — доступны через CSS-переменные для кастомных компонентов
 export const flowColors = {
     block: {
-        morning: {
-            light: getExtendedColor('block-morning-light'),
-            dark: getExtendedColor('block-morning-dark'),
-        },
-        afternoon: {
-            light: getExtendedColor('block-afternoon-light'),
-            dark: getExtendedColor('block-afternoon-dark'),
-        },
-        evening: {
-            light: getExtendedColor('block-evening-light'),
-            dark: getExtendedColor('block-evening-dark'),
-        },
-        night: {
-            light: getExtendedColor('block-night-light'),
-            dark: getExtendedColor('block-night-dark'),
-        },
+        morning: 'var(--flow-block-morning)',
+        afternoon: 'var(--flow-block-afternoon)',
+        evening: 'var(--flow-block-evening)',
+        night: 'var(--flow-block-night)',
     },
     weight: {
-        quick: {
-            light: getExtendedColor('weight-quick-light'),
-            dark: getExtendedColor('weight-quick-dark'),
-        },
-        focused: {
-            light: getExtendedColor('weight-focused-light'),
-            dark: getExtendedColor('weight-focused-dark'),
-        },
-        deep: {
-            light: getExtendedColor('weight-deep-light'),
-            dark: getExtendedColor('weight-deep-dark'),
-        },
+        quick: 'var(--flow-weight-quick-color)',
+        focused: 'var(--flow-weight-focused-color)',
+        deep: 'var(--flow-weight-deep-color)',
     },
 };
 
@@ -50,30 +19,30 @@ export const muiTheme = createTheme({
     palette: {
         mode: 'light',
         primary: {
-            main: light.primary,
-            contrastText: light.onPrimary,
-            light: light.primaryContainer,
-            dark: coreColors.primary,
+            main: 'var(--md-sys-color-primary)',
+            contrastText: 'var(--md-sys-color-on-primary)',
+            light: 'var(--md-sys-color-primary-container)',
+            dark: 'var(--md-sys-color-primary)',
         },
         secondary: {
-            main: light.secondary,
-            contrastText: light.onSecondary,
-            light: light.secondaryContainer,
+            main: 'var(--md-sys-color-secondary)',
+            contrastText: 'var(--md-sys-color-on-secondary)',
+            light: 'var(--md-sys-color-secondary-container)',
         },
         error: {
-            main: light.error,
-            contrastText: light.onError,
-            light: light.errorContainer,
+            main: 'var(--md-sys-color-error)',
+            contrastText: 'var(--md-sys-color-on-error)',
+            light: 'var(--md-sys-color-error-container)',
         },
         background: {
-            default: light.background,
-            paper: light.surface,
+            default: 'var(--md-sys-color-background)',
+            paper: 'var(--md-sys-color-surface)',
         },
         text: {
-            primary: light.onBackground,
-            secondary: light.onSurfaceVariant,
+            primary: 'var(--md-sys-color-on-background)',
+            secondary: 'var(--md-sys-color-on-surface-variant)',
         },
-        divider: light.outlineVariant,
+        divider: 'var(--md-sys-color-outline-variant)',
     },
     typography: {
         fontFamily: '"Inter", system-ui, sans-serif',
@@ -98,7 +67,7 @@ export const muiTheme = createTheme({
         MuiButton: {
             styleOverrides: {
                 root: {
-                    borderRadius: '9999px', // M3 full rounded
+                    borderRadius: '9999px',
                     textTransform: 'none',
                 },
             },
@@ -106,50 +75,18 @@ export const muiTheme = createTheme({
         MuiFab: {
             styleOverrides: {
                 root: {
-                    borderRadius: '16px', // M3 large
+                    borderRadius: '16px',
                 },
             },
         },
-        MuiCard: {
+        MuiToggleButton: {
             styleOverrides: {
                 root: {
-                    borderRadius: '16px',
-                    boxShadow: '0px 1px 3px rgba(0,0,0,0.12)',
+                    textTransform: 'none',
                 },
             },
         },
     },
 });
 
-// Dark theme
-export const muiDarkTheme = createTheme({
-    ...muiTheme,
-    palette: {
-        mode: 'dark',
-        primary: {
-            main: dark.primary,
-            contrastText: dark.onPrimary,
-            light: dark.primaryContainer,
-            dark: coreColors.primary,
-        },
-        secondary: {
-            main: dark.secondary,
-            contrastText: dark.onSecondary,
-            light: dark.secondaryContainer,
-        },
-        error: {
-            main: dark.error,
-            contrastText: dark.onError,
-            light: dark.errorContainer,
-        },
-        background: {
-            default: dark.background,
-            paper: dark.surface,
-        },
-        text: {
-            primary: dark.onBackground,
-            secondary: dark.onSurfaceVariant,
-        },
-        divider: dark.outlineVariant,
-    },
-});
+export default muiTheme;
