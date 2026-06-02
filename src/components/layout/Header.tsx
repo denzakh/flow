@@ -1,35 +1,26 @@
-import React from 'react';
-import FAB from '../ui/FAB';
-import { Mic, Bell, Settings } from 'lucide-react';
-import { UserSettings } from '../../types.ts';
+import React, { useRef } from 'react';
+import { useButton, useHover } from 'react-aria';
+import { LayoutGrid, GalleryVertical, Moon, Sun } from 'lucide-react';
 import { TRANSLATIONS } from '../../constants.tsx';
 
 interface HeaderProps {
   currentTime: Date;
   user: { name: string } | null;
-  settings: UserSettings;
-  alarmEnabled: boolean;
-  onSettingsClick: () => void;
-  onAlarmClick: () => void;
   language: keyof typeof TRANSLATIONS;
-  isVoiceListening?: boolean;
-  isVoiceSupported?: boolean;
-  onVoiceClick?: () => void;
-  isVoiceEnabled?: boolean;
+  isDarkTheme: boolean;
+  isListView: boolean;
+  onToggleTheme: () => void;
+  onToggleView: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
   currentTime,
   user,
-  settings,
-  alarmEnabled,
-  onSettingsClick,
-  onAlarmClick,
   language,
-  isVoiceListening = false,
-  isVoiceSupported = false,
-  onVoiceClick,
-  isVoiceEnabled = false,
+  isDarkTheme,
+  isListView,
+  onToggleTheme,
+  onToggleView,
 }) => {
   const t = TRANSLATIONS[language];
 
@@ -41,80 +32,136 @@ const Header: React.FC<HeaderProps> = ({
     return t.goodNight;
   };
 
-  const formattedDate = currentTime.toLocaleDateString(language, {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'short',
-  });
-
   return (
     <header
-      className="mb-6 p-4"
+      className="flex items-start self-stretch"
       style={{
-        background: 'var(--md-sys-color-surface-container)',
-        borderRadius: 'var(--md-sys-shape-corner-large)',
-        boxShadow: 'var(--md-sys-elevation-1)',
+        paddingLeft: '16px',
+        paddingRight: '16px',
+        paddingBottom: '16px',
+        gap: '10px',
       }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
-          <span
-            className="md-typescale-label-medium mb-1"
-            style={{ color: 'var(--md-sys-color-on-surface-variant)' }}
-          >
-            {formattedDate}
-          </span>
-          <h1 className="md-typescale-headline-medium" style={{ color: 'var(--md-sys-color-on-surface)' }}>
-            {getGreeting()}, {user?.name.split(' ')[0]}
-          </h1>
-        </div>
-        <div className="flex gap-2">
-          {isVoiceSupported && onVoiceClick && isVoiceEnabled && (
-            <FAB
-              size="small"
-              icon={<Mic size={20} />}
-              onPress={onVoiceClick}
-              isListening={isVoiceListening}
-              aria-label={isVoiceListening ? 'Stop listening' : 'Start voice control'}
-              color="surface"
-            />
-          )}
-          <button
-            type="button"
-            onClick={onAlarmClick}
-            className={`md-state-layer md-focus-ring flex items-center justify-center w-12 h-12 ${alarmEnabled ? 'alarm-active' : ''
-              }`}
-            style={{
-              borderRadius: 'var(--md-sys-shape-corner-full)',
-              background: alarmEnabled
-                ? 'var(--md-sys-color-primary-container)'
-                : 'var(--md-sys-color-surface-container-high)',
-              color: alarmEnabled
-                ? 'var(--md-sys-color-on-primary-container)'
-                : 'var(--md-sys-color-on-surface)',
-              minWidth: '48px',
-              minHeight: '48px',
-            }}
-          >
-            <Bell size={22} className={alarmEnabled ? 'animate-swing' : ''} />
-          </button>
-          <button
-            type="button"
-            onClick={onSettingsClick}
-            className="md-state-layer md-focus-ring flex items-center justify-center w-12 h-12"
-            style={{
-              borderRadius: 'var(--md-sys-shape-corner-full)',
-              background: 'var(--md-sys-color-surface-container-high)',
-              color: 'var(--md-sys-color-on-surface)',
-              minWidth: '48px',
-              minHeight: '48px',
-            }}
-          >
-            <Settings size={22} />
-          </button>
-        </div>
+      {/* Текстовая часть */}
+      <div className="flex flex-col flex-1">
+        <h1
+          className="m-0"
+          style={{
+            fontFamily: 'Inter, system-ui, sans-serif',
+            fontSize: '33px',
+            lineHeight: '40px',
+            fontWeight: 600,
+            letterSpacing: '-0.4px',
+            color: 'var(--md-sys-color-primary)',
+          }}
+        >
+          {getGreeting()}, {user?.name.split(' ')[0]}
+        </h1>
+      </div>
+
+      {/* Кнопки переключения */}
+      <div className="flex gap-2">
+        {/* Toggle View (Сетка / Список) */}
+        <ToggleIconButton
+          isSelected={isListView}
+          onPress={onToggleView}
+          ariaLabel={isListView ? 'Switch to grid view' : 'Switch to list view'}
+          selectedIcon={<GalleryVertical size={24} />}
+          unselectedIcon={<LayoutGrid size={24} />}
+        />
+
+        {/* Toggle Theme (Темная / Светлая) */}
+        <ToggleIconButton
+          isSelected={isDarkTheme}
+          onPress={onToggleTheme}
+          ariaLabel={isDarkTheme ? 'Switch to light theme' : 'Switch to dark theme'}
+          selectedIcon={<Sun size={24} />}
+          unselectedIcon={<Moon size={24} />}
+        />
       </div>
     </header>
+  );
+};
+
+// Компонент Toggle Icon Button с состояниями
+interface ToggleIconButtonProps {
+  isSelected: boolean;
+  onPress: () => void;
+  ariaLabel: string;
+  selectedIcon: React.ReactNode;
+  unselectedIcon: React.ReactNode;
+}
+
+const ToggleIconButton: React.FC<ToggleIconButtonProps> = ({
+  isSelected,
+  onPress,
+  ariaLabel,
+  selectedIcon,
+  unselectedIcon,
+}) => {
+  const ref = useRef<HTMLButtonElement>(null);
+  const { buttonProps, isPressed } = useButton({ onPress }, ref);
+  const { hoverProps, isHovered } = useHover({});
+
+  // Объединяем пропсы
+  const combinedProps = {
+    ...buttonProps,
+    ...hoverProps,
+    ref,
+  };
+
+  // Определяем форму заливки
+  const getHoverBorderRadius = () => {
+    if (isPressed) return '12px'; // Всегда квадратная при нажатии
+    if (isSelected) return '9999px'; // Круглая когда selected
+    return '12px'; // Квадратная когда unselected
+  };
+
+  return (
+    <button
+      {...combinedProps}
+      aria-label={ariaLabel}
+      aria-pressed={isSelected}
+      className="relative flex items-center justify-center overflow-hidden"
+      style={{
+        width: '48px',
+        height: '48px',
+        borderRadius: '12px',
+        color: 'var(--md-sys-color-on-surface-variant)',
+        transition: 'background-color 150ms ease',
+      }}
+    >
+      {/* СЛОЙ 1: Selected background (постоянный, самый нижний) */}
+      {isSelected && (
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundColor: 'var(--md-sys-color-primary)',
+            opacity: 0.08,
+            zIndex: 0,
+          }}
+        />
+      )}
+
+      {/* СЛОЙ 2: Hover overlay (средний) */}
+      {isHovered && (
+        <div
+          className="absolute inset-0"
+          style={{
+            borderRadius: getHoverBorderRadius(),
+            backgroundColor: 'var(--md-sys-color-on-surface-variant)',
+            opacity: isPressed ? 0.12 : 0.08, // Темнее при нажатии
+            transition: 'border-radius 150ms ease, opacity 150ms ease',
+            zIndex: 10,
+          }}
+        />
+      )}
+
+      {/* СЛОЙ 3: Иконка (верхний) */}
+      <div className="relative z-20" style={{ width: '24px', height: '24px' }}>
+        {isSelected ? selectedIcon : unselectedIcon}
+      </div>
+    </button>
   );
 };
 

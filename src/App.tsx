@@ -83,6 +83,8 @@ const App: React.FC = () => {
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const [isListView, setIsListView] = useState(false);
 
   // Voice control state
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(() => {
@@ -796,15 +798,11 @@ const App: React.FC = () => {
       <Header
         currentTime={currentTime}
         user={user}
-        settings={settings}
-        alarmEnabled={settings.alarm.enabled}
-        onSettingsClick={() => setShowSettings(true)}
-        onAlarmClick={() => setShowAlarmMenu(true)}
         language={settings.language}
-        isVoiceListening={isVoiceListening}
-        isVoiceSupported={voiceService?.isRecognitionSupported() || false}
-        onVoiceClick={toggleVoiceListening}
-        isVoiceEnabled={voiceSettings.enabled}
+        isDarkTheme={isDarkTheme}
+        isListView={isListView}
+        onToggleTheme={() => setIsDarkTheme(prev => !prev)}
+        onToggleView={() => setIsListView(prev => !prev)}
       />
 
       <VoiceFeedback
@@ -819,8 +817,8 @@ const App: React.FC = () => {
 
       {capacityNotification && (
         <div className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top duration-300 ${capacityNotification.type === 'transferred'
-            ? 'bg-emerald-500/90 text-white'
-            : 'bg-amber-500/90 text-white'
+          ? 'bg-emerald-500/90 text-white'
+          : 'bg-amber-500/90 text-white'
           } backdrop-blur-sm`}>
           <div className="flex items-center gap-3">
             <span className="text-sm font-bold">
