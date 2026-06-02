@@ -24,6 +24,7 @@ import TaskManagerPanel from './components/TaskManagerPanel.tsx';
 import RecoveryBanner from './components/blocks/RecoveryBanner.tsx';
 import FocusPoint from './components/blocks/FocusPoint.tsx';
 import VoiceSettingsModal from './components/voice/VoiceSettingsModal.tsx';
+import FlowToolbar from './components/layout/FlowToolbar';
 
 type ViewMode = 'day' | 'week' | 'month' | 'year';
 
@@ -817,11 +818,10 @@ const App: React.FC = () => {
       />
 
       {capacityNotification && (
-        <div className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top duration-300 ${
-          capacityNotification.type === 'transferred'
+        <div className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top duration-300 ${capacityNotification.type === 'transferred'
             ? 'bg-emerald-500/90 text-white'
             : 'bg-amber-500/90 text-white'
-        } backdrop-blur-sm`}>
+          } backdrop-blur-sm`}>
           <div className="flex items-center gap-3">
             <span className="text-sm font-bold">
               {capacityNotification.message}
@@ -832,7 +832,7 @@ const App: React.FC = () => {
 
       {showVoiceConfirmation && pendingVoiceCommand && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div 
+          <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             style={{
               background: 'var(--md-sys-color-surface-container)',
@@ -1013,6 +1013,15 @@ const App: React.FC = () => {
           onTempAlarmChange={setTempAlarm}
         />
       )}
+
+      <FlowToolbar
+        onSettingsClick={() => setShowSettings(true)}
+        onIdeasClick={() => console.log('Ideas')}
+        onVoiceClick={toggleVoiceListening}
+        onAddTaskClick={() => setIsInputFocused(true)}
+        onSmartPlannerClick={() => console.log('Smart Planner')}
+        isVoiceListening={isVoiceListening}
+      />
     </div>
   );
 };

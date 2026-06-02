@@ -299,3 +299,22 @@ Use these where applicable — do not substitute with plain buttons/rows:
 - Error states: never red-only — add icon (error_outline) + supporting text
 - Loading states: use M3 LinearProgressIndicator or CircularProgressIndicator,
   never custom spinners
+## Component Specifications: FlowToolbar
+**Location:** `src/components/layout/FlowToolbar.tsx`
+**Purpose:** Bottom navigation bar with scroll-hide behavior and strict M3 styling.
+
+### Visual Rules (STRICT):
+1. **Container:** Full width, NO side margins, NO container border-radius. Background MUST be `var(--md-sys-color-surface-container)`.
+2. **Monolithic Background:** Gesture bar and button area share the SAME background. No transparent gaps.
+3. **Gesture Bar:** At the VERY BOTTOM. Color: `var(--md-sys-color-on-surface)`. Width: `w-32`, Height: `h-1`, rounded-full, with `pb-4`.
+4. **Icon Buttons:** `w-12 h-12`, `rounded-full`, color `on-surface-variant`, `scale(0.96)` on press.
+5. **Central Voice Button:** MUI `Button` (`variant="contained"`), `borderRadius: '16px'`, `56x56px`, `primary` bg, `on-primary` icon, elevation-2.
+
+### Behavior Rules:
+- Scroll Down (>50px): `translate-y-full`
+- Scroll Up: `translate-y-0`
+- Transition: `duration-300 ease-out`
+
+### AI FORBIDDEN Actions:
+- ❌ Do NOT add `mx-4` or `rounded-2xl` to the main container.
+- ❌ Do NOT break the monolithic `surface-container` background.
