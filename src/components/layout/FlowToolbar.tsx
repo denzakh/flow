@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useButton } from 'react-aria';
+import React, { useState, useEffect } from 'react';
+import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import { Settings, Lightbulb, Mic, Plus, Brain } from 'lucide-react';
 
@@ -45,7 +45,6 @@ export const FlowToolbar: React.FC<FlowToolbarProps> = ({
                 }`}
             style={{
                 zIndex: 100,
-                // Монолитный фон для всего блока (и toolbar, и область под gesture bar)
                 backgroundColor: 'var(--md-sys-color-surface-container)',
                 boxShadow: 'var(--md-sys-elevation-2)',
             }}
@@ -53,12 +52,30 @@ export const FlowToolbar: React.FC<FlowToolbarProps> = ({
             {/* Toolbar content */}
             <div className="flex items-center justify-around px-4 py-3">
                 {/* Settings */}
-                <IconButton onPress={onSettingsClick} ariaLabel="Settings">
+                <IconButton
+                    onClick={onSettingsClick}
+                    aria-label="Settings"
+                    sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '12px',
+                        color: 'var(--md-sys-color-on-surface-variant)',
+                    }}
+                >
                     <Settings size={24} />
                 </IconButton>
 
                 {/* Ideas */}
-                <IconButton onPress={onIdeasClick} ariaLabel="Ideas">
+                <IconButton
+                    onClick={onIdeasClick}
+                    aria-label="Ideas"
+                    sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '12px',
+                        color: 'var(--md-sys-color-on-surface-variant)',
+                    }}
+                >
                     <Lightbulb size={24} />
                 </IconButton>
 
@@ -68,7 +85,7 @@ export const FlowToolbar: React.FC<FlowToolbarProps> = ({
                     onClick={onVoiceClick}
                     data-listening={isVoiceListening}
                     sx={{
-                        borderRadius: '16px', // Скругленный квадрат по канонам M3
+                        borderRadius: '16px',
                         minWidth: '56px',
                         height: '56px',
                         padding: 0,
@@ -79,26 +96,41 @@ export const FlowToolbar: React.FC<FlowToolbarProps> = ({
                             backgroundColor: 'var(--md-sys-color-primary)',
                             boxShadow: 'var(--md-sys-elevation-3)',
                         },
-                        '&:active': {
-                            transform: 'scale(0.96)',
-                        },
                     }}
                 >
                     <Mic size={24} />
                 </Button>
 
                 {/* Add Task */}
-                <IconButton onPress={onAddTaskClick} ariaLabel="Add task">
+                <IconButton
+                    onClick={onAddTaskClick}
+                    aria-label="Add task"
+                    sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '12px',
+                        color: 'var(--md-sys-color-on-surface-variant)',
+                    }}
+                >
                     <Plus size={24} />
                 </IconButton>
 
                 {/* Smart Day Planner */}
-                <IconButton onPress={onSmartPlannerClick} ariaLabel="Smart Day Planner">
+                <IconButton
+                    onClick={onSmartPlannerClick}
+                    aria-label="Smart Day Planner"
+                    sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '12px',
+                        color: 'var(--md-sys-color-on-surface-variant)',
+                    }}
+                >
                     <Brain size={24} />
                 </IconButton>
             </div>
 
-            {/* Gesture bar — простая полоска цветом on-surface на фоне surface-container */}
+            {/* Gesture bar */}
             <div className="flex justify-center pb-4 pt-1">
                 <div
                     className="h-1 w-32 rounded-full"
@@ -106,33 +138,6 @@ export const FlowToolbar: React.FC<FlowToolbarProps> = ({
                 />
             </div>
         </div>
-    );
-};
-
-// Icon Button (not tonal)
-const IconButton: React.FC<{
-    onPress: () => void;
-    ariaLabel: string;
-    children: React.ReactNode;
-}> = ({ onPress, ariaLabel, children }) => {
-    const ref = useRef<HTMLButtonElement>(null);
-    const { buttonProps, isPressed } = useButton({ onPress }, ref);
-
-    return (
-        <button
-            {...buttonProps}
-            ref={ref}
-            aria-label={ariaLabel}
-            data-pressed={isPressed}
-            className="md-state-layer w-12 h-12 flex items-center justify-center rounded-full"
-            style={{
-                color: 'var(--md-sys-color-on-surface-variant)',
-                transform: isPressed ? 'scale(0.96)' : 'scale(1)',
-                transition: 'transform 150ms ease',
-            }}
-        >
-            {children}
-        </button>
     );
 };
 
