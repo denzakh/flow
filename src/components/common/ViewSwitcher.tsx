@@ -1,7 +1,7 @@
 import React from 'react';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import { Calendar, CalendarDays, CalendarRange, CalendarClock } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { TRANSLATIONS } from '../../constants.tsx';
 
 type ViewMode = 'day' | 'week' | 'month' | 'year';
@@ -14,12 +14,6 @@ interface ViewSwitcherProps {
 
 const VIEW_MODES: ViewMode[] = ['day', 'week', 'month', 'year'];
 
-const VIEW_ICONS: Record<ViewMode, React.FC<{ size?: number; strokeWidth?: number }>> = {
-  day: Calendar,
-  week: CalendarDays,
-  month: CalendarRange,
-  year: CalendarClock,
-};
 
 const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ viewMode, onModeChange, language }) => {
   const t = TRANSLATIONS[language];
@@ -77,19 +71,15 @@ const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ viewMode, onModeChange, lan
         },
       }}
     >
-      {VIEW_MODES.map((mode) => {
-        const Icon = VIEW_ICONS[mode];
-        return (
-          <ToggleButton
-            key={mode}
-            value={mode}
-            aria-label={t[mode]}
-          >
-            <Icon size={18} />
-            <span>{t[mode]}</span>
-          </ToggleButton>
-        );
-      })}
+      {VIEW_MODES.map((mode) => (
+        <ToggleButton
+          key={mode}
+          value={mode}
+        >
+          {mode === viewMode && <Check size={18} />}
+          <span>{t[mode]}</span>
+        </ToggleButton>
+      ))}
     </ToggleButtonGroup>
   );
 };
