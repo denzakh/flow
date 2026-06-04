@@ -575,7 +575,7 @@ Task forms encode weight and physical behavior in Matter.js:
 ### Physics Bonus
 - Circle (Low) — rolls smoothly, settles easily
 - Rhomb (Medium) — tips and settles on corner
-- Star (High) — bounces unpredictably, hard to stack → physical metaphor for urgency
+- 12-sided Cookie (High) — bounces unpredictably, hard to stack → physical metaphor for urgency
 
 ### Accessibility
 - prefers-reduced-motion → all shapes become circles
