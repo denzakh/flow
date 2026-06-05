@@ -85,6 +85,7 @@ const App: React.FC = () => {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [isListView, setIsListView] = useState(false);
+  const [isTaskSheetOpen, setIsTaskSheetOpen] = useState(false);
 
   // Voice control state
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(() => {
@@ -889,16 +890,17 @@ const App: React.FC = () => {
             tasks={tasks}
             collapsedBlocks={collapsedBlocks}
             language={settings.language}
-            onTaskAdd={(title, periods, recurrence, weight) => {
-              console.log('📝 FocusPoint adding task:', title, 'periods:', periods, 'weight:', weight);
+            isTaskSheetOpen={isTaskSheetOpen}
+            onCloseTaskSheet={() => setIsTaskSheetOpen(false)}
+            onTaskAdd={(newTaskData) => {
+              console.log('📝 TaskSheet adding task:', newTaskData);
+              const targetDate = newTaskData.dueDate || todayStr;
+              const adjustment = adjustTaskPeriods(tasks, newTaskData.periods, targetDate, newTaskData.weight, activePeriodId, currentTime);
 
-              // Check capacity and adjust periods if needed
-              const adjustment = adjustTaskPeriods(tasks, periods, todayStr, weight, activePeriodId, currentTime);
+              console.log('🔄 TaskSheet adjustment:', adjustment);
 
-              console.log('🔄 FocusPoint adjustment:', adjustment);
-
-              let finalPeriods = periods;
-              let finalDate = todayStr;
+              let finalPeriods = newTaskData.periods;
+              let finalDate = targetDate;
 
               if (adjustment.transferred) {
                 finalPeriods = adjustment.periods;
@@ -918,17 +920,17 @@ const App: React.FC = () => {
                   const periodName = finalPeriods[0] ? periodNames[finalPeriods[0]] : '';
                   const dateStr = tomorrow.toLocaleDateString(settings.language === 'ru' ? 'ru-RU' : settings.language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short' });
                   message = t.taskTransferredTomorrow
-                    .replace('{title}', title)
+                    .replace('{title}', newTaskData.title)
                     .replace('{period}', periodName)
                     .replace('{date}', dateStr);
                 } else {
                   const periodName = finalPeriods[0] ? periodNames[finalPeriods[0]] : '';
                   message = t.taskTransferred
-                    .replace('{title}', title)
+                    .replace('{title}', newTaskData.title)
                     .replace('{period}', periodName) + ' ' + t.blockOverflow;
                 }
 
-                console.log('✅ FocusPoint task transferred:', message);
+                console.log('✅ TaskSheet task transferred:', message);
 
                 setCapacityNotification({
                   type: 'transferred',
@@ -936,7 +938,7 @@ const App: React.FC = () => {
                 });
                 setTimeout(() => setCapacityNotification(null), 5000);
               } else if (adjustment.allFull) {
-                console.log('⚠️ FocusPoint: All periods full');
+                console.log('⚠️ TaskSheet: All periods full');
                 setCapacityNotification({
                   type: 'full',
                   message: t.allBlocksFull
@@ -944,22 +946,17 @@ const App: React.FC = () => {
                 setTimeout(() => setCapacityNotification(null), 5000);
               }
 
-              const baseTask: Omit<Task, 'id' | 'periods' | 'dueDate'> = {
-                title,
+              const taskToAdd: Task = {
+                ...newTaskData,
+                id: Math.random().toString(36).substr(2, 9),
                 completed: false,
                 createdAt: Date.now(),
-                priority: 'medium',
-                weight,
-                recurrence
+                periods: finalPeriods,
+                dueDate: finalDate
               };
 
-              console.log('✨ FocusPoint creating task:', { ...baseTask, periods: finalPeriods, dueDate: finalDate });
-
-              const newTask: Task = { ...baseTask, id: Math.random().toString(36).substr(2, 9), periods: finalPeriods, dueDate: finalDate };
-              setTasks([...tasks, newTask]);
-              setNewTaskTitle('');
-              setSelectedRecurrence('none');
-              if (activePeriodId !== TimePeriod.NIGHT) setSelectedPeriods([activePeriodId]);
+              setTasks([...tasks, taskToAdd]);
+              setIsTaskSheetOpen(false);
             }}
             onQuickAdd={handleQuickAdd}
             onToggle={toggleTask}
@@ -1016,7 +1013,7 @@ const App: React.FC = () => {
         onSettingsClick={() => setShowSettings(true)}
         onIdeasClick={() => console.log('Ideas')}
         onVoiceClick={toggleVoiceListening}
-        onAddTaskClick={() => setIsInputFocused(true)}
+        onAddTaskClick={() => setIsTaskSheetOpen(true)}
         onSmartPlannerClick={() => console.log('Smart Planner')}
         isVoiceListening={isVoiceListening}
       />
