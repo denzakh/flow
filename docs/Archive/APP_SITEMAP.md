@@ -517,9 +517,9 @@ enum TimePeriod {
 
 // Вес задачи (effort)
 enum TaskWeight {
-  QUICK = 'quick',      // 1 point, <15 мин
-  FOCUSED = 'focused',  // 3 points, ~1 час
-  DEEP = 'deep'         // 6 points, 2+ часа
+  quick = 'quick',      // 1 point, <15 мин
+  focused = 'focused',  // 3 points, ~1 час
+  deep = 'deep'         // 6 points, 2+ часа
 }
 
 // Приоритет

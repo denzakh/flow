@@ -86,7 +86,7 @@ export const optimizeTasks = (
 export const suggestWeight = (title: string): TaskWeight => {
   const normalizedTitle = title.toLowerCase().trim();
 
-  // Ключевые слова для QUICK задач (< 15 мин)
+  // Ключевые слова для quick задач (< 15 мин)
   const quickKeywords = [
     'email', 'почта', 'письмо', 'звонок', 'call', 'sms', 'message', 'сообщение',
     'coffee', 'кофе', 'чай', 'tea', 'break', 'перерыв',
@@ -98,7 +98,7 @@ export const suggestWeight = (title: string): TaskWeight => {
     'заказать', 'order', 'доставка', 'delivery'
   ];
 
-  // Ключевые слова для DEEP задач (2+ часа)
+  // Ключевые слова для deep задач (2+ часа)
   const deepKeywords = [
     'код', 'code', 'разработать', 'develop', 'программ', 'program',
     'дизайн', 'design', 'проект', 'project', 'систем', 'system',
@@ -112,13 +112,13 @@ export const suggestWeight = (title: string): TaskWeight => {
     'архитектур', 'architect', 'инфраструктур', 'infrastruct'
   ];
 
-  // Проверка на QUICK задачи
-  const hasQuickKeyword = quickKeywords.some(keyword => 
+  // Проверка на quick задачи
+  const hasQuickKeyword = quickKeywords.some(keyword =>
     normalizedTitle.includes(keyword)
   );
 
-  // Проверка на DEEP задачи
-  const hasDeepKeyword = deepKeywords.some(keyword => 
+  // Проверка на deep задачи
+  const hasDeepKeyword = deepKeywords.some(keyword =>
     normalizedTitle.includes(keyword)
   );
 
@@ -130,7 +130,7 @@ export const suggestWeight = (title: string): TaskWeight => {
   if (hasDeepKeyword && !hasQuickKeyword) {
     return 'deep';
   }
-  
+
   if (hasQuickKeyword && !hasDeepKeyword) {
     return 'quick';
   }
@@ -139,7 +139,7 @@ export const suggestWeight = (title: string): TaskWeight => {
   if (isShortTitle) {
     return 'quick';
   }
-  
+
   if (isLongTitle) {
     return 'deep';
   }
@@ -202,6 +202,7 @@ export const wouldExceedCapacity = (
   taskWeight: TaskWeight
 ): boolean => {
   const currentPoints = calculatePeriodPoints(tasks, period, date);
+  console.log(taskWeight)
   const taskPoints = WEIGHT_CONFIG[taskWeight].points;
   return currentPoints + taskPoints > BLOCK_CAPACITY;
 };

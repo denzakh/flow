@@ -103,7 +103,7 @@ Flag any Figma value that cannot be mapped to an existing `tokens.css` variable 
 
 ---
 
-## QUICK VERSION (for simple components)
+## quick VERSION (for simple components)
 
 If the component is simple (few variants, no physics, no smart logic), use this shorter version:
 

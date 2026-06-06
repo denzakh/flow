@@ -4,9 +4,9 @@ import { Sun, SunDim, CloudMoon, Moon, Zap, Target, Layers, Heart } from 'lucide
 import { TimePeriod, TimeBlockConfig, TaskWeight } from './types';
 
 export const WEIGHT_CONFIG = {
-  [TaskWeight.QUICK]: { label: 'Quick', points: 1, icon: Zap, color: 'var(--flow-weight-quick-color)' },
-  [TaskWeight.FOCUSED]: { label: 'Focused', points: 3, icon: Target, color: 'var(--flow-weight-focused-color)' },
-  [TaskWeight.DEEP]: { label: 'Deep', points: 6, icon: Layers, color: 'var(--flow-weight-deep-color)' }
+  [TaskWeight.quick]: { label: 'Quick', points: 1, icon: Zap, color: 'var(--flow-weight-quick-color)' },
+  [TaskWeight.focused]: { label: 'Focused', points: 3, icon: Target, color: 'var(--flow-weight-focused-color)' },
+  [TaskWeight.deep]: { label: 'Deep', points: 6, icon: Layers, color: 'var(--flow-weight-deep-color)' }
 };
 
 export const RECOVERY_TIPS = {

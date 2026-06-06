@@ -508,31 +508,31 @@ export class VoiceCommandProcessor {
 
     const weightMap: Record<string, TaskWeight> = {
       // English
-      'quick': TaskWeight.QUICK,
-      'focused': TaskWeight.FOCUSED,
-      'deep': TaskWeight.DEEP,
+      'quick': TaskWeight.quick,
+      'focused': TaskWeight.focused,
+      'deep': TaskWeight.deep,
       // Russian - все падежи
-      'быстрая': TaskWeight.QUICK,
-      'быстрый': TaskWeight.QUICK,
-      'быструю': TaskWeight.QUICK,
-      'быстрое': TaskWeight.QUICK,
-      'быстро': TaskWeight.QUICK,
-      'фокус': TaskWeight.FOCUSED,
-      'фокусированная': TaskWeight.FOCUSED,
-      'фокусированной': TaskWeight.FOCUSED,
-      'фокусированный': TaskWeight.FOCUSED,
-      'фокусированную': TaskWeight.FOCUSED,
-      'фокусированное': TaskWeight.FOCUSED,
-      'фокусировано': TaskWeight.FOCUSED,
-      'фокусированном': TaskWeight.FOCUSED,
-      'фокусированных': TaskWeight.FOCUSED,
-      'глубокая': TaskWeight.DEEP,
-      'глубокой': TaskWeight.DEEP,
-      'глубокий': TaskWeight.DEEP,
-      'глубокую': TaskWeight.DEEP,
-      'глубокое': TaskWeight.DEEP,
-      'глубоко': TaskWeight.DEEP,
-      'глубоком': TaskWeight.DEEP
+      'быстрая': TaskWeight.quick,
+      'быстрый': TaskWeight.quick,
+      'быструю': TaskWeight.quick,
+      'быстрое': TaskWeight.quick,
+      'быстро': TaskWeight.quick,
+      'фокус': TaskWeight.focused,
+      'фокусированная': TaskWeight.focused,
+      'фокусированной': TaskWeight.focused,
+      'фокусированный': TaskWeight.focused,
+      'фокусированную': TaskWeight.focused,
+      'фокусированное': TaskWeight.focused,
+      'фокусировано': TaskWeight.focused,
+      'фокусированном': TaskWeight.focused,
+      'фокусированных': TaskWeight.focused,
+      'глубокая': TaskWeight.deep,
+      'глубокой': TaskWeight.deep,
+      'глубокий': TaskWeight.deep,
+      'глубокую': TaskWeight.deep,
+      'глубокое': TaskWeight.deep,
+      'глубоко': TaskWeight.deep,
+      'глубоком': TaskWeight.deep
     };
 
     // Точное совпадение
@@ -542,22 +542,22 @@ export class VoiceCommandProcessor {
 
     // Нечеткое совпадение - проверяем префиксы
     if (normalized.startsWith('быстр')) {
-      return TaskWeight.QUICK;
+      return TaskWeight.quick;
     }
     if (normalized.includes('фокус')) {
-      return TaskWeight.FOCUSED;
+      return TaskWeight.focused;
     }
     if (normalized.startsWith('глубок')) {
-      return TaskWeight.DEEP;
+      return TaskWeight.deep;
     }
     if (normalized.startsWith('quick')) {
-      return TaskWeight.QUICK;
+      return TaskWeight.quick;
     }
     if (normalized.includes('focus')) {
-      return TaskWeight.FOCUSED;
+      return TaskWeight.focused;
     }
     if (normalized.startsWith('deep')) {
-      return TaskWeight.DEEP;
+      return TaskWeight.deep;
     }
 
     return undefined;

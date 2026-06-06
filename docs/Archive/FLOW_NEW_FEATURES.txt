@@ -35,7 +35,7 @@ Flow:
 
 UI BEHAVIOR
 Hobbies displayed as "gentle suggestions", not tasks.
-Can "insert hobby into block" with one tap → creates QUICK task.
+Can "insert hobby into block" with one tap → creates quick task.
 In Recovery Mode, hobbies shown more often.
 
 WHY IT MATTERS
@@ -125,7 +125,7 @@ PHASE 2 - HOBBIES
 - Add hobbies CRUD to App.tsx
 - Store in flow_hobbies in localStorage
 - Display as small cards in available blocks
-- Add "Insert as task" button (creates QUICK task)
+- Add "Insert as task" button (creates quick task)
 - Add HobbyModal for creation/editing
 - Enhance Recovery Mode to show hobbies more often
 
@@ -260,7 +260,7 @@ Logic:
 - Display in appropriate time blocks
 - Suggest when slots free
 - Consider Recovery Mode
-- On selection → create QUICK task
+- On selection → create quick task
 
 2. COMMITMENTS
 Fixed daily activities that occupy blocks (work, study, childcare).

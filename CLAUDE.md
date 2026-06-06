@@ -26,7 +26,7 @@ Repo: https://github.com/denzakh/flow
 ### Core types (src/types.ts)
 ```ts
 TimePeriod: MORNING | AFTERNOON | EVENING | NIGHT
-TaskWeight: QUICK | FOCUSED | DEEP
+TaskWeight: quick | focused | deep
 Priority: 'low' | 'medium' | 'high'
 Language: 'en' | 'ru' | 'es'
 Recurrence: 'none' | 'daily' | 'weekly' | 'monthly' | 'all-blocks'
@@ -100,7 +100,7 @@ VoiceCommandResult: { success, command?, error?, requiresConfirmation, confirmat
 - `newTaskTitle` — current input text
 - `selectedPeriods` — TimePeriod[] (default: [MORNING])
 - `selectedRecurrence` — Recurrence ('none' default)
-- `selectedWeight` — TaskWeight (FOCUSED default)
+- `selectedWeight` — TaskWeight (focused default)
 
 **Settings modal:**
 - `showSettings` — boolean

@@ -69,9 +69,9 @@ export const colors = {
 // Flow-specific weight config (used in constants.tsx)
 // ─────────────────────────────────────────────────────────────
 export const WEIGHT_CONFIG = {
-  [TaskWeight.QUICK]: { label: 'Quick', points: 1, color: colors.flowWeightQuick },
-  [TaskWeight.FOCUSED]: { label: 'Focused', points: 3, color: colors.flowWeightFocused },
-  [TaskWeight.DEEP]: { label: 'Deep', points: 6, color: colors.flowWeightDeep },
+  [TaskWeight.quick]: { label: 'Quick', points: 1, color: colors.flowWeightQuick },
+  [TaskWeight.focused]: { label: 'Focused', points: 3, color: colors.flowWeightFocused },
+  [TaskWeight.deep]: { label: 'Deep', points: 6, color: colors.flowWeightDeep },
 } as const;
 
 

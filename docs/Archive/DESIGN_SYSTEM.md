@@ -55,9 +55,9 @@ Flow-calendar/
 
 | Вес | Токен | Цвет | Фон | Бордер |
 |-----|-------|------|-----|--------|
-| QUICK | `--weight-quick` | `#34d399` | `rgba(52, 211, 153, 0.1)` | `rgba(52, 211, 153, 0.3)` |
-| FOCUSED | `--weight-focused` | `#60a5fa` | `rgba(96, 165, 250, 0.1)` | `rgba(96, 165, 250, 0.3)` |
-| DEEP | `--weight-deep` | `#a78bfa` | `rgba(167, 139, 250, 0.1)` | `rgba(167, 139, 250, 0.3)` |
+| quick | `--weight-quick` | `#34d399` | `rgba(52, 211, 153, 0.1)` | `rgba(52, 211, 153, 0.3)` |
+| focused | `--weight-focused` | `#60a5fa` | `rgba(96, 165, 250, 0.1)` | `rgba(96, 165, 250, 0.3)` |
+| deep | `--weight-deep` | `#a78bfa` | `rgba(167, 139, 250, 0.1)` | `rgba(167, 139, 250, 0.3)` |
 
 ### Priority
 

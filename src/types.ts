@@ -6,9 +6,9 @@ export enum TimePeriod {
 }
 
 export enum TaskWeight {
-  QUICK = 'quick',
-  FOCUSED = 'focused',
-  DEEP = 'deep'
+  quick = 'quick',
+  focused = 'focused',
+  deep = 'deep',
 }
 
 export type Priority = 'low' | 'medium' | 'high';
@@ -51,7 +51,7 @@ export interface Task {
 export interface TimeBlockConfig {
   id: TimePeriod;
   label: string;
-  startTime: string; 
+  startTime: string;
   endTime: string;
   icon: string;
 }

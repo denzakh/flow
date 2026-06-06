@@ -46,7 +46,7 @@ export default function TaskSheet({
     language,
 }: TaskSheetProps) {
     const [title, setTitle] = useState('');
-    const [selectedWeight, setSelectedWeight] = useState<TaskWeight>(TaskWeight.FOCUSED);
+    const [selectedWeight, setSelectedWeight] = useState<TaskWeight>(TaskWeight.focused);
     const [selectedPriority, setSelectedPriority] = useState<Priority>('medium');
     const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>(activePeriodId);
     const [selectedRecurrence, setSelectedRecurrence] = useState<Recurrence>('none');
@@ -67,7 +67,7 @@ export default function TaskSheet({
     useEffect(() => {
         if (isOpen) {
             setTitle('');
-            setSelectedWeight(TaskWeight.FOCUSED);
+            setSelectedWeight(TaskWeight.focused);
             setSelectedPriority('medium');
             setSelectedPeriod(activePeriodId);
             setSelectedRecurrence('none');
@@ -397,23 +397,23 @@ export default function TaskSheet({
                                     fontWeight: 600,
                                 },
                             },
-                            '& .MuiToggleButton-root[value="QUICK"].Mui-selected': {
+                            '& .MuiToggleButton-root[value="quick"].Mui-selected': {
                                 bgcolor: 'var(--flow-weight-quick-color)',
                                 color: 'var(--flow-weight-quick-on-color)',
                             },
-                            '& .MuiToggleButton-root[value="FOCUSED"].Mui-selected': {
+                            '& .MuiToggleButton-root[value="focused"].Mui-selected': {
                                 bgcolor: 'var(--flow-weight-focused-color)',
                                 color: 'var(--flow-weight-focused-on-color)',
                             },
-                            '& .MuiToggleButton-root[value="DEEP"].Mui-selected': {
+                            '& .MuiToggleButton-root[value="deep"].Mui-selected': {
                                 bgcolor: 'var(--flow-weight-deep-color)',
                                 color: 'var(--flow-weight-deep-on-color)',
                             },
                         }}
                     >
-                        <ToggleButton value="QUICK">Quick</ToggleButton>
-                        <ToggleButton value="FOCUSED">Focused</ToggleButton>
-                        <ToggleButton value="DEEP">Deep</ToggleButton>
+                        <ToggleButton value="quick">Quick</ToggleButton>
+                        <ToggleButton value="focused">Focused</ToggleButton>
+                        <ToggleButton value="deep">Deep</ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
 

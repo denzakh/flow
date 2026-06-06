@@ -74,7 +74,7 @@ const App: React.FC = () => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [selectedPeriods, setSelectedPeriods] = useState<TimePeriod[]>([TimePeriod.MORNING]);
   const [selectedRecurrence, setSelectedRecurrence] = useState<Recurrence>('none');
-  const [selectedWeight, setSelectedWeight] = useState<TaskWeight>(TaskWeight.FOCUSED);
+  const [selectedWeight, setSelectedWeight] = useState<TaskWeight>(TaskWeight.focused);
 
   const [tempWake, setTempWake] = useState(settings.wakeUpTime);
   const [tempRest, setTempRest] = useState(settings.restTime);

@@ -636,7 +636,7 @@ interface TaskSheetProps {
 **Internal state:**
 ```typescript
 const [title, setTitle] = useState('');
-const [selectedWeight, setSelectedWeight] = useState<TaskWeight>(TaskWeight.FOCUSED);
+const [selectedWeight, setSelectedWeight] = useState<TaskWeight>(TaskWeight.focused);
 const [selectedPriority, setSelectedPriority] = useState<Priority>('medium');
 const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>(activePeriodId);
 const [selectedRecurrence, setSelectedRecurrence] = useState<Recurrence>('none');
