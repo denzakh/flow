@@ -11,6 +11,7 @@ interface TimeBlockListProps {
   tasks: Task[];
   collapsedBlocks: Record<string, boolean>;
   language: Language;
+  isListView: boolean;
   onQuickAdd: (period: TimePeriod) => void;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
@@ -26,6 +27,7 @@ const TimeBlockList: React.FC<TimeBlockListProps> = ({
   tasks,
   collapsedBlocks,
   language,
+  isListView,
   onQuickAdd,
   onToggle,
   onDelete,
@@ -33,7 +35,7 @@ const TimeBlockList: React.FC<TimeBlockListProps> = ({
   onToggleCollapse
 }) => {
   return (
-    <div className="space-y-6">
+    <div className={isListView ? 'flex flex-col gap-6' : 'grid grid-cols-2 gap-4'}>
       {blocks.map((block) => {
         const isActive = activePeriodId === block.id && todayStr === viewDate.toISOString().split('T')[0];
         const isNight = block.id === TimePeriod.NIGHT;

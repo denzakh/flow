@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TimePeriod, Task, Language, TaskWeight, Recurrence, TimeBlockConfig } from '../../types.ts';
+import React from 'react';
+import { TimePeriod, Task, Language, TimeBlockConfig } from '../../types.ts';
 import RecoveryBanner from '../blocks/RecoveryBanner.tsx';
 import TaskManagerPanel from '../TaskManagerPanel';
 import TimeBlockList from '../blocks/TimeBlockList.tsx';
@@ -8,6 +8,7 @@ import TaskSheet from '../modals/TaskSheet.tsx';
 interface DayViewProps {
   isRecoveryMode: boolean;
   isWindDown: boolean;
+  isListView: boolean;
   currentTime: Date;
   dynamicBlocks: TimeBlockConfig[];
   activePeriodId: TimePeriod;
@@ -24,21 +25,14 @@ interface DayViewProps {
   onDelete: (id: string) => void;
   onUpdate: (id: string, updates: Partial<Task>) => void;
   onToggleCollapse: (blockId: string) => void;
-  onWeightChange: (weight: TaskWeight) => void;
-  onPeriodToggle: (period: TimePeriod) => void;
-  onRecurrenceChange: (recurrence: Recurrence) => void;
-  onInputFocusChange: (focused: boolean) => void;
   onDeleteAllCompleted: () => void;
   onDeleteAll: () => void;
-  selectedWeight: TaskWeight;
-  selectedPeriods: TimePeriod[];
-  selectedRecurrence: Recurrence;
-  isInputFocused: boolean;
 }
 
 const DayView: React.FC<DayViewProps> = ({
   isRecoveryMode,
   isWindDown,
+  isListView,
   currentTime,
   dynamicBlocks,
   activePeriodId,
@@ -56,7 +50,7 @@ const DayView: React.FC<DayViewProps> = ({
   onUpdate,
   onToggleCollapse,
   onDeleteAllCompleted,
-  onDeleteAll
+  onDeleteAll,
 }) => {
   return (
     <>
@@ -83,6 +77,7 @@ const DayView: React.FC<DayViewProps> = ({
         tasks={tasks}
         collapsedBlocks={collapsedBlocks}
         language={language}
+        isListView={isListView}
         onQuickAdd={onQuickAdd}
         onToggle={onToggle}
         onDelete={onDelete}
@@ -92,7 +87,7 @@ const DayView: React.FC<DayViewProps> = ({
 
       <TaskSheet
         isOpen={isTaskSheetOpen}
-        onClose={onCloseTaskSheet || (() => { })}
+        onClose={onCloseTaskSheet || (() => {})}
         onTaskAdd={onTaskAdd}
         activePeriodId={activePeriodId}
         tasks={tasks}
