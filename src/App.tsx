@@ -1,9 +1,31 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import { getIcon } from './constants.tsx';
-import { Task, TimePeriod, UserSettings, TimeBlockConfig, Language, AlarmConfig, Recurrence, TaskWeight, UserProfile, VoiceSettings, VoiceCommand, CommandType } from './types.ts';
-import { TRANSLATIONS, ALARM_SOUNDS, RECOVERY_TIPS, WEIGHT_CONFIG, VOICE_TRANSLATIONS } from './constants.tsx';
-import { suggestWeight, adjustTaskPeriods } from './services/taskOptimizer.ts';
-import TaskItem from './components/TaskItem.tsx';
+import {
+  Task,
+  TimePeriod,
+  UserSettings,
+  Language,
+  AlarmConfig,
+  Recurrence,
+  UserProfile,
+  VoiceSettings,
+  VoiceCommand,
+  CommandType,
+} from './types.ts';
+import { TRANSLATIONS, ALARM_SOUNDS, VOICE_TRANSLATIONS } from './constants.tsx';
+import { suggestWeight } from './services/taskOptimizer.ts';
+import {
+  getActivePeriodId,
+  getDynamicBlocks,
+  getIsRecoveryMode,
+  getIsWindDown,
+} from './services/circadian.ts';
+import { createTaskId, resolveTaskPlacement, type CapacityNotification } from './utils/taskCreation.ts';
+import { createMuiTheme } from './theme/mui-theme.ts';
 import Auth from './components/Auth.tsx';
 import Header from './components/layout/Header.tsx';
 import ViewSwitcher from './components/common/ViewSwitcher.tsx';
@@ -13,100 +35,71 @@ import WeekView from './components/views/WeekView.tsx';
 import MonthView from './components/views/MonthView.tsx';
 import YearView from './components/views/YearView.tsx';
 import SettingsModal from './components/modals/SettingsModal.tsx';
-import AlarmModal from './components/modals/AlarmModal.tsx';
 import AlarmPlayingModal from './components/modals/AlarmPlayingModal.tsx';
+import VoiceConfirmDialog from './components/modals/VoiceConfirmDialog.tsx';
 import { VoiceControlService } from './services/voice/VoiceControlService.ts';
 import { VoiceCommandProcessor } from './services/voice/VoiceCommandProcessor.ts';
 import VoiceFeedback from './components/voice/VoiceFeedback.tsx';
-import restIcon from './assets/images/Background+Border+Shadow.png';
-import { AnimatePresence } from 'framer-motion';
-import TaskManagerPanel from './components/TaskManagerPanel.tsx';
-import RecoveryBanner from './components/blocks/RecoveryBanner.tsx';
-import FocusPoint from './components/blocks/FocusPoint.tsx';
-import VoiceSettingsModal from './components/voice/VoiceSettingsModal.tsx';
 import FlowToolbar from './components/layout/FlowToolbar';
 
 type ViewMode = 'day' | 'week' | 'month' | 'year';
 
-const BackgroundSpots = memo(({ isWindDown }: { isWindDown: boolean }) => null);
+const DEFAULT_SETTINGS: UserSettings = {
+  wakeUpTime: '07:00',
+  restTime: '23:00',
+  recoveryDays: [0, 6],
+  workHistory: [],
+  language: 'en',
+  alarm: { enabled: false, time: '07:00', sound: 'forest' },
+};
+
+const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
+  enabled: true,
+  language: 'en',
+  autoSubmit: false,
+  requireConfirmation: true,
+  ttsEnabled: true,
+  confidenceThreshold: 0.7,
+};
+
+function readStoredJson<T>(key: string, fallback: T): T {
+  const saved = localStorage.getItem(key);
+  if (!saved) return fallback;
+  try {
+    return JSON.parse(saved) as T;
+  } catch {
+    return fallback;
+  }
+}
 
 const App: React.FC = () => {
-  const [appState, setAppState] = useState<'splash' | 'auth' | 'ready'>(() => {
-    const user = localStorage.getItem('flow_user');
-    return user ? 'ready' : 'splash';
-  });
-
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem('flow_user');
-    return saved ? JSON.parse(saved) : null;
-  });
-
+  const [appState, setAppState] = useState<'splash' | 'auth' | 'ready'>(() =>
+    localStorage.getItem('flow_user') ? 'ready' : 'splash'
+  );
+  const [user, setUser] = useState<UserProfile | null>(() => readStoredJson('flow_user', null));
   const [viewMode, setViewMode] = useState<ViewMode>('day');
   const [viewDate, setViewDate] = useState(new Date());
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem('flow_tasks');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [settings, setSettings] = useState<UserSettings>(() => {
-    const saved = localStorage.getItem('flow_settings');
-    return saved ? JSON.parse(saved) : {
-      wakeUpTime: '07:00',
-      restTime: '23:00',
-      recoveryDays: [0, 6],
-      workHistory: [],
-      language: 'en',
-      alarm: { enabled: false, time: '07:00', sound: 'forest' }
-    };
-  });
-
+  const [tasks, setTasks] = useState<Task[]>(() => readStoredJson('flow_tasks', []));
+  const [settings, setSettings] = useState<UserSettings>(() => readStoredJson('flow_settings', DEFAULT_SETTINGS));
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showSettings, setShowSettings] = useState(false);
-  const [showAlarmMenu, setShowAlarmMenu] = useState(false);
   const [isAlarmPlaying, setIsAlarmPlaying] = useState(false);
   const [lastAlarmTriggeredAt, setLastAlarmTriggeredAt] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const fadeIntervalRef = useRef<number | null>(null);
-
-  const t = TRANSLATIONS[settings.language];
-  const todayStr = currentTime.toISOString().split('T')[0];
-
-  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [isDarkTheme, setIsDarkTheme] = useState(() => localStorage.getItem('flow_theme') === 'dark');
+  const [isListView, setIsListView] = useState(false);
+  const [isTaskSheetOpen, setIsTaskSheetOpen] = useState(false);
+  const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
   const [selectedPeriods, setSelectedPeriods] = useState<TimePeriod[]>([TimePeriod.MORNING]);
   const [selectedRecurrence, setSelectedRecurrence] = useState<Recurrence>('none');
-  const [selectedWeight, setSelectedWeight] = useState<TaskWeight>(TaskWeight.focused);
-
   const [tempWake, setTempWake] = useState(settings.wakeUpTime);
   const [tempRest, setTempRest] = useState(settings.restTime);
   const [tempLang, setTempLang] = useState<Language>(settings.language);
   const [tempAlarm, setTempAlarm] = useState<AlarmConfig>(settings.alarm);
   const [settingsError, setSettingsError] = useState<string | null>(null);
-  const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
-  const [isInputFocused, setIsInputFocused] = useState(false);
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
-  const [isListView, setIsListView] = useState(false);
-  const [isTaskSheetOpen, setIsTaskSheetOpen] = useState(false);
-
-  // Voice control state
-  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(() => {
-    const saved = localStorage.getItem('flow_voice_settings');
-    return saved ? JSON.parse(saved) : {
-      enabled: true,
-      language: settings.language as 'ru' | 'en' | 'es',
-      autoSubmit: false,
-      requireConfirmation: true,
-      ttsEnabled: true,
-      confidenceThreshold: 0.7
-    };
-  });
-
-  // Save voiceSettings to localStorage
-  useEffect(() => {
-    localStorage.setItem('flow_voice_settings', JSON.stringify(voiceSettings));
-  }, [voiceSettings]);
-
-  const [voiceService, setVoiceService] = useState<VoiceControlService | null>(null);
-  const [voiceProcessor, setVoiceProcessor] = useState<VoiceCommandProcessor | null>(null);
+  const [capacityNotification, setCapacityNotification] = useState<CapacityNotification | null>(null);
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(() =>
+    readStoredJson('flow_voice_settings', { ...DEFAULT_VOICE_SETTINGS, language: settings.language })
+  );
   const [isVoiceListening, setIsVoiceListening] = useState(false);
   const [isVoiceProcessing, setIsVoiceProcessing] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState('');
@@ -116,20 +109,47 @@ const App: React.FC = () => {
   const [showVoiceConfirmation, setShowVoiceConfirmation] = useState(false);
   const [pendingVoiceCommand, setPendingVoiceCommand] = useState<VoiceCommand | null>(null);
 
-  // Capacity notification state
-  const [capacityNotification, setCapacityNotification] = useState<{
-    type: 'transferred' | 'full';
-    message: string;
-  } | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fadeIntervalRef = useRef<number | null>(null);
+  const voiceServiceRef = useRef<VoiceControlService | null>(null);
+  const voiceProcessorRef = useRef<VoiceCommandProcessor | null>(null);
+
+  const t = TRANSLATIONS[settings.language];
+  const todayStr = currentTime.toISOString().split('T')[0];
+  const muiTheme = useMemo(() => createMuiTheme(isDarkTheme ? 'dark' : 'light'), [isDarkTheme]);
+
+  const isWindDown = useMemo(
+    () => getIsWindDown(settings.restTime, currentTime),
+    [settings.restTime, currentTime]
+  );
+  const activePeriodId = useMemo(
+    () => getActivePeriodId(settings, currentTime),
+    [settings, currentTime]
+  );
+  const isRecoveryMode = useMemo(
+    () => getIsRecoveryMode(settings, currentTime, activePeriodId, isWindDown),
+    [settings, currentTime, activePeriodId, isWindDown]
+  );
+  const dynamicBlocks = useMemo(
+    () => getDynamicBlocks(settings, {
+      morning: t.morning,
+      afternoon: t.afternoon,
+      evening: t.evening,
+      night: t.night,
+    }),
+    [settings, t.morning, t.afternoon, t.evening, t.night]
+  );
 
   useEffect(() => {
-    if (appState === 'splash') {
-      const timer = setTimeout(() => {
-        if (!user) setAppState('auth');
-        else setAppState('ready');
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+    document.documentElement.classList.toggle('dark', isDarkTheme);
+    document.documentElement.classList.toggle('light', !isDarkTheme);
+    localStorage.setItem('flow_theme', isDarkTheme ? 'dark' : 'light');
+  }, [isDarkTheme]);
+
+  useEffect(() => {
+    if (appState !== 'splash') return;
+    const timer = setTimeout(() => setAppState(user ? 'ready' : 'auth'), 3000);
+    return () => clearTimeout(timer);
   }, [appState, user]);
 
   useEffect(() => {
@@ -145,394 +165,141 @@ const App: React.FC = () => {
     else localStorage.removeItem('flow_user');
   }, [user]);
 
-  // Initialize voice control service
   useEffect(() => {
-    if (voiceSettings.enabled && !voiceService) {
-      const service = new VoiceControlService(voiceSettings);
-      setVoiceService(service);
+    localStorage.setItem('flow_voice_settings', JSON.stringify(voiceSettings));
+  }, [voiceSettings]);
 
-      const processor = new VoiceCommandProcessor(voiceSettings.language);
-      setVoiceProcessor(processor);
-    } else if (!voiceSettings.enabled && voiceService) {
-      voiceService.dispose();
-      setVoiceService(null);
-      setVoiceProcessor(null);
-    }
-  }, [voiceSettings.enabled]);
-
-  // Update voice service settings when they change
   useEffect(() => {
-    if (voiceService && voiceProcessor) {
-      voiceService.updateSettings(voiceSettings);
-      voiceProcessor.setLanguage(voiceSettings.language);
-    }
-  }, [voiceSettings, voiceService, voiceProcessor]);
-
-  // Basic task operations (must be declared before voice handlers)
-  const toggleTask = useCallback((id: string) => setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t)), []);
-  const deleteTask = useCallback((id: string) => setTasks(prev => prev.filter(t => t.id !== id)), []);
-  const updateTask = useCallback((id: string, updates: Partial<Task>) => setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t)), []);
-
-  // Bulk task operations
-  const deleteAllCompletedTasks = useCallback(() => {
-    setTasks(prev => prev.filter(t => !t.completed));
-  }, []);
-
-  const deleteAllTasks = useCallback(() => {
-    setTasks([]);
-  }, []);
-
-  const getTaskStats = useCallback(() => {
-    const total = tasks.length;
-    const completed = tasks.filter(t => t.completed).length;
-    const active = total - completed;
-    return { total, completed, active };
-  }, [tasks]);
-
-  const navigateDate = (direction: number) => {
-    const newDate = new Date(viewDate);
-    if (viewMode === 'day') newDate.setDate(newDate.getDate() + direction);
-    else if (viewMode === 'week') newDate.setDate(newDate.getDate() + direction * 7);
-    else if (viewMode === 'month') newDate.setMonth(newDate.getMonth() + direction);
-    else if (viewMode === 'year') newDate.setFullYear(newDate.getFullYear() + direction);
-    setViewDate(newDate);
-  };
-
-  const isWindDown = useMemo(() => {
-    const [rH, rM] = settings.restTime.split(':').map(Number);
-    const restMins = rH * 60 + rM;
-    const currentMins = currentTime.getHours() * 60 + currentTime.getMinutes();
-    const windDownStart = restMins - 90;
-    if (windDownStart < 0) {
-      const adjustedStart = 1440 + windDownStart;
-      return currentMins >= adjustedStart || currentMins < restMins;
-    }
-    return currentMins >= windDownStart && currentMins < restMins;
-  }, [settings.restTime, currentTime]);
-
-  const activePeriodId = useMemo(() => {
-    const currentMins = currentTime.getHours() * 60 + currentTime.getMinutes();
-    const [wH, wM] = settings.wakeUpTime.split(':').map(Number);
-    const [rH, rM] = settings.restTime.split(':').map(Number);
-    let wakeMins = wH * 60 + wM;
-    let restMins = rH * 60 + rM;
-    const isNight = restMins > wakeMins
-      ? (currentMins >= restMins || currentMins < wakeMins)
-      : (currentMins >= restMins && currentMins < wakeMins);
-    if (isNight) return TimePeriod.NIGHT;
-    let adjustedCurrent = currentMins;
-    if (adjustedCurrent < wakeMins) adjustedCurrent += 24 * 60;
-    const activeDuration = (restMins < wakeMins ? restMins + 24 * 60 : restMins) - wakeMins;
-    const offset = adjustedCurrent - wakeMins;
-    if (offset < activeDuration / 3) return TimePeriod.MORNING;
-    if (offset < 2 * activeDuration / 3) return TimePeriod.AFTERNOON;
-    return TimePeriod.EVENING;
-  }, [settings, currentTime]);
-
-  const isNightSilence = activePeriodId === TimePeriod.NIGHT;
-
-  const isRecoveryMode = useMemo(() => {
-    if (isNightSilence) return false;
-    const isDesignatedDay = settings.recoveryDays.includes(currentTime.getDay());
-    return isDesignatedDay || isWindDown;
-  }, [settings.recoveryDays, currentTime, isWindDown, isNightSilence]);
-
-  const dynamicBlocks = useMemo<TimeBlockConfig[]>(() => {
-    const [wH, wM] = settings.wakeUpTime.split(':').map(Number);
-    const [rH, rM] = settings.restTime.split(':').map(Number);
-    let wakeMinutes = wH * 60 + wM;
-    let restMinutes = rH * 60 + rM;
-    if (restMinutes <= wakeMinutes) restMinutes += 24 * 60;
-    const activeDuration = restMinutes - wakeMinutes;
-    const blockDuration = Math.floor(activeDuration / 3);
-    const formatTime = (totalMinutes: number) => {
-      const h = Math.floor((totalMinutes % (24 * 60)) / 60);
-      const m = totalMinutes % 60;
-      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-    };
-    return [
-      { id: TimePeriod.MORNING, label: t.morning, startTime: formatTime(wakeMinutes), endTime: formatTime(wakeMinutes + blockDuration), icon: 'Sun' },
-      { id: TimePeriod.AFTERNOON, label: t.afternoon, startTime: formatTime(wakeMinutes + blockDuration), endTime: formatTime(wakeMinutes + 2 * blockDuration), icon: 'SunDim' },
-      { id: TimePeriod.EVENING, label: t.evening, startTime: formatTime(wakeMinutes + 2 * blockDuration), endTime: formatTime(restMinutes), icon: 'CloudMoon' },
-      { id: TimePeriod.NIGHT, label: t.night, startTime: formatTime(restMinutes), endTime: formatTime(wakeMinutes), icon: 'Moon' }
-    ] as TimeBlockConfig[];
-  }, [settings, t]);
-
-  // Handle voice command result
-  const handleVoiceCommand = useCallback(async (command: VoiceCommand) => {
-    // ПРОВЕРКА НА ТИХИЙ ОТВЕТ (шумовые фразы)
-    if (command.silent === true) {
-      console.log('🔇 Silent command detected, ignoring:', command.rawText);
-      setIsVoiceProcessing(false);
-      setVoiceStatus('idle');
+    if (!voiceSettings.enabled) {
+      voiceServiceRef.current?.dispose();
+      voiceServiceRef.current = null;
+      voiceProcessorRef.current = null;
       return;
     }
 
-    setIsVoiceProcessing(true);
-    setVoiceStatus('processing');
+    const service = new VoiceControlService(voiceSettings);
+    const processor = new VoiceCommandProcessor(voiceSettings.language);
+    voiceServiceRef.current = service;
+    voiceProcessorRef.current = processor;
 
-    console.log('🎤 Received command:', command.type, 'intent:', command.intent);
+    return () => service.dispose();
+  }, [voiceSettings.enabled]);
 
-    try {
-      // Check confidence threshold
-      if (command.confidence < voiceSettings.confidenceThreshold && voiceSettings.requireConfirmation) {
-        // Stop auto-restart before showing confirmation
-        voiceService?.stopListening();
+  useEffect(() => {
+    if (!voiceSettings.enabled) return;
+    voiceServiceRef.current?.updateSettings(voiceSettings);
+    voiceProcessorRef.current?.setLanguage(voiceSettings.language);
+  }, [voiceSettings]);
 
-        setPendingVoiceCommand(command);
-        setShowVoiceConfirmation(true);
-        setIsVoiceProcessing(false);
-        setVoiceStatus('idle');
-        return;
+  useEffect(() => {
+    if (appState !== 'ready' || activePeriodId === TimePeriod.NIGHT) return;
+    setSelectedPeriods((prev) =>
+      prev.length === 1 && prev[0] === TimePeriod.MORNING ? [activePeriodId] : prev
+    );
+  }, [activePeriodId, appState]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now);
+
+      if (!settings.alarm.enabled || isAlarmPlaying) return;
+
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      if (timeStr === settings.alarm.time && lastAlarmTriggeredAt !== timeStr) {
+        triggerAlarm();
+        setLastAlarmTriggeredAt(timeStr);
       }
+    }, 1000);
 
-      // Execute command
-      await executeVoiceCommand(command);
+    return () => clearInterval(timer);
+  }, [settings.alarm, isAlarmPlaying, lastAlarmTriggeredAt]);
 
-      // Success feedback
-      if (voiceSettings.ttsEnabled && voiceService) {
-        const feedback = getVoiceFeedback(command.type, command.intent, true);
-        console.log('🔊 Speaking feedback:', feedback);
-        voiceService.speak(feedback);
-      }
+  function showNotification(notification: CapacityNotification) {
+    setCapacityNotification(notification);
+    setTimeout(() => setCapacityNotification(null), 5000);
+  }
 
-      setVoiceStatus('success');
-      setTimeout(() => setVoiceStatus('idle'), 2000);
-    } catch (error) {
-      console.error('Voice command error:', error);
-      setVoiceStatus('error');
-      setVoiceError('Failed to execute command');
+  function commitTask(draft: Omit<Task, 'id' | 'createdAt' | 'completed'>, includeBlockOverflowSuffix = true) {
+    const targetDate = draft.dueDate || todayStr;
+    let notification: CapacityNotification | null = null;
 
-      if (voiceSettings.ttsEnabled && voiceService) {
-        voiceService.speak(VOICE_TRANSLATIONS[voiceSettings.language].error);
-      }
-
-      setTimeout(() => {
-        setVoiceStatus('idle');
-        setVoiceError(undefined);
-      }, 3000);
-    } finally {
-      setIsVoiceProcessing(false);
-    }
-  }, [voiceSettings, voiceService, tasks, viewDate, viewMode, settings]);
-
-  // Execute voice command
-  const executeVoiceCommand = useCallback(async (command: VoiceCommand) => {
-    switch (command.type) {
-      case CommandType.ADD_TASK:
-        if (command.entities.title) {
-          const weight = suggestWeight(command.entities.title);
-          let periodsToUse = selectedRecurrence === 'all-blocks'
-            ? [TimePeriod.MORNING, TimePeriod.AFTERNOON, TimePeriod.EVENING]
-            : selectedPeriods.length > 0 ? [...selectedPeriods] : [activePeriodId];
-
-          // Filter out NIGHT period and check capacity
-          periodsToUse = periodsToUse.filter(p => p !== TimePeriod.NIGHT);
-
-          console.log('🎤 Voice add task:', command.entities.title, 'periods:', periodsToUse, 'date:', todayStr);
-          console.log('🕐 Current time:', currentTime, 'active period:', activePeriodId);
-
-          // Check capacity and adjust periods if needed (with current time context)
-          const adjustment = adjustTaskPeriods(tasks, periodsToUse, todayStr, weight, activePeriodId, currentTime);
-
-          console.log('🎤 Voice adjustment:', adjustment);
-
-          if (adjustment.transferred) {
-            periodsToUse = adjustment.periods;
-            const taskDate = adjustment.date;
-
-            const periodNames = {
-              [TimePeriod.MORNING]: t.morning,
-              [TimePeriod.AFTERNOON]: t.afternoon,
-              [TimePeriod.EVENING]: t.evening
-            };
-
-            const isNewDay = taskDate !== todayStr;
-
-            let message;
-            if (isNewDay) {
-              const tomorrow = new Date(taskDate);
-              const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
-              const dateStr = tomorrow.toLocaleDateString(settings.language === 'ru' ? 'ru-RU' : settings.language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short' });
-              message = t.taskTransferredTomorrow
-                .replace('{title}', command.entities.title || '')
-                .replace('{period}', periodName)
-                .replace('{date}', dateStr);
-            } else {
-              const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
-              message = t.taskTransferred
-                .replace('{title}', command.entities.title || '')
-                .replace('{period}', periodName);
-            }
-
-            console.log('🎤 Voice transferred:', message);
-
-            setCapacityNotification({
-              type: 'transferred',
-              message
-            });
-            setTimeout(() => setCapacityNotification(null), 5000);
-          } else if (adjustment.allFull) {
-            setCapacityNotification({
-              type: 'full',
-              message: t.allBlocksFull
-            });
-            setTimeout(() => setCapacityNotification(null), 5000);
-          }
-
-          const newTask: Task = {
-            id: Math.random().toString(36).substr(2, 9),
-            title: command.entities.title,
-            periods: periodsToUse,
-            completed: false,
-            createdAt: Date.now(),
-            priority: 'medium',
-            weight,
-            recurrence: 'none',
-            dueDate: adjustment.date
-          };
-
-          console.log('🎤 Creating voice task:', newTask);
-
-          setTasks([...tasks, newTask]);
-        }
-        break;
-
-      case CommandType.UPDATE_TASK:
-        if (command.entities.index && tasks[command.entities.index - 1]) {
-          const taskIndex = command.entities.index - 1;
-          setTasks(tasks.map((task, idx) => {
-            if (idx === taskIndex) {
-              return {
-                ...task,
-                weight: command.entities.weight ?? task.weight,
-                periods: command.entities.period ? [command.entities.period] : task.periods
-              };
-            }
-            return task;
-          }));
-          console.log('🔄 UI Update: task', command.entities.index, 'updated');
-        }
-        break;
-
-      case CommandType.TOGGLE_TASK:
-        if (command.entities.index && tasks[command.entities.index - 1]) {
-          const taskIndex = command.entities.index - 1;
-          setTasks(tasks.map((task, idx) =>
-            idx === taskIndex ? { ...task, completed: !task.completed } : task
-          ));
-          console.log('✅ UI Update: task', command.entities.index, 'toggled');
-        } else if (command.entities.title) {
-          // Поиск по названию (нечёткий)
-          const task = tasks.find(t =>
-            t.title.toLowerCase().includes(command.entities.title!.toLowerCase())
-          );
-          if (task) {
-            setTasks(tasks.map(t =>
-              t.id === task.id ? { ...t, completed: !t.completed } : t
-            ));
-            console.log('✅ UI Update: task by title toggled');
-          }
-        }
-        break;
-
-      case CommandType.DELETE_TASK:
-        if (command.entities.index && tasks[command.entities.index - 1]) {
-          const taskIndex = command.entities.index - 1;
-          setTasks(tasks.filter((_, idx) => idx !== taskIndex));
-          console.log('🗑️ UI Update: task', command.entities.index, 'deleted');
-        } else if (command.entities.title) {
-          setTasks(tasks.filter(t =>
-            !t.title.toLowerCase().includes(command.entities.title!.toLowerCase())
-          ));
-          console.log('🗑️ UI Update: task by title deleted');
-        }
-        break;
-
-      case CommandType.NAVIGATE_DATE:
-        if (command.entities.direction === 'next') {
-          navigateDate(1);
-        } else if (command.entities.direction === 'prev') {
-          navigateDate(-1);
-        } else if (command.entities.direction === 'today') {
-          const today = new Date();
-          setViewDate(today);
-          // Also reset view mode to day if in week/month/year
-          if (viewMode !== 'day') {
-            setViewMode('day');
-          }
-        }
-        break;
-
-      case CommandType.CHANGE_VIEW:
-        if (command.entities.viewMode) {
-          setViewMode(command.entities.viewMode);
-        }
-        break;
-    }
-  }, [tasks, selectedPeriods, selectedRecurrence, activePeriodId, todayStr, toggleTask, deleteTask, updateTask, navigateDate, t, setCapacityNotification]);
-
-  // Toggle voice listening
-  const toggleVoiceListening = useCallback(() => {
-    if (!voiceService) return;
-
-    if (isVoiceListening || voiceStatus === 'listening') {
-      // Stop listening
-      voiceService.stopListening();
-      setIsVoiceListening(false);
-      setVoiceStatus('idle');
-      setVoiceTranscript('');
-      setVoiceConfidence(undefined);
-      setShowVoiceConfirmation(false); // Close confirmation if open
-      setPendingVoiceCommand(null);
-      console.log('🛑 Voice stopped');
-    } else {
-      setVoiceStatus('listening');
-      setIsVoiceListening(true);
-
-      voiceService.startListening(
-        (transcript, isFinal, confidence) => {
-          setVoiceTranscript(transcript);
-
-          // STT confidence often returns 0 in Chrome — use threshold as fallback
-          const effectiveConfidence = (confidence === undefined || confidence === 0)
-            ? voiceSettings.confidenceThreshold + 0.1 // Default to slightly above threshold
-            : confidence;
-
-          setVoiceConfidence(effectiveConfidence);
-          console.log('🎯 STT Confidence:', effectiveConfidence.toFixed(2), '(raw:', confidence, ') Threshold:', voiceSettings.confidenceThreshold);
-
-          if (isFinal && voiceProcessor) {
-            const command = voiceProcessor.parseCommand(transcript, effectiveConfidence);
-            console.log('🎤 Command confidence:', command.confidence.toFixed(2), 'Type:', command.type);
-            handleVoiceCommand(command);
-            setIsVoiceListening(false);
-          }
-        },
-        (error) => {
-          console.error('Voice recognition error:', error);
-          setVoiceStatus('error');
-          setVoiceError(error);
-          setIsVoiceListening(false);
-
-          setTimeout(() => {
-            setVoiceStatus('idle');
-            setVoiceError(undefined);
-          }, 3000);
-        }
+    setTasks((prev) => {
+      const placement = resolveTaskPlacement(
+        prev,
+        draft.periods,
+        targetDate,
+        draft.weight,
+        activePeriodId,
+        currentTime,
+        settings.language,
+        todayStr,
+        { title: draft.title, includeBlockOverflowSuffix }
       );
+
+      notification = placement.notification;
+
+      return [
+        ...prev,
+        {
+          ...draft,
+          id: createTaskId(),
+          createdAt: Date.now(),
+          completed: false,
+          periods: placement.periods,
+          dueDate: placement.date,
+        },
+      ];
+    });
+
+    if (notification) {
+      showNotification(notification);
     }
-  }, [voiceService, isVoiceListening, voiceProcessor, handleVoiceCommand]);
+  }
 
-  // Get voice feedback message
-  const getVoiceFeedback = (commandType: CommandType, intent: string, success: boolean): string => {
-    const lang = voiceSettings.language;
-    const translations = VOICE_TRANSLATIONS[lang];
+  function toggleTask(id: string) {
+    setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)));
+  }
 
-    if (!success) {
-      return translations.error;
+  function deleteTask(id: string) {
+    setTasks((prev) => prev.filter((task) => task.id !== id));
+  }
+
+  function updateTask(id: string, updates: Partial<Task>) {
+    setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, ...updates } : task)));
+  }
+
+  function navigateDate(direction: number) {
+    setViewDate((prev) => {
+      const next = new Date(prev);
+      if (viewMode === 'day') next.setDate(next.getDate() + direction);
+      else if (viewMode === 'week') next.setDate(next.getDate() + direction * 7);
+      else if (viewMode === 'month') next.setMonth(next.getMonth() + direction);
+      else next.setFullYear(next.getFullYear() + direction);
+      return next;
+    });
+  }
+
+  function goToToday() {
+    setViewDate(new Date());
+    setViewMode('day');
+  }
+
+  function openTaskSheet() {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
     }
+    setIsTaskSheetOpen(true);
+  }
 
+  function handleQuickAdd(period: TimePeriod) {
+    if (period === TimePeriod.NIGHT) return;
+    setSelectedPeriods([period]);
+    openTaskSheet();
+  }
+
+  function getVoiceFeedback(commandType: CommandType): string {
+    const translations = VOICE_TRANSLATIONS[voiceSettings.language];
     switch (commandType) {
       case CommandType.ADD_TASK:
         return translations.taskAdded;
@@ -549,475 +316,477 @@ const App: React.FC = () => {
       default:
         return translations.navigated;
     }
-  };
+  }
 
-  // Handle voice confirmation
-  const handleVoiceConfirmation = useCallback((confirmed: boolean) => {
+  function executeVoiceCommand(command: VoiceCommand) {
+    switch (command.type) {
+      case CommandType.ADD_TASK: {
+        if (!command.entities.title) break;
+
+        const weight = suggestWeight(command.entities.title);
+        const periods =
+          selectedRecurrence === 'all-blocks'
+            ? [TimePeriod.MORNING, TimePeriod.AFTERNOON, TimePeriod.EVENING]
+            : selectedPeriods.length > 0
+              ? [...selectedPeriods]
+              : [activePeriodId];
+
+        commitTask({
+          title: command.entities.title,
+          periods,
+          priority: 'medium',
+          weight,
+          recurrence: 'none',
+          dueDate: todayStr,
+        }, false);
+        break;
+      }
+
+      case CommandType.UPDATE_TASK: {
+        if (!command.entities.index) break;
+        const taskIndex = command.entities.index - 1;
+        setTasks((prev) =>
+          prev.map((task, index) =>
+            index === taskIndex
+              ? {
+                  ...task,
+                  weight: command.entities.weight ?? task.weight,
+                  periods: command.entities.period ? [command.entities.period] : task.periods,
+                  priority: command.entities.priority ?? task.priority,
+                }
+              : task
+          )
+        );
+        break;
+      }
+
+      case CommandType.TOGGLE_TASK: {
+        if (command.entities.index) {
+          const taskIndex = command.entities.index - 1;
+          setTasks((prev) =>
+            prev.map((task, index) =>
+              index === taskIndex ? { ...task, completed: !task.completed } : task
+            )
+          );
+        } else if (command.entities.title) {
+          const title = command.entities.title.toLowerCase();
+          setTasks((prev) =>
+            prev.map((task) =>
+              task.title.toLowerCase().includes(title) ? { ...task, completed: !task.completed } : task
+            )
+          );
+        }
+        break;
+      }
+
+      case CommandType.DELETE_TASK: {
+        if (command.entities.index) {
+          const taskIndex = command.entities.index - 1;
+          setTasks((prev) => prev.filter((_, index) => index !== taskIndex));
+        } else if (command.entities.title) {
+          const title = command.entities.title.toLowerCase();
+          setTasks((prev) => prev.filter((task) => !task.title.toLowerCase().includes(title)));
+        }
+        break;
+      }
+
+      case CommandType.NAVIGATE_DATE: {
+        if (command.entities.direction === 'next') navigateDate(1);
+        else if (command.entities.direction === 'prev') navigateDate(-1);
+        else if (command.entities.direction === 'today') goToToday();
+        break;
+      }
+
+      case CommandType.CHANGE_VIEW: {
+        if (command.entities.viewMode) setViewMode(command.entities.viewMode);
+        break;
+      }
+    }
+  }
+
+  function handleVoiceCommand(command: VoiceCommand) {
+    if (command.silent) {
+      setIsVoiceProcessing(false);
+      setVoiceStatus('idle');
+      return;
+    }
+
+    setIsVoiceProcessing(true);
+    setVoiceStatus('processing');
+
+    try {
+      if (command.confidence < voiceSettings.confidenceThreshold && voiceSettings.requireConfirmation) {
+        voiceServiceRef.current?.stopListening();
+        setPendingVoiceCommand(command);
+        setShowVoiceConfirmation(true);
+        setVoiceStatus('idle');
+        return;
+      }
+
+      executeVoiceCommand(command);
+
+      if (voiceSettings.ttsEnabled && voiceServiceRef.current) {
+        voiceServiceRef.current.speak(getVoiceFeedback(command.type));
+      }
+
+      setVoiceStatus('success');
+      setTimeout(() => setVoiceStatus('idle'), 2000);
+    } catch {
+      setVoiceStatus('error');
+      setVoiceError('Failed to execute command');
+
+      if (voiceSettings.ttsEnabled && voiceServiceRef.current) {
+        voiceServiceRef.current.speak(VOICE_TRANSLATIONS[voiceSettings.language].error);
+      }
+
+      setTimeout(() => {
+        setVoiceStatus('idle');
+        setVoiceError(undefined);
+      }, 3000);
+    } finally {
+      setIsVoiceProcessing(false);
+    }
+  }
+
+  function toggleVoiceListening() {
+    const service = voiceServiceRef.current;
+    const processor = voiceProcessorRef.current;
+    if (!service || !processor) return;
+
+    if (isVoiceListening || voiceStatus === 'listening') {
+      service.stopListening();
+      setIsVoiceListening(false);
+      setVoiceStatus('idle');
+      setVoiceTranscript('');
+      setVoiceConfidence(undefined);
+      setShowVoiceConfirmation(false);
+      setPendingVoiceCommand(null);
+      return;
+    }
+
+    setVoiceStatus('listening');
+    setIsVoiceListening(true);
+
+    service.startListening(
+      (transcript, isFinal, confidence) => {
+        setVoiceTranscript(transcript);
+
+        const effectiveConfidence =
+          confidence === undefined || confidence === 0
+            ? voiceSettings.confidenceThreshold + 0.1
+            : confidence;
+
+        setVoiceConfidence(effectiveConfidence);
+
+        if (isFinal) {
+          handleVoiceCommand(processor.parseCommand(transcript, effectiveConfidence));
+          setIsVoiceListening(false);
+        }
+      },
+      (error) => {
+        setVoiceStatus('error');
+        setVoiceError(error);
+        setIsVoiceListening(false);
+        setTimeout(() => {
+          setVoiceStatus('idle');
+          setVoiceError(undefined);
+        }, 3000);
+      }
+    );
+  }
+
+  function handleVoiceConfirmation(confirmed: boolean) {
     setShowVoiceConfirmation(false);
 
     if (confirmed && pendingVoiceCommand) {
       executeVoiceCommand(pendingVoiceCommand);
-
-      if (voiceSettings.ttsEnabled && voiceService) {
-        const feedback = getVoiceFeedback(pendingVoiceCommand.type, pendingVoiceCommand.intent, true);
-        voiceService.speak(feedback);
+      if (voiceSettings.ttsEnabled && voiceServiceRef.current) {
+        voiceServiceRef.current.speak(getVoiceFeedback(pendingVoiceCommand.type));
       }
     }
 
     setPendingVoiceCommand(null);
-  }, [pendingVoiceCommand, voiceSettings, voiceService, executeVoiceCommand]);
+  }
 
-  useEffect(() => {
-    if (appState === 'ready' && activePeriodId !== TimePeriod.NIGHT && selectedPeriods.length === 1 && selectedPeriods[0] === TimePeriod.MORNING) {
-      setSelectedPeriods([activePeriodId]);
-    }
-  }, [activePeriodId, appState]);
+  function triggerAlarm() {
+    const sound = ALARM_SOUNDS.find((item) => item.id === settings.alarm.sound);
+    if (!sound || isAlarmPlaying) return;
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      setCurrentTime(now);
-      if (settings.alarm.enabled) {
-        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-        if (timeStr === settings.alarm.time && !isAlarmPlaying && lastAlarmTriggeredAt !== timeStr) {
-          triggerAlarm();
-          setLastAlarmTriggeredAt(timeStr);
-        }
+    const audio = new Audio(sound.url);
+    audio.loop = true;
+    audio.volume = 0;
+    audio.play().catch((error) => console.error('Audio playback blocked', error));
+    audioRef.current = audio;
+    setIsAlarmPlaying(true);
+
+    const fadeTime = 15000;
+    const steps = 100;
+    let currentStep = 0;
+    fadeIntervalRef.current = window.setInterval(() => {
+      currentStep += 1;
+      if (audioRef.current) {
+        audioRef.current.volume = Math.min(1, currentStep / steps);
       }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [settings.alarm, isAlarmPlaying, lastAlarmTriggeredAt]);
+      if (currentStep >= steps && fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+      }
+    }, fadeTime / steps);
+  }
 
-  const triggerAlarm = () => {
-    const sound = ALARM_SOUNDS.find(s => s.id === settings.alarm.sound);
-    if (sound && !isAlarmPlaying) {
-      const audio = new Audio(sound.url);
-      audio.loop = true;
-      audio.volume = 0;
-      audio.play().catch(e => console.error("Audio playback blocked", e));
-      audioRef.current = audio;
-      setIsAlarmPlaying(true);
-      const fadeTime = 15000;
-      const steps = 100;
-      let currentStep = 0;
-      fadeIntervalRef.current = window.setInterval(() => {
-        currentStep++;
-        if (audioRef.current) audioRef.current.volume = Math.min(1, currentStep / steps);
-        if (currentStep >= steps && fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-      }, fadeTime / steps);
-    }
-  };
-
-  const stopAlarm = () => {
+  function stopAlarm() {
     if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     setIsAlarmPlaying(false);
-  };
+  }
 
-  const snoozeAlarm = () => {
+  function snoozeAlarm() {
     stopAlarm();
     const now = new Date();
     now.setMinutes(now.getMinutes() + 5);
     const newTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    setSettings(prev => ({ ...prev, alarm: { ...prev.alarm, time: newTime } }));
-  };
+    setSettings((prev) => ({ ...prev, alarm: { ...prev.alarm, time: newTime } }));
+  }
 
-  const togglePeriodSelection = (period: TimePeriod) => {
-    if (period === TimePeriod.NIGHT) return;
-    setSelectedPeriods(prev => {
-      if (prev.includes(period)) {
-        return prev.length > 1 ? prev.filter(p => p !== period) : prev;
-      } else {
-        return [...prev, period];
-      }
-    });
-  };
-
-  const handleQuickAdd = (period: TimePeriod) => {
-    if (period === TimePeriod.NIGHT) return;
-    setSelectedPeriods([period]);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const titleTimeoutRef = useRef<number | null>(null);
-  useEffect(() => {
-    const currentTitle = newTaskTitle.trim();
-    if (currentTitle.length > 3) {
-      if (titleTimeoutRef.current) clearTimeout(titleTimeoutRef.current);
-      titleTimeoutRef.current = window.setTimeout(() => {
-        const weight = suggestWeight(currentTitle);
-        if (newTaskTitle.trim() === currentTitle) {
-          setSelectedWeight(weight);
-        }
-      }, 1000);
-    }
-    return () => {
-      if (titleTimeoutRef.current) clearTimeout(titleTimeoutRef.current);
-    };
-  }, [newTaskTitle]);
-
-  const addTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTaskTitle.trim()) return;
-
-    let periodsToUse = selectedRecurrence === 'all-blocks'
-      ? [TimePeriod.MORNING, TimePeriod.AFTERNOON, TimePeriod.EVENING]
-      : [...selectedPeriods]; // Create a copy
-
-    const baseTask: Omit<Task, 'id' | 'periods' | 'dueDate'> = {
-      title: newTaskTitle,
-      completed: false,
-      createdAt: Date.now(),
-      priority: 'medium',
-      weight: selectedWeight,
-      recurrence: selectedRecurrence
-    };
-
-    let targetDate = viewMode === 'day' ? todayStr : viewDate.toISOString().split('T')[0];
-
-    console.log('📝 Adding task:', newTaskTitle, 'periods:', periodsToUse, 'date:', targetDate);
-    console.log('🕐 Current time:', currentTime, 'active period:', activePeriodId);
-
-    // Check capacity and adjust periods if needed (pass current time and period)
-    const adjustment = adjustTaskPeriods(tasks, periodsToUse, targetDate, selectedWeight, activePeriodId, currentTime);
-
-    console.log('🔄 Adjustment result:', adjustment);
-
-    if (adjustment.transferred) {
-      // Task was transferred to a different period or day
-      periodsToUse = adjustment.periods;
-      targetDate = adjustment.date;
-
-      const periodNames = {
-        [TimePeriod.MORNING]: t.morning,
-        [TimePeriod.AFTERNOON]: t.afternoon,
-        [TimePeriod.EVENING]: t.evening
-      };
-
-      const isNewDay = targetDate !== todayStr;
-
-      let message;
-      if (isNewDay) {
-        const tomorrow = new Date(targetDate);
-        const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
-        const dateStr = tomorrow.toLocaleDateString(settings.language === 'ru' ? 'ru-RU' : settings.language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short' });
-        message = t.taskTransferredTomorrow
-          .replace('{title}', newTaskTitle)
-          .replace('{period}', periodName)
-          .replace('{date}', dateStr);
-      } else {
-        const periodName = periodsToUse[0] ? periodNames[periodsToUse[0]] : '';
-        message = t.taskTransferred
-          .replace('{title}', newTaskTitle)
-          .replace('{period}', periodName) + ' ' + t.blockOverflow;
-      }
-
-      console.log('✅ Task transferred:', message);
-
-      setCapacityNotification({
-        type: 'transferred',
-        message
-      });
-      setTimeout(() => setCapacityNotification(null), 5000);
-    } else if (adjustment.allFull) {
-      // All periods are full
-      console.log('⚠️ All periods full');
-      setCapacityNotification({
-        type: 'full',
-        message: t.allBlocksFull
-      });
-      setTimeout(() => setCapacityNotification(null), 5000);
-    }
-
-    const newTask: Task = { ...baseTask, id: Math.random().toString(36).substr(2, 9), periods: periodsToUse, dueDate: targetDate };
-
-    console.log('✨ Creating task:', newTask);
-
-    setTasks([...tasks, newTask]);
-    setNewTaskTitle('');
-    setSelectedRecurrence('none');
-    if (activePeriodId !== TimePeriod.NIGHT) {
-      setSelectedPeriods([activePeriodId]);
-    }
-  };
-
-  const handleSaveSettings = () => {
+  function handleSaveSettings() {
     const [wH, wM] = tempWake.split(':').map(Number);
     const [rH, rM] = tempRest.split(':').map(Number);
     const wakeM = wH * 60 + wM;
     const restM = rH * 60 + rM;
     const diff = (wakeM + 1440 - restM) % 1440;
+
     if (diff < 420) {
       setSettingsError(t.sleepGapError);
       return;
     }
-    setSettings({ ...settings, wakeUpTime: tempWake, restTime: tempRest, language: tempLang, alarm: tempAlarm });
+
+    setSettings({
+      ...settings,
+      wakeUpTime: tempWake,
+      restTime: tempRest,
+      language: tempLang,
+      alarm: tempAlarm,
+    });
     setSettingsError(null);
     setShowSettings(false);
-    setShowAlarmMenu(false);
-  };
+  }
 
-  const handleLogout = () => {
+  function handleLogout() {
     setUser(null);
     setAppState('auth');
     localStorage.removeItem('flow_user');
     window.location.reload();
-  };
+  }
+
+  function handleTaskAdd(draft: Omit<Task, 'id' | 'createdAt' | 'completed'>) {
+    commitTask(draft);
+    setIsTaskSheetOpen(false);
+    setSelectedRecurrence('none');
+    if (activePeriodId !== TimePeriod.NIGHT) {
+      setSelectedPeriods([activePeriodId]);
+    }
+  }
 
   if (appState === 'splash') {
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0a0a0a] z-[100]" style={{ background: '#0a0a0a' }}>
-        <BackgroundSpots isWindDown={false} />
-        <div className="relative mb-12">
-          {getIcon('refresh', 'text-white animate-[spin_10s_linear_infinite]', 80)}
-          <div className="absolute inset-0 flex items-center justify-center">
-            {getIcon('auto_awesome', 'text-white animate-pulse', 22)}
+      <ThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
+          style={{
+            background: 'var(--md-sys-color-background)',
+            color: 'var(--md-sys-color-on-background)',
+          }}
+        >
+          <div className="relative mb-12">
+            {getIcon('refresh', 'animate-[spin_10s_linear_infinite]', 80)}
+            <div className="absolute inset-0 flex items-center justify-center">
+              {getIcon('auto_awesome', 'animate-pulse', 22)}
+            </div>
           </div>
+          <h1 className="mb-4 text-5xl font-light tracking-tighter">Flow</h1>
+          <p className="text-[10px] font-bold uppercase tracking-[0.4em]">Harmonize your day</p>
         </div>
-        <h1 className="text-5xl font-light text-white tracking-tighter mb-4" style={{ color: 'white' }}>Flow</h1>
-        <p className="text-white font-bold uppercase tracking-[0.4em] text-[10px]" style={{ color: 'white' }}>Harmonize your day</p>
-      </div>
+      </ThemeProvider>
     );
   }
 
   if (appState === 'auth') {
-    return <Auth lang={settings.language} onAuth={(u) => { setUser(u); setAppState('ready'); }} />;
+    return (
+      <ThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        <Auth
+          lang={settings.language}
+          onAuth={(profile) => {
+            setUser(profile);
+            setAppState('ready');
+          }}
+        />
+      </ThemeProvider>
+    );
   }
 
   return (
-    <div className="min-h-screen max-w-lg mx-auto px-6 py-8 relative">
-      <BackgroundSpots isWindDown={isWindDown} />
+    <ThemeProvider theme={muiTheme}>
+      <CssBaseline />
 
-      {isAlarmPlaying && (
-        <AlarmPlayingModal
-          settings={settings}
-          onStop={stopAlarm}
-          onSnooze={snoozeAlarm}
+      <div className="relative mx-auto min-h-screen max-w-lg px-6 py-8">
+        {isAlarmPlaying && (
+          <AlarmPlayingModal settings={settings} onStop={stopAlarm} onSnooze={snoozeAlarm} />
+        )}
+
+        <Header
+          currentTime={currentTime}
+          user={user}
+          language={settings.language}
+          isDarkTheme={isDarkTheme}
+          isListView={isListView}
+          onToggleTheme={() => setIsDarkTheme((prev) => !prev)}
+          onToggleView={() => setIsListView((prev) => !prev)}
         />
-      )}
 
-      <Header
-        currentTime={currentTime}
-        user={user}
-        language={settings.language}
-        isDarkTheme={isDarkTheme}
-        isListView={isListView}
-        onToggleTheme={() => setIsDarkTheme(prev => !prev)}
-        onToggleView={() => setIsListView(prev => !prev)}
-      />
+        <VoiceFeedback
+          isListening={isVoiceListening}
+          isProcessing={isVoiceProcessing}
+          transcript={voiceTranscript}
+          confidence={voiceConfidence}
+          status={voiceStatus}
+          errorMessage={voiceError}
+          language={voiceSettings.language}
+        />
 
-      <VoiceFeedback
-        isListening={isVoiceListening}
-        isProcessing={isVoiceProcessing}
-        transcript={voiceTranscript}
-        confidence={voiceConfidence}
-        status={voiceStatus}
-        errorMessage={voiceError}
-        language={voiceSettings.language}
-      />
-
-      {capacityNotification && (
-        <div className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top duration-300 ${capacityNotification.type === 'transferred'
-          ? 'bg-emerald-500/90 text-white'
-          : 'bg-amber-500/90 text-white'
-          } backdrop-blur-sm`}>
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-bold">
-              {capacityNotification.message}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {showVoiceConfirmation && pendingVoiceCommand && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            style={{
-              background: 'var(--md-sys-color-surface-container)',
-              borderRadius: '24px',
-              border: '1px solid var(--md-sys-color-outline-variant)',
-              boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3)'
-            }}
+        <Snackbar
+          open={capacityNotification !== null}
+          autoHideDuration={5000}
+          onClose={() => setCapacityNotification(null)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          sx={{ top: { xs: 96 } }}
+        >
+          <Alert
+            onClose={() => setCapacityNotification(null)}
+            severity={capacityNotification?.type === 'full' ? 'warning' : 'success'}
+            variant="filled"
+            sx={{ width: '100%' }}
           >
-            <h3 className="text-lg font-light text-white mb-4">
-              {VOICE_TRANSLATIONS[voiceSettings.language].confirmAdd.replace('{title}', pendingVoiceCommand.entities.title || '')}
-            </h3>
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleVoiceConfirmation(false)}
-                className="flex-1 py-2 px-4 rounded-lg bg-white/10 text-white/80 hover:bg-white/20 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleVoiceConfirmation(true)}
-                className="flex-1 py-2 px-4 rounded-lg bg-active text-white hover:opacity-90 transition-opacity"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            {capacityNotification?.message}
+          </Alert>
+        </Snackbar>
 
-      <div className="flex flex-col gap-4 mb-6">
-        <ViewSwitcher
-          viewMode={viewMode}
-          onModeChange={setViewMode}
-          language={settings.language}
+        <VoiceConfirmDialog
+          open={showVoiceConfirmation}
+          command={pendingVoiceCommand}
+          language={voiceSettings.language}
+          onConfirm={() => handleVoiceConfirmation(true)}
+          onCancel={() => handleVoiceConfirmation(false)}
         />
-        <DateNavigator
-          viewDate={viewDate}
-          viewMode={viewMode}
-          todayStr={todayStr}
-          language={settings.language}
-          onNavigate={navigateDate}
-          onToday={() => setViewDate(new Date())}
-        />
-      </div>
 
-      <main className="space-y-10 animate-in fade-in duration-500">
-        {viewMode === 'day' && (
-          <DayView
-            isRecoveryMode={isRecoveryMode}
-            isWindDown={isWindDown}
-            currentTime={currentTime}
-            dynamicBlocks={dynamicBlocks}
-            activePeriodId={activePeriodId}
-            todayStr={todayStr}
-            viewDate={viewDate}
-            tasks={tasks}
-            collapsedBlocks={collapsedBlocks}
+        <div className="mb-6">
+          <ViewSwitcher
+            viewMode={viewMode}
+            onModeChange={setViewMode}
             language={settings.language}
-            isTaskSheetOpen={isTaskSheetOpen}
-            onCloseTaskSheet={() => setIsTaskSheetOpen(false)}
-            onTaskAdd={(newTaskData) => {
-              console.log('📝 TaskSheet adding task:', newTaskData);
-              const targetDate = newTaskData.dueDate || todayStr;
-              const adjustment = adjustTaskPeriods(tasks, newTaskData.periods, targetDate, newTaskData.weight, activePeriodId, currentTime);
+          />
+        </div>
 
-              console.log('🔄 TaskSheet adjustment:', adjustment);
-
-              let finalPeriods = newTaskData.periods;
-              let finalDate = targetDate;
-
-              if (adjustment.transferred) {
-                finalPeriods = adjustment.periods;
-                finalDate = adjustment.date;
-
-                const periodNames = {
-                  [TimePeriod.MORNING]: t.morning,
-                  [TimePeriod.AFTERNOON]: t.afternoon,
-                  [TimePeriod.EVENING]: t.evening
-                };
-
-                const isNewDay = finalDate !== todayStr;
-
-                let message;
-                if (isNewDay) {
-                  const tomorrow = new Date(finalDate);
-                  const periodName = finalPeriods[0] ? periodNames[finalPeriods[0]] : '';
-                  const dateStr = tomorrow.toLocaleDateString(settings.language === 'ru' ? 'ru-RU' : settings.language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short' });
-                  message = t.taskTransferredTomorrow
-                    .replace('{title}', newTaskData.title)
-                    .replace('{period}', periodName)
-                    .replace('{date}', dateStr);
-                } else {
-                  const periodName = finalPeriods[0] ? periodNames[finalPeriods[0]] : '';
-                  message = t.taskTransferred
-                    .replace('{title}', newTaskData.title)
-                    .replace('{period}', periodName) + ' ' + t.blockOverflow;
-                }
-
-                console.log('✅ TaskSheet task transferred:', message);
-
-                setCapacityNotification({
-                  type: 'transferred',
-                  message
-                });
-                setTimeout(() => setCapacityNotification(null), 5000);
-              } else if (adjustment.allFull) {
-                console.log('⚠️ TaskSheet: All periods full');
-                setCapacityNotification({
-                  type: 'full',
-                  message: t.allBlocksFull
-                });
-                setTimeout(() => setCapacityNotification(null), 5000);
+        <main className="animate-in fade-in space-y-10 duration-500">
+          {viewMode === 'day' && (
+            <DayView
+              isRecoveryMode={isRecoveryMode}
+              isWindDown={isWindDown}
+              isListView={isListView}
+              currentTime={currentTime}
+              dynamicBlocks={dynamicBlocks}
+              activePeriodId={activePeriodId}
+              todayStr={todayStr}
+              viewDate={viewDate}
+              tasks={tasks}
+              collapsedBlocks={collapsedBlocks}
+              language={settings.language}
+              isTaskSheetOpen={isTaskSheetOpen}
+              onCloseTaskSheet={() => setIsTaskSheetOpen(false)}
+              onTaskAdd={handleTaskAdd}
+              onQuickAdd={handleQuickAdd}
+              onToggle={toggleTask}
+              onDelete={deleteTask}
+              onUpdate={updateTask}
+              onToggleCollapse={(blockId) =>
+                setCollapsedBlocks((prev) => ({ ...prev, [blockId]: !prev[blockId] }))
               }
+              onDeleteAllCompleted={() => setTasks((prev) => prev.filter((task) => !task.completed))}
+              onDeleteAll={() => setTasks([])}
+            />
+          )}
 
-              const taskToAdd: Task = {
-                ...newTaskData,
-                id: Math.random().toString(36).substr(2, 9),
-                completed: false,
-                createdAt: Date.now(),
-                periods: finalPeriods,
-                dueDate: finalDate
-              };
+          {viewMode === 'week' && (
+            <WeekView
+              viewDate={viewDate}
+              tasks={tasks}
+              settings={settings}
+              todayStr={todayStr}
+              language={settings.language}
+            />
+          )}
 
-              setTasks([...tasks, taskToAdd]);
-              setIsTaskSheetOpen(false);
-            }}
-            onQuickAdd={handleQuickAdd}
-            onToggle={toggleTask}
-            onDelete={deleteTask}
-            onUpdate={updateTask}
-            onToggleCollapse={(blockId) => setCollapsedBlocks(prev => ({ ...prev, [blockId]: !prev[blockId] }))}
-            onWeightChange={setSelectedWeight}
-            onPeriodToggle={togglePeriodSelection}
-            onRecurrenceChange={setSelectedRecurrence}
-            onInputFocusChange={setIsInputFocused}
-            onDeleteAllCompleted={deleteAllCompletedTasks}
-            onDeleteAll={deleteAllTasks}
-            selectedWeight={selectedWeight}
-            selectedPeriods={selectedPeriods}
-            selectedRecurrence={selectedRecurrence}
-            isInputFocused={isInputFocused}
+          {viewMode === 'month' && (
+            <MonthView
+              viewDate={viewDate}
+              tasks={tasks}
+              settings={settings}
+              todayStr={todayStr}
+              onDayClick={(day) => {
+                setViewDate(day);
+                setViewMode('day');
+              }}
+            />
+          )}
+
+          {viewMode === 'year' && (
+            <YearView viewDate={viewDate} tasks={tasks} language={settings.language} />
+          )}
+        </main>
+
+        <div className="relative z-20 mt-6">
+          <DateNavigator
+            viewDate={viewDate}
+            viewMode={viewMode}
+            todayStr={todayStr}
+            language={settings.language}
+            onNavigate={navigateDate}
+            onToday={goToToday}
+          />
+        </div>
+
+        {showSettings && (
+          <SettingsModal
+            settings={settings}
+            tempWake={tempWake}
+            tempRest={tempRest}
+            tempLang={tempLang}
+            tempAlarm={tempAlarm}
+            error={settingsError}
+            voiceSettings={voiceSettings}
+            onVoiceSettingsChange={setVoiceSettings}
+            onSave={handleSaveSettings}
+            onClose={() => setShowSettings(false)}
+            onLogout={handleLogout}
+            onTempWakeChange={setTempWake}
+            onTempRestChange={setTempRest}
+            onTempLangChange={setTempLang}
           />
         )}
-        {viewMode === 'week' && <WeekView viewDate={viewDate} tasks={tasks} settings={settings} todayStr={todayStr} language={settings.language} />}
-        {viewMode === 'month' && <MonthView viewDate={viewDate} tasks={tasks} settings={settings} todayStr={todayStr} onDayClick={(day) => { setViewDate(day); setViewMode('day'); }} />}
-        {viewMode === 'year' && <YearView viewDate={viewDate} tasks={tasks} language={settings.language} />}
-      </main>
 
-      {showSettings && (
-        <SettingsModal
-          settings={settings}
-          tempWake={tempWake}
-          tempRest={tempRest}
-          tempLang={tempLang}
-          tempAlarm={tempAlarm}
-          error={settingsError}
-          voiceSettings={voiceSettings}
-          onVoiceSettingsChange={setVoiceSettings}
-          onSave={handleSaveSettings}
-          onClose={() => setShowSettings(false)}
-          onLogout={handleLogout}
-          onTempWakeChange={setTempWake}
-          onTempRestChange={setTempRest}
-          onTempLangChange={setTempLang}
+        <FlowToolbar
+          onSettingsClick={() => setShowSettings(true)}
+          onIdeasClick={() => undefined}
+          onVoiceClick={toggleVoiceListening}
+          onAddTaskClick={openTaskSheet}
+          onSmartPlannerClick={() => undefined}
+          isVoiceListening={isVoiceListening}
         />
-      )}
-
-      {showAlarmMenu && (
-        <AlarmModal
-          settings={settings}
-          tempAlarm={tempAlarm}
-          onSave={handleSaveSettings}
-          onClose={() => setShowAlarmMenu(false)}
-          onTempAlarmChange={setTempAlarm}
-        />
-      )}
-
-      <FlowToolbar
-        onSettingsClick={() => setShowSettings(true)}
-        onIdeasClick={() => console.log('Ideas')}
-        onVoiceClick={toggleVoiceListening}
-        onAddTaskClick={() => setIsTaskSheetOpen(true)}
-        onSmartPlannerClick={() => console.log('Smart Planner')}
-        isVoiceListening={isVoiceListening}
-      />
-    </div>
+      </div>
+    </ThemeProvider>
   );
 };
 

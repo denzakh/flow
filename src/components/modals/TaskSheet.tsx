@@ -73,9 +73,20 @@ export default function TaskSheet({
             setSelectedRecurrence('none');
             setIsAutoSelected(true);
             setTitleError(null);
-            setTimeout(() => inputRef.current?.focus(), 100);
+            requestAnimationFrame(() => inputRef.current?.focus());
         }
     }, [isOpen, activePeriodId]);
+
+    const releaseFocus = () => {
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+    };
+
+    const handleClose = () => {
+        releaseFocus();
+        onClose();
+    };
 
     const handleSubmit = () => {
         const trimmed = title.trim();
@@ -101,6 +112,7 @@ export default function TaskSheet({
             tasks, [selectedPeriod], todayStr, selectedWeight, activePeriodId, currentTime
         );
 
+        releaseFocus();
         onTaskAdd({
             title: trimmed,
             periods: adjustment.periods,
@@ -109,7 +121,7 @@ export default function TaskSheet({
             priority: selectedPriority,
             recurrence: selectedRecurrence,
         });
-        onClose();
+        handleClose();
     };
 
     const handlePeriodChange = (_: React.MouseEvent<HTMLElement>, val: TimePeriod | null) => {
@@ -193,11 +205,16 @@ export default function TaskSheet({
         <SwipeableDrawer
             anchor="bottom"
             open={isOpen}
-            onClose={onClose}
+            onClose={handleClose}
             onOpen={() => { }}
             disableSwipeToOpen
-            BackdropProps={{
-                sx: { bgcolor: 'var(--md-sys-color-scrim)', opacity: 0.32 },
+            ModalProps={{
+                disableRestoreFocus: true,
+            }}
+            slotProps={{
+                backdrop: {
+                    sx: { bgcolor: 'var(--md-sys-color-scrim)', opacity: 0.32 },
+                },
             }}
             sx={{
                 '& .MuiDrawer-paper': {
@@ -565,7 +582,7 @@ export default function TaskSheet({
                 {/* Text Button (Cancel) */}
                 <Button
                     variant="text"
-                    onClick={onClose}
+                    onClick={handleClose}
                     sx={{
                         display: 'block',
                         mx: 'auto',
