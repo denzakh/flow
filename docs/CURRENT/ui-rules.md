@@ -1,102 +1,81 @@
----
-Контекст проекта: Flow App
-Слой системы: Визуальный (UI/UX)
-Официальные спецификации:
-- Дизайн-система Google M3: https://m3.material.io/
-- Стилизация компонентов: https://react-spectrum.adobe.com/react-aria/react-aria-components.html
----
+# Flow UI Implementation Rules (Material 3 Expressive + Hybrid Architecture)
 
-> ⚠️ ТЕКУЩИЙ СТАТУС: Приложение в процессе миграции на M3.
-> Компонентная библиотека: `src/components/ui/` (в разработке)
-> Готовые компоненты: Button.tsx, FAB.tsx
-> Токены: `src/theme/tokens.css` (актуально, использовать всегда)
-> Тема: `src/theme/material-theme.json` (актуально)
-> Структура: все исходники в `src/`, импорты относительные
+> ⚠️ ВНИМАНИЕ ИИ-АГЕНТУ: Приложение использует ГИБРИДНУЮ архитектуру стилизации.
+> 1. STANDARD UI (Формы, Настройки, Модалки, Шторки): Используем Material-UI (MUI v5/v6).
+> 2. EXPRESSIVE UI (Циркадные блоки, Баблы задач, Слой дат): Используем Tailwind CSS v4 + React Aria.
+> Любой хардкод HEX-значений или пикселей внутри компонентов СТРОГО ЗАПРЕЩЕН.
 
 ---
-
-# Flow UI Implementation Rules (Material 3 + Tailwind)
 
 ## 1. Сетка и Анатомия Отступов (Layout & Spacing)
-- **Базовый шаг:** Строгая сетка 4px. Все отступы (padding, margin), размеры элементов и расстояния между ними должны быть кратны 4.
-- **Стандартные шаги Tailwind:**
-  - `p-2` / `m-2` = 8px (микро-расстояния, иконки)
-  - `p-4` / `m-4` = 16px (стандартный отступ внутри карточек)
-  - `p-6` / `m-6` = 24px (крупные блоки, отступы экранов)
-- **Плотность (Density):** Для списков задач во Flow использовать компактную сетку (разрывы 8px), чтобы минимизировать вертикальный скролл.
-- **Минимальный touch target:** 48×48px для любого интерактивного элемента.
 
-## 2. Геометрия и Формы (Shapes & Borders)
-Использовать CSS переменные из `src/theme/tokens.css`, не хардкоженные значения:
+- **Базовый шаг:** Строгая сетка 4px. Все padding, margin, размеры элементов и расстояния между ними должны быть кратны 4.
+- **Стандартные шаги во Flow:**
+  - `p-1` / `m-1` = 4px (микро-выравнивание, стыки элементов)
+  - `p-2` / `m-2` = 8px (расстояние между иконкой и текстом, внутренние зазоры чипсов)
+  - `p-4` / `m-4` = 16px (каноничный внутренний отступ для карточек `TimeBlock` и списков задач)
+  - `p-6` / `m-6` = 24px (безопасные отступы от краев экрана для мобильных устройств)
 
-| Tailwind класс | CSS переменная | Размер | Применение |
-|---|---|---|---|
-| — | `--md-sys-shape-corner-none` | 0px | Край экрана десктопа |
-| `rounded-m3-xs` | `--md-sys-shape-corner-extra-small` | 4px | Тултипы, маленькие индикаторы |
-| `rounded-m3-sm` | `--md-sys-shape-corner-small` | 8px | Чипсы, контекстные меню |
-| `rounded-m3-md` | `--md-sys-shape-corner-medium` | 12px | Карточки задач |
-| `rounded-m3-lg` | `--md-sys-shape-corner-large` | 16px | FAB, навигационные панели |
-| `rounded-m3-xl` | `--md-sys-shape-corner-extra-large` | 28px | Диалоги, Bottom Sheet |
-| `rounded-full` | `--md-sys-shape-corner-full` | 9999px | Кнопки, аватары |
+---
 
-## 3. Маппинг Цветовых Ролей (Color Roles Mapping)
-Использовать исключительно токены из `src/theme/tokens.css`.
-Произвольные HEX-коды в компонентах **запрещены**.
+## 2. Система Форм и Скруглений (Shapes)
 
-### Системные роли M3:
-- **Фон приложения:** `var(--md-sys-color-background)`
-- **Поверхность карточек:** `var(--md-sys-color-surface-container)`
-- **Карточки активных задач:** `var(--md-sys-color-surface-container-high)`
-- **Экран с воздухом:** `var(--md-sys-color-surface-container-low)`
-- **Текст заголовков:** `var(--md-sys-color-on-surface)`
-- **Второстепенный текст:** `var(--md-sys-color-on-surface-variant)`
-- **Акцент/Primary:** `var(--md-sys-color-primary)`
-- **Текст на Primary:** `var(--md-sys-color-on-primary)`
-- **Ошибки:** `var(--md-sys-color-error)`
-- **Разделители:** `var(--md-sys-color-outline-variant)`
+Форма во Flow является носителем биологического смысла. Острые углы полностью **запрещены**, так как они вызывают когнитивный микростресс и нарушают концепцию Calm UI.
 
-### Flow-специфичные роли (блоки дня):
-- **Morning:** `var(--flow-block-morning)` — терракота #D4622A
-- **Afternoon:** `var(--flow-block-afternoon)` — синий #1976D2
-- **Evening:** `var(--flow-block-evening)` — пурпурный #7B3FC4
-- **Night:** `var(--flow-block-night)` — индиго #37306B
+- **Служебный UI (MUI):**
+  - Окна настроек, диалоги, Bottom Sheets: `rounded-[28px]` (M3 Large/Extra Large).
+  - Поля ввода (TextFields): `rounded-t-xl` или полные капсулы в зависимости от контекста темы.
+- **Карточки Задач и Блоки холста (Expressive UI):**
+  - `TimeBlock` (Квадранты дня): Мягкие скругления углов согласно макету Figma. `min-height` жестко зафиксирован для блокировки Layout Shift.
+  - `Quick Tasks (1 pt)`: Идеальный круг (`rounded-full`). Текст внутри запрещен — только центрированная контрастная иконка.
+  - `Focused Tasks (3 pts)`: Мягкий квадрат (`rounded-3xl` / squircle).
+  - `Deep Tasks (6 pts)`: Биоморфная, плавная форма «печенья» через SVG clip-path с обязательным контрастным контуром.
 
-### Flow-специфичные роли (веса задач):
-- **Quick:** `var(--flow-weight-quick-container)` — мята #CCFCE3
-- **Focused:** `var(--flow-weight-focused-container)` — лимон #FEF3C7
-- **Deep:** `var(--flow-weight-deep-container)` — роза #FCE4F5
+---
 
-## 4. Типографика (Typography Scale)
-Шрифт: **Inter** (подключён в index.html).
-Все размеры через CSS переменные из `src/theme/tokens.css`.
+## 3. Адаптивная Эргономика (Thumb Zone & Left-Handed Mode)
 
-| Применение | CSS переменная |
-|---|---|
-| Названия экранов | `--md-sys-typescale-headline-large-*` |
-| Названия блоков дня | `--md-sys-typescale-title-large-*` |
-| Заголовки задач | `--md-sys-typescale-title-medium-*` |
-| Описания, заметки | `--md-sys-typescale-body-medium-*` |
-| Текст на кнопках | `--md-sys-typescale-label-large-*` |
-| Чипсы, бейджи | `--md-sys-typescale-label-medium-*` |
-| Временные метки | `--md-sys-typescale-body-small-*` |
+Интерфейс обязан динамически перестраивать геометрию элементов в зависимости от глобального контекста руки пользователя (`isLeftHanded`), защищая интерактивные зоны от перекрытия ладонью (Anti-Occlusion).
 
-## 5. Компонентная Библиотека (src/components/ui/)
-Всегда проверять наличие готового компонента перед созданием нового:
+### А. Слой Даты (DateNavigator):
+Находится под циркадными блоками и над нижним тулбаром. Высота строго `52px`.
+- `isLeftHanded === false` ➔ Текст даты слева, кнопки-стрелки (Назад/Вперед) сдвинуты вправо (Thumb Zone правши).
+- `isLeftHanded === true` ➔ Кнопки-стрелки зеркально перелетают налево (Thumb Zone левши), текст даты уходит вправо.
 
-| Компонент | Статус | Применение |
-|---|---|---|
-| `Button.tsx` | ✅ готов | Все кнопки (filled/tonal/outlined/text) |
-| `FAB.tsx` | ✅ готов | Голосовая кнопка, главные действия |
-| `Switch.tsx` | 🔄 в плане | Тоглы в настройках |
-| `Chip.tsx` | 🔄 в плане | Веса задач, фильтры |
-| `BottomSheet.tsx` | 🔄 в плане | Модалки, панели |
-| `ListItem.tsx` | 🔄 в плане | Строки задач |
-| `NavigationBar.tsx` | 🔄 в плане | Bottom navigation |
+### Б. Нижняя панель управления (FlowToolbar):
+Монолитный тулбар во всю ширину экрана без скруглений и боковых маргинов.
+- **Центр:** Всегда неподвижно зафиксирован круглый Smart FAB (`56x56px`, скругление `16px`). Если в настройках выбран ввод голосом — иконка Lucide `Mic`, если текстом — Lucide `Plus`.
+- **Фланги панели:**
+  - При `isLeftHanded === false`: Иконка `Inbox` и дата слева ➔ FAB по центру ➔ Иконка `Settings` справа.
+  - При `isLeftHanded === true`: Иконка `Settings` слева ➔ FAB по центру ➔ Иконка `Inbox` справа.
 
-## 6. Запрещённые Паттерны
-- ❌ Хардкоженные HEX цвета в компонентах
-- ❌ Хардкоженные px значения (только кратные 4)
-- ❌ `backdrop-filter: blur()` — удалён, не использовать
-- ❌ Glassmorphism классы (glass-card, glass-2 и т.д.) — удалены
-- ❌ Импорты из корня проекта — все файлы в `src/`
-- ❌ Создание нового UI элемента без проверки компонентной библиотеки
+---
+
+## 4. Типографика (Typography)
+
+Единственный системный шрифт проекта — **Inter**. Использование Poppins или Google Sans удалено из кодовой базы. Все размеры привязываются к типам M3 через CSS-переменные из `src/theme/tokens.css`.
+
+| Сущность в интерфейсе Flow | Токен CSS / Класс Tailwind |
+|----------------------------|----------------------------|
+| Главные заголовки экранов | `var(--md-sys-typescale-headline-large)` |
+| Названия циркадных блоков  | `var(--md-sys-typescale-title-large)` |
+| Заголовки задач в списках  | `var(--md-sys-typescale-title-medium)` |
+| Описания, тексты заметок   | `var(--md-sys-typescale-body-medium)` |
+| Текст на кнопках управления| `var(--md-sys-typescale-label-large)` |
+| Временные метки, pts-бейджи| `var(--md-sys-typescale-body-small)` |
+
+---
+
+## 5. Карта Компонентов (Инструкция по переиспользованию)
+
+ИИ-агент обязан проверять этот реестр перед тем, как импортировать или создавать компоненты. Превышение полномочий библиотек запрещено.
+
+| Компонент интерфейса | Библиотека-донор | Правило стилизации |
+|----------------------|------------------|--------------------|
+| Кнопки (Filled, Tonal, Text) | **MUI** (`@mui/material/Button`) | Строго через тему, транслирующую `tokens.css` |
+| Поля ввода (TextField) | **MUI** (`@mui/material/TextField`) | Зарезервировано место под helper text (No Layout Shift) |
+| Шторки ввода (Bottom Sheet) | **MUI** (`@mui/material/SwipeableDrawer`) | Скругление верхних углов `28px` |
+| Циркадный блок времени | **React Aria + Tailwind** | Кастомный контейнер, управляющий холстом Matter.js |
+| Физический пузырь задачи | **React Aria + Tailwind** | Свободное тело в симуляции, форма зависит от pts-веса |
+| Переключатель дат (Слой времени) | **React Aria + Tailwind** | Горизонтальный флекс-контейнер, адаптивный под `isLeftHanded` |
+| Иконки приложения | **Lucide React** | Запрещено использовать `@mui/icons-material`. Только `lucide-react`. |

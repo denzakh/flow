@@ -11,7 +11,11 @@ Repo: https://github.com/denzakh/flow
 ## Stack
 - **Frontend**: React 19 + TypeScript + Vite
 - **Icons**: Используем строго lucide-react. Кодовая база очищена от альтернативных систем.
-- **Styling**: Tailwind CSS + `src/theme/tokens.css` + `design-tokens.ts` (строго без inline hex-значений)
+- **Typography**: Inter (SIL OFL 1.1) как единственный системный шрифт
+- **Styling**: Гибридная архитектура:
+  - **MUI v5/v6**: Для стандартных компонентов Material Design 3 (Modals, Forms, Nav, Settings)
+  - **Tailwind CSS v4 + React Aria**: Для кастомных компонентов с физикой (Day Blocks, Task Bubbles, Matter.js canvas)
+  - **CSS variables**: Единая система токенов из `src/theme/tokens.css` для обоих подходов
 - **Storage**: localStorage (all data is client-side)
 - **Voice**: Web Speech API (SpeechRecognition + SpeechSynthesis)
 - **AI (planned)**: Anthropic API via backend proxy
@@ -232,6 +236,11 @@ POST /api/ai
   - `src/utils/MaterialIcons.tsx` — 50+ custom SVG icons (pendant removed, moved to legacy folder)
 - ⚠️ **No src/tests/ directory exists** — tests may be absent or in a different location.
 - ⚠️ **Design tokens (`design-tokens.ts`) define a dark theme only** — the light theme described in the Color System section below is not yet implemented in code/styles.css.
+
+### ✅ Текущее состояние системы иконок и шрифтов
+- **Icons**: Полный переход на lucide-react. Legacy файл `src/utils/MaterialIcons.tsx` перемещен в `src/legacy/icons/` для архивации.
+- **Typography**: Единственный системный шрифт — Inter. Удалены все упоминания Poppins и Google Sans из кодовой базы.
+- **Font loading**: Шрифт Inter загружается через системные механизмы, fallback на system-ui и sans-serif.
 
 ### ⚠️ KNOWN ISSUES (as of 2026-05-15 v5)
 | # | Issue | Severity | Status |
@@ -700,10 +709,62 @@ Idea: { id: string; text: string; createdAt: string; tags?: string[]; convertedT
 - VoiceFAB pulse animation
 - Shape-based priority system (M3 inspired, web-native)
 
+## Component Layout Hierarchy
+
+### Z-Index and Layering Rules
+1. **Background Layer**: BackgroundSpots, global background
+2. **Temporal Layer**: DateNavigator (prev/next/today navigation) — расположен СТРОГО ПОД блоками дня
+3. **Content Layer**: DayView blocks, Week/Month/Year views, task lists
+4. **Overlay Layer**: Modals, dialogs, snackbars, capacity notifications
+5. **Toolbar Layer**: FlowToolbar — монолитный bottom toolbar с центральной FAB кнопкой
+
+### FlowToolbar Specifications
+- **Position**: Fixed bottom, full width, no side margins
+- **Background**: `var(--md-sys-color-surface-container)` (монолитный фон)
+- **Central FAB**: 56×56px, `borderRadius: '16px'`, primary background, on-primary icon
+- **Icon Buttons**: 48×48px touch targets, `on-surface-variant` color
+- **Gesture Bar**: At very bottom, `var(--md-sys-color-on-surface)`, w-32 h-1, rounded-full
+- **Behavior**: Scroll-hide (>50px down = translate-y-full, up = translate-y-0)
+
+### DateNavigator Positioning
+- **Location**: Directly above the main content area
+- **Z-index**: Below DayView blocks but above background elements
+- **Responsiveness**: Adapts to view mode (day/week/month/year)
+
+## Демаркационная линия: MUI vs Custom Components
+
+### STANDARD UI (использует MUI)
+- Modals (SettingsModal, AlarmModal, etc.)
+- Forms (TextField, Button, Switch)
+- Navigation (BottomNavigation, Tabs)
+- List Items, Cards, Dialogs, Snackbar
+- Все компоненты, которые следуют стандартным паттернам Material Design 3
+
+### EXPRESSIVE UI (использует Tailwind + React Aria)
+- DayView 4-quadrant grid
+- BubbleBlock с Matter.js физикой
+- Task bubbles с динамическими формами и поведением
+- Capacity visualization через bubbles
+- VoiceFAB с кастомной анимацией
+- Shape-based priority system
+- Idea Bank messenger UI
+
+### Правила интеграции
+- MUI компоненты должны использовать CSS переменные из tokens.css (никаких хардкодных цветов)
+- Custom компоненты не должны оборачиваться в MUI обертки, чтобы не нарушать DOM физику
+- Оба подхода должны уважать prefers-reduced-motion и другие accessibility настройки
+- Все интерактивные элементы должны иметь размер ≥ 48×48px
+
 ## Theme Files
-- `src/theme/material-theme.json` — M3 theme export with Inter typography, 
-  seed #7B3FC4, includes all color schemes (light/dark/high-contrast) 
-  and full type scale
+- `src/theme/tokens.css` — Основной файл токенов с полной системой Material Design 3
+  - Typography: Inter как единственный шрифт
+  - Color schemes: light/dark/high-contrast/forced-colors
+  - Motion: M3 easing curves и duration tokens
+  - Shapes: corner radius tokens от none до extra-large
+  - Flow-specific tokens: weight colors, block colors, custom utilities
+- `src/theme/design-tokens.ts` — TypeScript типы для design tokens
+- `src/theme/mui-theme.ts` — MUI theme configuration, consuming CSS variables from tokens.css
+- `tailwind.config.ts` — Tailwind configuration, mapping CSS variables to Tailwind classes
 
   ---
 

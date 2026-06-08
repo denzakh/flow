@@ -1,320 +1,85 @@
-# Flow App: Design & Code Constitution
+# Flow Calendar: Design & Code Constitution (.cursorrules)
 
-## 1. System Authority
-- Reference @Material Design 3 (https://m3.material.io) for all visual logic.
-- Reference React Aria (https://react-spectrum.adobe.com/react-aria/) for accessible component implementation.
-- If a design token exists in `tokens.css` or `design-tokens.ts`, use it. Never use hardcoded HEX or pixel values.
+## 1. System Authority & Hybrid UI Architecture
+You are building Flow, a circadian-rhythm productivity app based on a HYBRID UI architecture. Strict discipline in separating library responsibilities is required:
 
-## 2. Visual Standards (Strict M3)
-- **Grid:** 4px baseline grid. All padding and margins must be multiples of 4.
-- **Elevation:** Only levels 0–5. Use surface tints instead of heavy shadows where possible.
-- **Shapes:** Tasks/Cards = Medium (12px), Buttons = Full, Dialogs = Large (28px).
-- **Typography:** Strict mapping to M3 typescale (Display, Headline, Title, Body, Label).
-- **State layers:** Every interactive element MUST have enabled / hovered / focused / pressed / disabled states via M3 translucency overlays.
+1. **STANDARD UI (Modals, Forms, Nav, Settings, Dialogs, Snackbar):** Use Material-UI (MUI v5/v6).
+   - CRITICAL: MUI must be strictly themed via `src/theme/mui-theme.ts` to consume our CSS variables from `tokens.css` (e.g., `var(--md-sys-color-primary)`). Inline HEX or default MUI colors are FORBIDDEN.
+2. **EXPRESSIVE UI (Day Blocks, Task Bubbles, Temporal Layer/DateNavigator):** Use Tailwind CSS v4 + React Aria.
+   - These are custom bio-mechanical entities. Do NOT use MUI wrappers here as they break DOM and physics simulation.
 
-# CORE DIRECTIVE FOR FLOW CALENDAR
-# CORE DIRECTIVE FOR FLOW CALENDAR: HYBRID ARCHITECTURE
-You are building Flow, a circadian-rhythm productivity app. We are using a HYBRID UI architecture:
+### Single Source of Truth for Styles:
+- `src/theme/tokens.css` (CSS variables for colors, typescale, shapes, M3 motion).
+- `src/theme/design-tokens.ts` (TypeScript definitions for tokens).
+- `tailwind.config.ts` (Maps CSS variables to Tailwind utility classes).
 
-1. STANDARD UI (Modals, Forms, Nav, Settings): Use Material-UI (MUI v5/v6).
-   - CRITICAL: MUI must be strictly themed to consume our CSS variables from `tokens.css` (e.g., `var(--md-sys-color-primary)`). Do not use default MUI colors.
-2. EXPRESSIVE UI (Day Blocks, Task Bubbles, Matter.js canvas): Use Tailwind CSS + React Aria for accessibility.
-   - The 4 circadian blocks and physics-based task bubbles are custom entities and must NOT use MUI wrappers that break DOM physics.
+---
 
-- Do not use glassmorphism.
-- Respect `prefers-reduced-motion` across both MUI and custom components.
-You are building Flow, a circadian-rhythm productivity app. Before writing or modifying ANY component, you MUST silently read and internalize the following architecture documents:
+## 2. Component Layout Hierarchy & Z-Index Rules
+1. **Background Layer**: Global background and organic spots.
+2. **Temporal Layer (DateNavigator)**: Located STROHO UNDER DayView blocks and ABOVE FlowToolbar.
+3. **Content Layer**: DayView 4-quadrant grid, task lists inside expanded blocks.
+4. **Overlay Layer**: MUI Modals, dialogs, bottom sheets, capacity notifications.
+5. **Toolbar Layer (FlowToolbar)**: Monolithic bottom control bar.
 
-1. `docs/ui-layout-flow.md` - For spacing, hierarchy, and container rules.
-2. `docs/ui-react-aria-flow.md` - For interaction logic, accessibility, and state management.
-3. `CLAUDE.md` - For global project context and M3 token system.
+---
 
-CRITICAL CONSTRAINTS:
-- No inline hex colors or arbitrary values. Use ONLY `tokens.css` and `tailwind.config.ts`.
-- Do not introduce new CSS files for components.
-- Do not use glassmorphism (backdrop-blur) or non-M3 elevations.
+## 3. Adaptive Biomechanics (Left-Handed Mode & Thumb-Driven UX)
+The app relies on a global `isLeftHanded` context. Interface must dynamically adapt to user physiology:
 
-Before outputting code, verify your mental model against the "Проверочные вопросы для ИИ-агента" found in the docs.
+### FlowToolbar Specifications (`src/components/layout/FlowToolbar.tsx`):
+- **Layout**: Fixed bottom, full width, no side margins, no container border-radius. Background: `var(--md-sys-color-surface-container)`.
+- **Central Smart FAB**: 56x56px, `borderRadius: '16px'`, elevation-2. Dynamic icon based on `UserSettings.primaryInputMethod`: if `'voice'` -> Lucide `Mic`, if `'text'` -> Lucide `Plus`. Position is ALWAYS centered.
+- **Side Actions Layout**:
+  - `isLeftHanded === false`: `[InboxIcon] [DateText] ➔ ➔ ➔ [Central FAB] ➔ ➔ ➔ [SettingsIcon]`
+  - `isLeftHanded === true`: `[SettingsIcon] ➔ ➔ ➔ [Central FAB] ➔ ➔ ➔ [DateText] [InboxIcon]`
 
-## Tech Stack
-- React 19 + TypeScript + Vite
-- MUI v5 (standard components)
-- Tailwind CSS v4 (utility classes)
-- React Aria (custom components only)
-- CSS variables from tokens.css (single source of truth)
+### DateNavigator Specifications (Temporal Layer below DayView):
+- Flex container, full width, interactive target height `h-[52px]`.
+- **Layout Shifts**:
+  - `isLeftHanded === false`: Left side -> `DateText (Title M)`. Right side -> `ButtonGroup[PrevDayButton, NextDayButton]` (Thumb Zone for right hand).
+  - `isLeftHanded === true`: Left side -> `ButtonGroup[PrevDayButton, NextDayButton]` (Thumb Zone for left hand). Right side -> `DateText`.
 
-## MUI + Tailwind: Responsibility Boundaries
+---
 
-| What | Where | How |
-|------|-------|-----|
-| Structure, layout | MUI sx | flex, grid, position only |
-| Colors | CSS variables | var(--md-sys-color-*) |
-| Spacing | Tailwind | className="p-4 mt-2" |
-| Typography | MUI theme | variant="body1", "h6" |
-| States | MUI sx | selected, hover, disabled |
-| Shapes (pill, squircle) | MUI sx | borderRadius: '9999px' |
+## 4. Circadian Day Blocks & Task Bubble Specifications
 
-## FORBIDDEN:
-- Hardcoded HEX in sx
-- sx for margin/padding (use Tailwind classes instead)
-- Token duplication (don't define colors in sx if they exist in theme)
-- @tailwind directives (Tailwind v4 uses @import "tailwindcss")
-- Deleting or modifying tokens.css without approval
-- Inline styles in components
-- Using @mui/icons-material (we use lucide-react)
-## Imports:
-- MUI: import Button from '@mui/material/Button'
-- Icons: import { IconName } from 'lucide-react'
-- NEVER: import { Button } from '@mui/material' (deep imports required)
+### TimeBlock (DayView Quadrants):
+- **Geometric Invariance**: `min-height` is strictly fixed to prevent Layout Shifts during loading or empty states.
+- **Loading State**: NO gray skeleton loaders. Container instantly renders target background. Smooth breathing transparency animation applied (`ease-m3-emphasized`, `duration-m3-long-4`).
+- **Empty State**: Pure pastel background, block title, and a subtle centered icon with 5-10% opacity. No aggressive call-to-actions.
+- **Overflow State**: Sum of task weights > 12 pts. Triggers a double internal border of `var(--flow-capacity-overload)` (#FCD34D). **RED color is FORBIDDEN.** Space for helper text in the inline slot must be pre-reserved.
 
-## Backup:
-ALWAYS run .agents/backup.sh pre-edit <file> before editing
-## Theme:
-- MUI theme uses CSS variables (var(--md-sys-color-*))
-- Tailwind uses same CSS variables
-- Both mutate together when .dark/.light class toggles on <html>
-- Flow custom colors: var(--flow-block-*), var(--flow-weight-*)
+### Visual Encoding System (NO RED FOR ERRORS, NO SHARP EDGES):
+Oustanding sharp shapes (stars/bursts) are **FORBIDDEN** as they cause cognitive micro-stress. Form encodes ONLY weight (duration), priority does not change geometry.
+- **Quick Tasks (1 pt)**: Ideal circle (`rounded-full`). Text is forbidden. Only one contrast icon strictly centered on dynamic pastel background.
+- **Focused Tasks (3 pts)**: Soft square / squircle (`rounded-3xl`). Text allowed.
+- **Deep Tasks (6 pts)**: Organic "Cookie" shape via custom SVG path. Must have a distinctive contrast outline (`var(--flow-block-*-on-container)`).
 
-## Component Rules:
-- Standard UI → MUI (Button, Dialog, TextField, Tabs, BottomNavigation, etc.)
-- Custom physics/bubbles → React + CSS variables (NOT MUI)
-- 4 TimeBlocks, Matter.js bubbles → Custom components
-- ViewSwitcher → MUI ToggleButtonGroup (pill shape, outline border)
-EOF
+### Dynamic Colors Mapping:
+Never use custom HEX for tasks or blocks. Use Extended M3 tokens:
+- Morning Block Container: `var(--flow-block-morning-container)` / Content: `var(--flow-block-morning-on-container)`
+- Tasks background: `var(--flow-weight-quick)`, `var(--flow-weight-focused)`, `var(--flow-weight-deep)`.
+- Tasks content: `var(--flow-weight-quick-on)`, `var(--flow-weight-focused-on)`, `var(--flow-weight-deep-on)`.
 
-## 3. Empathy & Accessibility (The "Respect" Principle)
-- All interactive targets must be ≥ 48×48px.
-- Use semantic HTML. Accessibility is not an afterthought — it's the core.
-- Color contrast must pass WCAG AA minimum; AAA where possible.
-- Never use color as the ONLY differentiator — always pair with shape, size, icon, or label.
-- prefers-reduced-motion → disable physics, all bubble shapes become circles with simple fade-in.
-- prefers-contrast: more → increase bubble opacity to 1.0, add 1px border same hue darker.
-- forced-colors (Windows High Contrast) → shape and size become the ONLY differentiators — preserve them.
-- Visual notifications setting → replaces all sound feedback with screen flash + persistent indicator (for deaf/HoH users).
+---
 
-## 4. Interaction States
-- Every interactive component MUST have: `enabled`, `hovered`, `focused`, `pressed`, `disabled`.
-- Use M3 State Layers (translucency overlays) — do not change opacity of the whole component.
-- Focus indicators: 3px solid, contrast ≥ 3:1 against adjacent colors.
+## 5. Interaction, Motion & Accessibility (A11y)
+- **Touch Targets**: All interactive elements (buttons, chips, list items) MUST have a clickable area of at least 52x52px (Flow calm standard).
+- **Events**: Always replace native `onClick` with React Aria's `onPress` for interactive nodes to ensure mobile touch normalization.
+- **Focus Rings**: Use `useFocusRing` hook to display outline focus indicators ONLY when navigating via keyboard.
+- **Motion Restrictions**: 
+  - Spatial Matter.js physics engine is allowed ONLY inside Compact Mode circadian blocks when `isRecoveryMode === false` and `prefers-reduced-motion` is inactive.
+  - If Recovery Mode or `prefers-reduced-motion` is enabled, destroy Matter.js engines instantly, render tasks as a static layout, and compress all CSS transitions to a instant 100ms fade-in.
+  - CSS Easing curves MUST use M3 tokens: Emphasized Decelerate `cubic-bezier(0.05, 0.7, 0.1, 1.0)` or Standard `cubic-bezier(0.2, 0, 0, 1.0)`. Linear or `ease-in-out` are FORBIDDEN.
 
-## 5. Development Rituals
-- Functional React components with TypeScript interfaces only.
-- Component structure: Atom → Molecule → Organism.
-- No hardcoded HEX values in component files — always reference a CSS variable.
-- Import order: tokens.css → motion.css → index.css.
-- Tailwind for spacing/layout. CSS variables for dynamic/theme-aware values.
-- Do NOT add new npm packages without explicit approval.
-- Do NOT change TypeScript logic, state management, voice module, or task optimizer — style changes only unless explicitly asked.
+---
 
-## 6. Flow Visual Language — Bubble System
-Bubbles encode task information through THREE independent visual channels:
-- **SIZE** → weight: Quick = small (r:14), Focused = medium (r:21), Deep = large (r:30)
-- **COLOR** → weight: Quick = mint #CCFCE3, Focused = lemon #FEF3C7, Deep = rose #FCE4F5
-- **SHAPE** → priority:
-  - Low = Circle (soft, rolls smoothly)
-  - Medium = Rounded rhomb / Clover4 (tips on corner)
-  - High = Burst / Star (sharp, bounces unpredictably)
+## 6. Code Style & Forbidden Actions
+- ❌ **FORBIDDEN**: Hardcoded HEX or pixel values in `sx` props or classNames.
+- ❌ **FORBIDDEN**: Using `@mui/icons-material`. We use `lucide-react` exclusively.
+- ❌ **FORBIDDEN**: Using `sx` for layout margins/paddings in MUI. Use Tailwind classes instead to keep spacing unified.
+- ❌ **FORBIDDEN**: Global `@tailwind` directives in sub-components (Tailwind v4 uses `@import "tailwindcss"` in index.css).
+- ❌ **FORBIDDEN**: Shallow imports for MUI. Use deep imports: `import Button from '@mui/material/Button'`.
 
-Shapes are implemented via SVG clipPath + Matter.js Bodies.fromVertices().
-Physics behavior is part of the semantic — High priority literally behaves more urgently.
-
-## 7. Custom Components — DO NOT apply M3 rules here
-These components are Flow-specific and intentionally deviate from M3:
-- **DayView 4-quadrant grid** — custom layout, no M3 equivalent
-- **BubbleBlock with Matter.js physics** — custom visual language
-- **Capacity visualization via bubbles** — not a M3 progress indicator
-- **VoiceFAB pulse animation** — extends M3 FAB with custom listening state
-- **Shape-based priority system** — inspired by M3 MaterialShapes, implemented web-native
-- **Idea Bank messenger UI** — custom chat-like pattern
-
-## 8. Tone & Copy Principles
-- Always supportive, never judgmental.
-- Overload signals: amber (care), never red (error).
-- Empty states: warm invitation, not emptiness.
-- Recovery/burnout: offer reset gently — "heavy week" not "you failed".
-- All smart hints and suggestions are optional — user can disable in Settings.
-
-## 9. M3 Component Specifications
-
-### Navigation Bar (Bottom)
-- Exactly 3–5 destinations — never fewer, never more
-- Active indicator: 64×32px pill shape on icon only — NOT full width highlight
-- Icon size: 24×24px; label: Label Medium
-- Badge: top-right of icon, number or dot only
-- Do NOT invent custom active states — use M3 indicator exactly
-
-### FAB (Floating Action Button)
-- Regular FAB: 56×56px, corner large (16px radius)
-- Small FAB: 40×40px
-- Large FAB: 96×96px
-- Extended FAB: height 56px, min-width 80px, icon LEFT of label, gap 8px
-- Container color: ALWAYS primaryContainer — NOT primary
-- Icon color: ALWAYS onPrimaryContainer
-- ONE FAB per screen maximum
-- Position: bottom-right OR bottom-center — never top, never left
-
-### Bottom Sheet
-- Modal sheet: always has scrim (rgba(0,0,0,0.32)) behind it
-- Handle: 32×4px pill, centered at top, color onSurfaceVariant at 40% opacity
-- Top corners: extraLarge (28px) ONLY — never full radius, never square
-- Header: 48px tall, title is Title Large
-- Do NOT add a close button — drag handle or scrim tap closes it
-- Content padding: 16px horizontal
-
-### List Items
-- Min height: 1-line = 56px / 2-line = 72px / 3-line = 88px
-- Leading element: 40×40px avatar OR 24×24px icon — never both
-- Trailing element: icon OR text OR checkbox — never combined
-- Padding: 16px horizontal; content vertically centered
-- Dividers: optional; use outline-variant color
-- Interactive: full row is tappable, state layer covers entire row
-
-### Text Fields
-- Two variants ONLY: Filled and Outlined — never custom shapes
-- Filled: background surfaceVariant, indicator line bottom only (default) → active on focus
-- Outlined: full border in outline color, transparent background
-- Label: always floating — never placeholder-only pattern
-- Height: 56px always
-- Leading icon: 24px, padding-left 12px
-- Trailing icon: 24px, padding-right 12px
-- Error: error color on border + label + supporting text + trailing icon simultaneously
-- Supporting text: body-small, 16px below field
-- Character count: trailing inside supporting text row
-
-### Chips (4 types — do not confuse with badges)
-- Assist chip: suggests an action, no selection state
-- Filter chip: toggleable, shows checkmark when selected
-- Input chip: represents entered value, has × to remove
-- Suggestion chip: system/AI-generated hint, not user-created
-- Height: always 32px
-- Shape: full radius (9999px)
-- Leading icon: 18px only
-- Never use chip where badge is needed and vice versa
-
-### Dialogs
-- Shape: extraLarge (28px corners)
-- Max width: 560px; min width: 280px
-- Title: Headline Small
-- Body: Body Medium
-- Actions: right-aligned text buttons (or filled + text for emphasis)
-- Max 2 action buttons
-- Do NOT use dialog for simple confirmations — use Snackbar instead
-
-### Snackbar
-- Max 1 action button (Label Large, primary color)
-- Auto-dismiss: 4 seconds default
-- Position: bottom-center, 16px from edge
-- Do NOT stack snackbars — queue them
-- Use for: task added, task moved, errors, undo
-
-### Elevation — Dark Theme (CRITICAL — agents always get this wrong)
-- In dark mode shadows are barely visible — compensate with surface tint overlay
-- Surface tint = primary color at specific opacity over surface:
-  - Level 0: 0% tint (no overlay)
-  - Level 1: 5% tint
-  - Level 2: 8% tint
-  - Level 3: 11% tint
-  - Level 4: 12% tint
-  - Level 5: 14% tint
-- Implementation: color-mix(in srgb, var(--md-sys-color-surface), var(--md-sys-color-primary) 5%)
-- Do NOT rely on box-shadow alone in dark mode — it barely shows
-
-### Motion Easing (NEVER use linear or ease-in-out — not M3)
-- Element entering screen → Emphasized Decelerate: cubic-bezier(0.05, 0.7, 0.1, 1.0)
-- Element leaving screen → Emphasized Accelerate: cubic-bezier(0.3, 0, 0.8, 0.15)
-- Element staying on screen → Standard: cubic-bezier(0.2, 0, 0, 1.0)
-- Container expand/collapse → Emphasized: cubic-bezier(0.2, 0, 0, 1.0)
-- Duration: entering = 400ms / leaving = 200ms / transitions = 300ms
-
-### Icons
-- Always 24×24px in components (18px inside chips only)
-- Use outlined style by default; filled style for active/selected state
-- Do NOT mix outlined and filled icons in the same component
-- Touch target: always wrap in 48×48px tappable area
-
-### Spacing & Layout
-- Base unit: 4px — all spacing must be multiples of 4
-- Screen edge margin: 16px (compact) / 24px (medium) / 24px+ (expanded)
-- Component internal padding: multiples of 4 only
-- Gap between components: 8px, 12px, 16px, 24px — nothing else
-
-## 10. M3 Advanced — Color, Motion, Expressive Components
-
-### Dynamic Color & Tonal Palettes
-- ALL colors must come from M3 Color Roles — never arbitrary hex values in components
-- Roles to use: Primary, OnPrimary, PrimaryContainer, OnPrimaryContainer,
-  Secondary, OnSecondary, SecondaryContainer, OnSecondaryContainer,
-  Tertiary, OnTertiary, TertiaryContainer, OnTertiaryContainer,
-  Surface, OnSurface, SurfaceVariant, OnSurfaceVariant,
-  Outline, OutlineVariant, Background, OnBackground
-- Bubble colors (weight) and block colors (time period) must map to these roles explicitly
-- Tonal palettes: always use all 5 (Primary, Secondary, Tertiary + 2 Neutral)
-  to ensure proper contrast across all combinations
-- Dynamic Color (future): support DynamicColors API to extract scheme from user wallpaper
-  — do not hardcode scheme, keep it injectable via CSS custom properties
-
-### Motion — Spring Parameters
-Separate Spatial motion (bubbles moving in space) from Effects (opacity, color transitions):
-
-**Spatial — Matter.js physics bubbles:**
-- These follow Matter.js physics engine, not CSS springs
-- On collision/bounce: apply squash & stretch via SVG transform (already implemented)
-- Drift force: small random impulse every ~30 frames to keep bubbles alive
-
-**Effects — CSS/JS transitions for UI state changes:**
-- Fast spring (buttons, chips, badges):
-  stiffness: 700, damping: 35 → approx cubic-bezier(0.2, 0, 0, 1.0) 150ms
-- Default spring (bottom sheets, panels sliding in):
-  stiffness: 380, damping: 30 → approx cubic-bezier(0.05, 0.7, 0.1, 1.0) 300ms
-- Slow spring (full-screen transitions, day view expand):
-  stiffness: 200, damping: 25 → approx cubic-bezier(0.2, 0, 0, 1.0) 500ms
-- Bubble → task list transition: Effects spring (opacity fade) + Spatial (scale collapse)
-  duration 400ms, Emphasized Decelerate easing
-
-### M3 Expressive Components
-Use these where applicable — do not substitute with plain buttons/rows:
-
-- **Button Groups** — for weight picker (Quick/Focused/Deep) in TaskSheet:
-  buttons visually connected, selected state uses filled style,
-  unselected uses outlined or tonal — they form a single control unit
-- **Split Button** — for actions with variants (e.g. "Add task ▾" with sub-options)
-  only if action has 2+ meaningful variants; do not overuse
-- **Toolbar** — for block header area (block name + capacity + add button):
-  flexible container that can hold FAB-style button + metadata, not just a plain row
-
-### Containment Principle
-- Day View quadrants must have CLEAR visual boundaries — not just color fill
-  Users find elements 4× faster with explicit containment
-- Use contrasting containers to group related elements:
-  block header (name + time + capacity) visually separated from bubble area
-- Nested containers for critical actions:
-  VoiceFAB must have high-contrast container — stands out from any background
-  Consider outline or shadow ring around FAB for maximum visibility
-
-### Elevated Accessibility Standards
-- Tap targets: MINIMUM 48×48px everywhere — consider 56×56px for primary actions
-- VoiceFAB: 60×60px minimum — it is the most important interaction in the app
-- Nested high-contrast containers for critical actions (VoiceFAB, primary CTA buttons)
-- Do not rely solely on color for any state — always add shape, icon, or label change
-- Error states: never red-only — add icon (error_outline) + supporting text
-- Loading states: use M3 LinearProgressIndicator or CircularProgressIndicator,
-  never custom spinners
-## Component Specifications: FlowToolbar
-**Location:** `src/components/layout/FlowToolbar.tsx`
-**Purpose:** Bottom navigation bar with scroll-hide behavior and strict M3 styling.
-
-### Visual Rules (STRICT):
-1. **Container:** Full width, NO side margins, NO container border-radius. Background MUST be `var(--md-sys-color-surface-container)`.
-2. **Monolithic Background:** Gesture bar and button area share the SAME background. No transparent gaps.
-3. **Gesture Bar:** At the VERY BOTTOM. Color: `var(--md-sys-color-on-surface)`. Width: `w-32`, Height: `h-1`, rounded-full, with `pb-4`.
-4. **Icon Buttons:** `w-12 h-12`, `rounded-full`, color `on-surface-variant`, `scale(0.96)` on press.
-5. **Central Voice Button:** MUI `Button` (`variant="contained"`), `borderRadius: '16px'`, `56x56px`, `primary` bg, `on-primary` icon, elevation-2.
-
-### Behavior Rules:
-- Scroll Down (>50px): `translate-y-full`
-- Scroll Up: `translate-y-0`
-- Transition: `duration-300 ease-out`
-
-### AI FORBIDDEN Actions:
-- ❌ Do NOT add `mx-4` or `rounded-2xl` to the main container.
-- ❌ Do NOT break the monolithic `surface-container` background.
+Before outputting any code modifications, verify that your architectural model complies with this Constitution.
