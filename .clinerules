@@ -50,11 +50,16 @@ The app relies on a global `isLeftHanded` context. Interface must dynamically ad
 - **Empty State**: Pure pastel background, block title, and a subtle centered icon with 5-10% opacity. No aggressive call-to-actions.
 - **Overflow State**: Sum of task weights > 12 pts. Triggers a double internal border of `var(--flow-capacity-overload)` (#FCD34D). **RED color is FORBIDDEN.** Space for helper text in the inline slot must be pre-reserved.
 
-### Visual Encoding System (NO RED FOR ERRORS, NO SHARP EDGES):
-Oustanding sharp shapes (stars/bursts) are **FORBIDDEN** as they cause cognitive micro-stress. Form encodes ONLY weight (duration), priority does not change geometry.
-- **Quick Tasks (1 pt)**: Ideal circle (`rounded-full`). Text is forbidden. Only one contrast icon strictly centered on dynamic pastel background.
-- **Focused Tasks (3 pts)**: Soft square / squircle (`rounded-3xl`). Text allowed.
-- **Deep Tasks (6 pts)**: Organic "Cookie" shape via custom SVG path. Must have a distinctive contrast outline (`var(--flow-block-*-on-container)`).
+### Visual Encoding System (Triple Accessibility Coding):
+Outstanding sharp shapes (stars/rhombuses) are **FORBIDDEN** as they cause cognitive micro-stress. We use a triple encoding system:
+- **WEIGHT (Duration)** is encoded by **SIZE and COLOR**:
+  - Quick (1 pt): Small size, Mint color (`var(--flow-weight-quick)`).
+  - Focused (3 pts): Medium size, Lemon color (`var(--flow-weight-focused)`).
+  - Deep (6 pts): Large size, Lavender-Rose color (`var(--flow-weight-deep)`).
+- **PRIORITY (Urgency)** is encoded by **SHAPE** (Geometry):
+  - Low / Default Priority: Perfect Circle (`rounded-full`).
+  - Medium Priority: Soft Square / Squircle (`rounded-3xl`).
+  - High Priority: Organic 12-sided "Cookie" shape via custom SVG path.
 
 ### Dynamic Colors Mapping:
 Never use custom HEX for tasks or blocks. Use Extended M3 tokens:
