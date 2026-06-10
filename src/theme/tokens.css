@@ -1,21 +1,20 @@
 @import "tailwindcss";
-
 /**
- * Flow Calendar — Material Design 3 Design Tokens
  * Flow Calendar — Material Design 3 Design Tokens
  * Generated from material-theme.json
  * Seed: #7B3FC4
  * Font: Inter (SIL OFL 1.1)
+ * 
  * Usage:
  *   color: var(--md-sys-color-primary);
  *   font-size: var(--md-sys-typescale-body-large-size);
  *   background: rgb(var(--md-sys-color-surface-rgb) / 0.8); ← for alpha
+ * 
  * DO NOT hardcode hex values in components — always use these variables.
  */
 
-
 /* ─────────────────────────────────────────
-GLOBAL TYPOGRAPHY & SHAPES (:root)
+   GLOBAL TYPOGRAPHY & SHAPES (:root)
 ───────────────────────────────────────── */
 :root {
   /* Typography Scale */
@@ -141,10 +140,17 @@ GLOBAL TYPOGRAPHY & SHAPES (:root)
   --md-sys-state-pressed-opacity: 0.12;
   --md-sys-state-dragged-opacity: 0.16;
   --md-sys-state-disabled-opacity: 0.38;
+
+  /* Elevation Levels (M3 spec) */
+  --md-sys-elevation-level1: 5%;
+  --md-sys-elevation-level2: 8%;
+  --md-sys-elevation-level3: 11%;
+  --md-sys-elevation-level4: 12%;
+  --md-sys-elevation-level5: 14%;
 }
 
 /* ─────────────────────────────────────────
-LIGHT THEME (default)
+   LIGHT THEME (default)
 ───────────────────────────────────────── */
 :root,
 .light {
@@ -159,7 +165,6 @@ LIGHT THEME (default)
   --md-sys-color-primary-container-rgb: 238 220 255;
   --md-sys-color-on-primary-container: #533B72;
   --md-sys-color-on-primary-container-rgb: 83 59 114;
-
   --md-sys-color-secondary: #65558F;
   --md-sys-color-secondary-rgb: 101 85 143;
   --md-sys-color-on-secondary: #FFFFFF;
@@ -168,7 +173,6 @@ LIGHT THEME (default)
   --md-sys-color-secondary-container-rgb: 233 221 255;
   --md-sys-color-on-secondary-container: #4D3D75;
   --md-sys-color-on-secondary-container-rgb: 76 67 117;
-
   --md-sys-color-tertiary: #006A60;
   --md-sys-color-tertiary-rgb: 0 106 96;
   --md-sys-color-on-tertiary: #FFFFFF;
@@ -178,7 +182,6 @@ LIGHT THEME (default)
   --md-sys-color-tertiary-container-rgb: 204 231 226;
   --md-sys-color-on-tertiary-container: #005048;
   --md-sys-color-on-tertiary-container-rgb: 0 80 72;
-
   --md-sys-color-error: #904A42;
   --md-sys-color-error-rgb: 144 74 66;
   --md-sys-color-on-error: #FFFFFF;
@@ -187,12 +190,10 @@ LIGHT THEME (default)
   --md-sys-color-error-container-rgb: 255 218 213;
   --md-sys-color-on-error-container: #73342C;
   --md-sys-color-on-error-container-rgb: 115 52 44;
-
   --md-sys-color-background: #FFF7FF;
   --md-sys-color-background-rgb: 255 247 255;
   --md-sys-color-on-background: #1D1A20;
   --md-sys-color-on-background-rgb: 29 26 32;
-
   --md-sys-color-surface: #F6F6F6;
   /* @override M3 algo (Figma design choice) */
   --md-sys-color-surface-rgb: 246 246 246;
@@ -226,7 +227,6 @@ LIGHT THEME (default)
   --md-sys-color-primary-fixed-dim-rgb: 216 186 251;
   --md-sys-color-on-primary-fixed-variant: #533B72;
   --md-sys-color-on-primary-fixed-variant-rgb: 83 59 114;
-
   --md-sys-color-secondary-fixed: #E9DDFF;
   --md-sys-color-secondary-fixed-rgb: 233 221 255;
   --md-sys-color-on-secondary-fixed: #210F47;
@@ -235,7 +235,6 @@ LIGHT THEME (default)
   --md-sys-color-secondary-fixed-dim-rgb: 208 188 254;
   --md-sys-color-on-secondary-fixed-variant: #4D3D75;
   --md-sys-color-on-secondary-fixed-variant-rgb: 76 67 117;
-
   --md-sys-color-tertiary-fixed: #9EF2E4;
   --md-sys-color-tertiary-fixed-rgb: 158 242 228;
   --md-sys-color-on-tertiary-fixed: #00201C;
@@ -244,7 +243,6 @@ LIGHT THEME (default)
   --md-sys-color-tertiary-fixed-dim-rgb: 130 213 200;
   --md-sys-color-on-tertiary-fixed-variant: #005048;
   --md-sys-color-on-tertiary-fixed-variant-rgb: 0 80 72;
-
   --md-sys-color-surface-dim: #DFD8E0;
   --md-sys-color-surface-dim-rgb: 223 216 224;
   --md-sys-color-surface-bright: #FFF7FF;
@@ -265,18 +263,16 @@ LIGHT THEME (default)
   --flow-weight-quick-color-rgb: 168 242 200;
   --flow-weight-quick-on-color: #005234;
   --flow-weight-quick-on-color-rgb: 0 82 52;
-
   --flow-weight-focused-color: #FFDEA3;
   --flow-weight-focused-color-rgb: 255 222 163;
   --flow-weight-focused-on-color: #5D4200;
   --flow-weight-focused-on-color-rgb: 93 66 0;
-
   --flow-weight-deep-color: #EADDFF;
   --flow-weight-deep-color-rgb: 234 221 255;
   --flow-weight-deep-on-color: #4E3D75;
   --flow-weight-deep-on-color-rgb: 78 61 117;
 
-  /* ── Flow Custom: Time Blocks (Light) ── */
+  /* ─ Flow Custom: Time Blocks (Light) ── */
   --flow-block-morning: #FFECE2;
   --flow-block-morning-rgb: 255 236 226;
   --flow-block-morning-on-color: #331200;
@@ -290,11 +286,11 @@ LIGHT THEME (default)
   --flow-block-night-rgb: 197 196 240;
   --flow-block-night-on-color: #0A0A3B;
   --flow-block-text: #1D1A20;
-  /* on-surface для светлых блоков */
 }
 
 /* ─────────────────────────────────────────
-DARK THEME (Synced with Figma Dark.tokens.json)
+   DARK THEME (Synced with Figma Dark.tokens.json)
+   Activated via: <html class="dark">
 ───────────────────────────────────────── */
 .dark {
   /* Core Colors */
@@ -308,7 +304,6 @@ DARK THEME (Synced with Figma Dark.tokens.json)
   --md-sys-color-primary-container-rgb: 83 59 114;
   --md-sys-color-on-primary-container: #EEDCFF;
   --md-sys-color-on-primary-container-rgb: 238 220 255;
-
   --md-sys-color-secondary: #D0BCFE;
   --md-sys-color-secondary-rgb: 208 188 254;
   --md-sys-color-on-secondary: #36265D;
@@ -317,7 +312,6 @@ DARK THEME (Synced with Figma Dark.tokens.json)
   --md-sys-color-secondary-container-rgb: 76 67 117;
   --md-sys-color-on-secondary-container: #E9DDFF;
   --md-sys-color-on-secondary-container-rgb: 233 221 255;
-
   --md-sys-color-tertiary: #82D5C8;
   --md-sys-color-tertiary-rgb: 130 213 200;
   --md-sys-color-on-tertiary: #003732;
@@ -326,7 +320,6 @@ DARK THEME (Synced with Figma Dark.tokens.json)
   --md-sys-color-tertiary-container-rgb: 0 80 72;
   --md-sys-color-on-tertiary-container: #9EF2E4;
   --md-sys-color-on-tertiary-container-rgb: 158 242 228;
-
   --md-sys-color-error: #FFB4AA;
   --md-sys-color-error-rgb: 255 180 170;
   --md-sys-color-on-error: #561E18;
@@ -335,17 +328,14 @@ DARK THEME (Synced with Figma Dark.tokens.json)
   --md-sys-color-error-container-rgb: 115 52 44;
   --md-sys-color-on-error-container: #FFDAD5;
   --md-sys-color-on-error-container-rgb: 255 218 213;
-
   --md-sys-color-background: #151218;
   --md-sys-color-background-rgb: 21 18 24;
   --md-sys-color-on-background: #E7E0E8;
   --md-sys-color-on-background-rgb: 231 224 232;
-
   --md-sys-color-surface: #151218;
   --md-sys-color-surface-rgb: 21 18 24;
   --md-sys-color-on-surface: #E7E0E8;
   --md-sys-color-on-surface-rgb: 231 224 232;
-
   --md-sys-color-surface-variant: #4A454E;
   --md-sys-color-surface-variant-rgb: 74 69 78;
   --md-sys-color-on-surface-variant: #CCC4CF;
@@ -354,7 +344,6 @@ DARK THEME (Synced with Figma Dark.tokens.json)
   --md-sys-color-outline-rgb: 149 142 153;
   --md-sys-color-outline-variant: #4A454E;
   --md-sys-color-outline-variant-rgb: 74 69 78;
-
   --md-sys-color-shadow: #000000;
   --md-sys-color-shadow-rgb: 0 0 0;
   --md-sys-color-scrim: #000000;
@@ -375,7 +364,6 @@ DARK THEME (Synced with Figma Dark.tokens.json)
   --md-sys-color-primary-fixed-dim-rgb: 216 186 251;
   --md-sys-color-on-primary-fixed-variant: #533B72;
   --md-sys-color-on-primary-fixed-variant-rgb: 83 59 114;
-
   --md-sys-color-secondary-fixed: #E9DDFF;
   --md-sys-color-secondary-fixed-rgb: 233 221 255;
   --md-sys-color-on-secondary-fixed: #210F47;
@@ -384,7 +372,6 @@ DARK THEME (Synced with Figma Dark.tokens.json)
   --md-sys-color-secondary-fixed-dim-rgb: 208 188 254;
   --md-sys-color-on-secondary-fixed-variant: #4D3D75;
   --md-sys-color-on-secondary-fixed-variant-rgb: 76 67 117;
-
   --md-sys-color-tertiary-fixed: #9EF2E4;
   --md-sys-color-tertiary-fixed-rgb: 158 242 228;
   --md-sys-color-on-tertiary-fixed: #00201C;
@@ -393,7 +380,6 @@ DARK THEME (Synced with Figma Dark.tokens.json)
   --md-sys-color-tertiary-fixed-dim-rgb: 130 213 200;
   --md-sys-color-on-tertiary-fixed-variant: #005048;
   --md-sys-color-on-tertiary-fixed-variant-rgb: 0 80 72;
-
   --md-sys-color-surface-dim: #151218;
   --md-sys-color-surface-dim-rgb: 21 18 24;
   --md-sys-color-surface-bright: #3B383E;
@@ -409,24 +395,22 @@ DARK THEME (Synced with Figma Dark.tokens.json)
   --md-sys-color-surface-container-highest: #373339;
   --md-sys-color-surface-container-highest-rgb: 55 51 57;
 
-  /* ── Flow Custom: Weight Bubbles (Dark — vivid) ── */
+  /* ─ Flow Custom: Weight Bubbles (Dark — vivid) ── */
   --flow-weight-quick-color: #90D5AE;
   --flow-weight-quick-color-rgb: 144 213 174;
   --flow-weight-quick-on-color: #003823;
   --flow-weight-quick-on-color-rgb: 0 56 35;
-
   --flow-weight-focused-color: #ECC06C;
   --flow-weight-focused-color-rgb: 236 192 108;
   --flow-weight-focused-on-color: #412D00;
   --flow-weight-focused-on-color-rgb: 65 45 0;
-
   --flow-weight-deep-color: #B388FF;
   /* Лавандовый неон */
   --flow-weight-deep-color-rgb: 179 136 255;
   --flow-weight-deep-on-color: #37265C;
   --flow-weight-deep-on-color-rgb: 55 38 92;
 
-  /* ── Flow Custom: Time Blocks (Dark) ── */
+  /* ── Flow Custom: Time Blocks (Dark) ─ */
   --flow-block-morning: #FFB787;
   --flow-block-morning-rgb: 255 183 135;
   --flow-block-morning-on-color: #502400;
@@ -440,12 +424,15 @@ DARK THEME (Synced with Figma Dark.tokens.json)
   --flow-block-night-rgb: 193 193 255;
   --flow-block-night-on-color: #2A2A60;
   --flow-block-text: #FFFFFF;
+
+  /* ─ Flow Custom: Overflow Warning (Explicit) ── */
+  --flow-capacity-overload: #FCD34D;
+  --flow-capacity-overload-rgb: 252 211 77;
 }
 
-
 /* ─────────────────────────────────────────
-MEDIUM CONTRAST (Light)
-Activated via:  <html data-contrast="medium">
+   MEDIUM CONTRAST (Light)
+   Activated via: <html data-contrast="medium">
 ───────────────────────────────────────── */
 [data-contrast="medium"] {
   --md-sys-color-primary: #422A60;
@@ -458,7 +445,6 @@ Activated via:  <html data-contrast="medium">
   --md-sys-color-primary-container-rgb: 123 98 155;
   --md-sys-color-on-primary-container: #FFFFFF;
   --md-sys-color-on-primary-container-rgb: 255 255 255;
-
   --md-sys-color-secondary: #3B3246;
   --md-sys-color-secondary-rgb: 59 50 70;
   --md-sys-color-on-secondary: #FFFFFF;
@@ -467,7 +453,6 @@ Activated via:  <html data-contrast="medium">
   --md-sys-color-secondary-container-rgb: 116 105 127;
   --md-sys-color-on-secondary-container: #FFFFFF;
   --md-sys-color-on-secondary-container-rgb: 255 255 255;
-
   --md-sys-color-tertiary: #003E37;
   --md-sys-color-tertiary-rgb: 0 62 55;
   --md-sys-color-on-tertiary: #FFFFFF;
@@ -476,7 +461,6 @@ Activated via:  <html data-contrast="medium">
   --md-sys-color-tertiary-container-rgb: 29 122 111;
   --md-sys-color-on-tertiary-container: #FFFFFF;
   --md-sys-color-on-tertiary-container-rgb: 255 255 255;
-
   --md-sys-color-error: #5D2516;
   --md-sys-color-error-rgb: 93 37 22;
   --md-sys-color-on-error: #FFFFFF;
@@ -485,7 +469,6 @@ Activated via:  <html data-contrast="medium">
   --md-sys-color-error-container-rgb: 161 89 71;
   --md-sys-color-on-error-container: #FFFFFF;
   --md-sys-color-on-error-container-rgb: 255 255 255;
-
   --md-sys-color-background: #FFF7FF;
   --md-sys-color-background-rgb: 255 247 255;
   --md-sys-color-on-background: #1D1A20;
@@ -553,11 +536,11 @@ Activated via:  <html data-contrast="medium">
 }
 
 /* ─────────────────────────────────────────
-HIGH CONTRAST (Light)
-Activated via:  <html data-contrast="high">
-Also respects prefers-contrast: more
+   HIGH CONTRAST (Light only)
+   Activated via: <html data-contrast="high">
+   Also respects prefers-contrast: more
 ───────────────────────────────────────── */
-:root[data-contrast="high"]:not([data-contrast="medium"]) {
+:root:not(.dark)[data-contrast="high"]:not([data-contrast="medium"]) {
   --md-sys-color-primary: #382055;
   --md-sys-color-primary-rgb: 56 32 85;
   --md-sys-color-surface-tint: #6C538C;
@@ -662,7 +645,7 @@ Also respects prefers-contrast: more
 }
 
 @media (prefers-contrast: more) {
-  :root:not([data-contrast="medium"]) {
+  :root:not(.dark):not([data-contrast="medium"]) {
     --md-sys-color-primary: #382055;
     --md-sys-color-primary-rgb: 56 32 85;
     --md-sys-color-surface-tint: #6C538C;
@@ -768,9 +751,10 @@ Also respects prefers-contrast: more
 }
 
 /* ─────────────────────────────────────────
-DARK + MEDIUM CONTRAST
+   DARK + MEDIUM CONTRAST
+   Activated via: <html class="dark">
 ───────────────────────────────────────── */
-[data-theme="dark"][data-contrast="medium"] {
+.dark[data-contrast="medium"] {
   --md-sys-color-primary: #E9D4FF;
   --md-sys-color-primary-rgb: 233 212 255;
   --md-sys-color-surface-tint: #D8BAFB;
@@ -872,9 +856,10 @@ DARK + MEDIUM CONTRAST
 }
 
 /* ─────────────────────────────────────────
-DARK + HIGH CONTRAST
+   DARK + HIGH CONTRAST
+   Activated via: <html class="dark">
 ───────────────────────────────────────── */
-[data-theme="dark"][data-contrast="high"] {
+.dark[data-contrast="high"] {
   --md-sys-color-primary: #F8ECFF;
   --md-sys-color-primary-rgb: 248 236 255;
   --md-sys-color-surface-tint: #D8BAFB;
@@ -976,7 +961,7 @@ DARK + HIGH CONTRAST
 }
 
 /* ─────────────────────────────────────────
-REDUCED MOTION
+   REDUCED MOTION
 ───────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -994,7 +979,7 @@ REDUCED MOTION
 }
 
 /* ─────────────────────────────────────────
-FORCED COLORS (Windows High Contrast)
+   FORCED COLORS (Windows High Contrast)
 ───────────────────────────────────────── */
 @media (forced-colors: active) {
   :root {
@@ -1010,7 +995,7 @@ FORCED COLORS (Windows High Contrast)
 }
 
 /* ─────────────────────────────────────────
-GLOBAL BASE STYLES
+   GLOBAL BASE STYLES
 ───────────────────────────────────────── */
 *,
 *::before,
@@ -1078,8 +1063,8 @@ html {
 }
 
 /* ─────────────────────────────────────────
-LEGACY ELEVATION (box-shadow values)
-Used in existing components — keep until migrated to tint-based elevation
+   LEGACY ELEVATION (box-shadow values)
+   Used in existing components — keep until migrated to tint-based elevation
 ───────────────────────────────────────── */
 :root {
   --md-sys-elevation-shadow-1: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
@@ -1089,7 +1074,7 @@ Used in existing components — keep until migrated to tint-based elevation
   --md-sys-elevation-shadow-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.3);
 }
 
-[data-theme="dark"] {
+.dark {
   --md-sys-elevation-shadow-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.5), 0px 1px 2px rgba(0, 0, 0, 0.6);
   --md-sys-elevation-shadow-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.5), 0px 1px 2px rgba(0, 0, 0, 0.6);
   --md-sys-elevation-shadow-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.5), 0px 1px 3px rgba(0, 0, 0, 0.6);
@@ -1103,8 +1088,8 @@ Used in existing components — keep until migrated to tint-based elevation
 }
 
 /* ─────────────────────────────────────────
-FLOW BLOCK EXTENDED TOKENS
-Container + on-container variants for block cards
+   FLOW BLOCK EXTENDED TOKENS
+   Container + on-container variants for block cards
 ───────────────────────────────────────── */
 :root {
   /* Light Containers */
@@ -1117,18 +1102,25 @@ Container + on-container variants for block cards
   --flow-block-night-container: #C5C4F0;
   --flow-block-night-on-container: #0A0A3B;
 
-  /* Dark Containers */
-  --flow-block-morning-on-container: #502400;
-  --flow-block-afternoon-on-container: #003258;
-  --flow-block-evening-on-container: #37265C;
-  --flow-block-night-on-container: #2A2A60;
-
   /* Weights */
   --flow-capacity-overload: #FCD34D;
+  --flow-capacity-overload-rgb: 252 211 77;
+}
+
+.dark {
+  /* Dark Containers */
+  --flow-block-morning-container: #2A1A10;
+  --flow-block-morning-on-container: #502400;
+  --flow-block-afternoon-container: #0A1A30;
+  --flow-block-afternoon-on-container: #003258;
+  --flow-block-evening-container: #1A0F2E;
+  --flow-block-evening-on-container: #37265C;
+  --flow-block-night-container: #0A0A18;
+  --flow-block-night-on-container: #2A2A60;
 }
 
 /* ─────────────────────────────────────────
-FLOW COMPONENT UTILITY CLASSES
+   FLOW COMPONENT UTILITY CLASSES
 ───────────────────────────────────────── */
 .weight-chip--quick {
   background: var(--flow-weight-quick-color);
