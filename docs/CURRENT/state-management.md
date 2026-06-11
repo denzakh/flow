@@ -44,25 +44,28 @@
 
 ## 2. Текущая Архитектура Состояний (РЕАЛИЗОВАНО)
 
-### Персистентные состояния (localStorage):
+### А. Персистентные состояния (localStorage / SSOT)
 
-* `flow_tasks` — массив объектов `Task`.
-* `flow_settings` — глобальные настройки, включая `wakeUpTime`, `restTime`, `language`, `isLeftHanded`.
-* `flow_user` — профиль пользователя (включая Guest Mode).
-* `flow_voice_settings` — конфигурация голосового управления.
+Все глобальные настройки и пользовательские данные хранятся в `localStorage`. ИИ-агенты обязаны использовать строго функциональные обновления для мутации этих объектов.
 
-### Навигация и временной контекст:
+```typescript
+// Ключ в localStorage: 'flow_settings'
+interface UserSettings {
+  wakeUpTime: string;      // Формат "HH:MM", дефолт: "07:00"
+  restTime: string;        // Формат "HH:MM", дефолт: "23:00"
+  language: 'en' | 'ru' | 'es';
+  isLeftHanded: boolean;   // КРИТИЧЕСКОЕ ПОЛЕ: Управляет биомеханикой и зеркалированием UI
+}
 
-* `viewMode` — `'day' | 'week' | 'month' | 'year'`.
-* `viewDate` — объект `Date`, определяющий просматриваемый день.
-* `currentTime` — системное время, обновляемое каждую секунду (используется для динамического расчета емкости блоков).
+// Ключ в localStorage: 'flow_tasks'
+type TaskList = Task[];
 
-### Голосовой и Вводной модуль:
-
-* `primaryInputMethod` — `'text' | 'voice'` (определяет семантику центрального Smart FAB).
-* `voiceStatus` — `'idle' | 'listening' | 'processing' | 'error' | 'success'`.
-* `pendingVoiceCommand` — распарсенная команда, ожидающая подтверждения пользователя.
-
+// Ключ в localStorage: 'flow_voice_settings'
+interface VoiceSettings {
+  enabled: boolean;
+  language: string;
+  silenceThreshold: number;
+}
 ---
 
 ## 3. Планируемая Архитектура (НЕ РЕАЛИЗОВЫВАТЬ СЕЙЧАС)

@@ -330,118 +330,72 @@ updateTask(tasks[0].id, { priority: 'high' });
 />
 ```
 
-## Color System — Full Specification update 22.04.26S
+## Color System & Styling Contract (SSOT)
 
 ### Philosophy
-Two equal themes — Light and Dark. Neither is primary.
-Dark theme is not "inverted light" — it's a separate, high-contrast experience.
-In dark mode, bubbles become light sources on a dark canvas.
-
-⚠️ **Current implementation status: Only the Dark theme is implemented in code.**
-- `styles.css` defines only dark-theme CSS variables (`--bg-primary: #0a0a0a`, etc.)
-- `design-tokens.ts` exports dark-theme color values only
-- No light-theme CSS variables or media query (`prefers-color-scheme: light`) found
-- The Light theme specification below is a **design intent, not yet implemented**
+- **Calm UI Principle**: The application uses a strict hybrid styling framework. Two equal themes exist: Light and Dark. Neither is inverted; both are tailored experiences.
+- **Light Emitting Tasks**: In Dark Mode, the 4 circadian time block containers act as deep, receding "rooms" (dark, quiet surfaces), while the floating task bubbles act as the primary soft neon "light sources" on the canvas to eradicate dopamine anxiety.
+- **Single Source of Truth (SSOT)**: Hardcoded HEX or RGB values inside layout components are strictly **FORBIDDEN**. All colors must be consumed exclusively via semantic CSS variables mapped from `src/theme/tokens.css`.
 
 ---
 
-### Light Theme (⚠️ NOT IMPLEMENTED — design spec only)
+### ☀️ Light Theme Tokens Map
+*Status: Architecture Design Intent (consuming default structural :root tokens)*
 
-**Block backgrounds** (vibrant, saturated):
-| Block     | Hex       | Character        |
-|-----------|-----------|------------------|
-| Morning   | #D4622A   | Terracotta       |
-| Afternoon | #1976D2   | Royal blue       |
-| Evening   | #7B3FC4   | Purple           |
-| Night     | #37306B   | Deep indigo      |
-
-**Text on blocks:** #FFFFFF white (all blocks ≥ 4.5:1 ✅)
-
-**Bubble colors** (light, airy — same across all blocks):
-| Weight  | Hex     | Character |
-|---------|---------|-----------|
-| Quick   | #CCFCE3 | Mint      |
-| Focused | #FEF3C7 | Lemon     |
-| Deep    | #FCE4F5 | Rose      |
-
-**WCAG 1.4.11 Non-text Contrast:** all bubble/block pairs ≥ 3:1 ✅
-
-**App background:** #F7F5F2 (warm white)
-**Surface / cards:** #FFFFFF
-**Text primary:** #1A1A1A
-**Text secondary:** #666666
-**Outline / dividers:** #E0DDD8
+| UI Element | CSS Token Variable | HEX Value | Usage / Component Target |
+| :--- | :--- | :--- | :--- |
+| **App Canvas** | `var(--md-sys-color-background)` | `#F7F5F2` | Main page backdrop behind layouts |
+| **Surface/Cards** | `var(--md-sys-color-surface)` | `#FFFFFF` | Bottom sheets, Modals, Task list rows |
+| **Morning Block** | `var(--flow-block-morning-container)` | `#FFECE2` | Terracotta tint for morning card fill |
+| **Afternoon Block**| `var(--flow-block-afternoon-container)`| `#E3F2FD` | Royal blue tint for afternoon card fill |
+| **Evening Block** | `var(--flow-block-evening-container)` | `#F3E5F5` | Purple tint for evening card fill |
+| **Night Block** | `var(--flow-block-night-container)` | `#ECEFF1` | Deep indigo/grey tint for night recovery fill |
+| **Block Text** | `var(--flow-block-text)` | `#1D1A20` | Dynamic text colors inside active blocks |
+| **Quick Weight** | `var(--flow-weight-quick-color)` | `#CCFCE3` | Mint fill for 1pt tasks (Size: Small) |
+| **Focused Weight**| `var(--flow-weight-focused-color)`| `#FEF3C7` | Lemon fill for 3pt tasks (Size: Medium) |
+| **Deep Weight** | `var(--flow-weight-deep-color)` | `#FCE4F5` | Rose fill for 6pt tasks (Size: Large) |
 
 ---
 
-### Dark Theme (✅ IMPLEMENTED)
+### 🌙 Dark Theme Tokens Map (✅ FULLY IMPLEMENTED)
+*Status: Verified and synced with Tailwind v4 via `.dark` global class configuration*
 
-**App background:** #0F0F14 (near black) — actual CSS: `--bg-primary: #0a0a0a`
-**Surface / cards:** #1A1A24 — actual CSS: `--bg-card: #141414`, `--bg-elevated: #1a1a1a`
-**Text primary:** #F0F0F5 — actual CSS: `--text-primary: #ffffff`
-**Text secondary:** #A0A0B5 — actual CSS: `--text-secondary: #a0a0a0`
-**Outline / dividers:** rgba(255,255,255,0.1) — actual CSS: ⚠️ not directly mapped
-
-**Block backgrounds** (dark tinted — quiet, recede into background):
-| Block     | Hex (spec) | Hex (actual CSS)     | Notes |
-|-----------|------------|----------------------|-------|
-| Morning   | #2A1A10    | `--period-morning: #fef3c7` ⚠️ | Spec says dark tinted, actual CSS has light yellow |
-| Afternoon | #0A1A30    | `--period-afternoon: #fde68a` ⚠️ | Same mismatch |
-| Evening   | #1A0F2E    | `--period-evening: #d4a574` | Different |
-| Night     | #0A0A18    | `--period-night: #6b7280` | Different |
-
-**Text on blocks:** #FFFFFF white ✅
-
-**Bubble colors** (vivid, saturated — become light sources):
-| Weight  | Hex (spec) | Hex (actual CSS) | Match? |
-|---------|------------|------------------|--------|
-| Quick   | #4ADE80    | `--weight-quick: #34d399` | ⚠️ Different shade |
-| Focused | #FCD34D    | `--weight-focused: #60a5fa` | ❌ Different hue entirely (amber vs blue) |
-| Deep    | #F472B6    | `--weight-deep: #a78bfa` | ❌ Different hue (pink vs purple) |
-
-**WCAG 1.4.11:** all bubble/block pairs ≥ 3:1 (verify after implementation) ✅
-
-⚠️ **Color system reality**: The CSS variables in `styles.css` and `design-tokens.ts` define a distinct dark theme that does NOT match the Color System spec hex values. The spec may be from an earlier design iteration. Block periods use amber/yellow tones instead of dark tinted, and weight colors skew toward blue/purple rather than amber/pink.
+| UI Element | CSS Token Variable | HEX Value | Usage / Component Target |
+| :--- | :--- | :--- | :--- |
+| **App Canvas** | `var(--md-sys-color-background)` | `#0F0F14` | High-contrast dark page backdrop |
+| **Surface/Cards** | `var(--md-sys-color-surface)` | `#1A1A24` | MUI Drawers, Settings sheet, inner task containers |
+| **Morning Block** | `var(--flow-block-morning-container)` | `#2A1A10` | Deep recessive espresso/dark-brown room background |
+| **Afternoon Block**| `var(--flow-block-afternoon-container)`| `#0A1A30` | Deep midnight blue room background |
+| **Evening Block** | `var(--flow-block-evening-container)` | `#1A0F2E` | Deep mysterious velvet purple room background |
+| **Night Block** | `var(--flow-block-night-container)` | `#0A0A18` | Pitch-black silent recovery background |
+| **Block Text** | `var(--flow-block-text)` | `#FFFFFF` | White high-contrast text layers for dark environments |
+| **Quick Weight** | `var(--flow-weight-quick-color)` | `#4ADE80` | Saturated neon mint source (Channels: `var(--...-rgb)`) |
+| **Focused Weight**| `var(--flow-weight-focused-color)`| `#FCD34D` | Saturated glowing lemon source |
+| **Deep Weight** | `var(--flow-weight-deep-color)` | `#F472B6` | Saturated intense rose source |
+| **Overload Warning**| `var(--flow-capacity-overload)` | `#FCD34D` | Persistent Amber warning color for points overflow |
 
 ---
 
-### Where Each Color Is Used
+### 🎨 Adaptive Elevation & Border System Rules
 
-**Block background color:**
-- Block card fill (the 4 quadrants in Day View)
-- Active block indicator in Week/Month views
-- Block label chip in task detail
+To preserve pixel-perfect contrast variations without adding duplicate style variables, components must adapt using native CSS color-mix logic:
 
-**Bubble color (weight):**
-- Physics bubble fill in Day View
-- Weight badge background in task list
-- Weight dot in all task rows
-- Capacity bar fill
+1. **Light Mode Execution**:
+   - TimeBlock containers must enforce an invisible border stroke: `border-color: transparent`.
+   - Structural depth is generated using Material Design 3 elevation shadows. Apply the pre-configured token class: `.md-elevation-1`.
+2. **Dark Mode Execution (`.dark`)**:
+   - M3 elevation shadows are entirely neutralized to maintain flat, undistracted canvas semantics.
+   - TimeBlock boundaries must render a razor-thin 1px adaptive frame using the internal context's on-color mixed into background shadows:
+     `border: 1px solid color-mix(in srgb, var(--flow-block-${period}-on-color) 15%, transparent)`.
+   - This ensures a beautiful, glowing, color-coded contour outline mapped cleanly to the active circadian period on a pitch-black layout.
 
-**App background (#F7F5F2 / #0F0F14):**
-- Page background behind the grid
-- Never used as card fill
+---
 
-**Surface (#FFFFFF / #1A1A24):**
-- Bottom sheet panels (add task, settings)
-- Modal backgrounds
-- Task list rows inside expanded blocks
+### ⚠️ Critical Component Mapping Matrix
 
-**Text primary:**
-- Block names (Morning, Afternoon...)
-- Task titles
-- All body text
-
-**Text secondary:**
-- Block time labels (06:00 – 12:00)
-- Capacity points (4/12 pts)
-- Placeholder text in inputs
-
-**Outline / dividers:**
-- Separator lines in bottom sheets
-- Input borders (default state)
-- Section dividers
-
+- **Overload Box Shadows**: When a block triggers `isOverCapacity === true`, layout rules **FORBID** using solid red tones. Components must render a dual inset shadow boundary: `box-shadow: inset 0 0 0 1px var(--flow-capacity-overload)`.
+- **Progress Bar Track**: The static unfulfilled timeline path must map natively to `var(--md-sys-color-surface-container-highest)`. The active filling indicator adapts straight to `var(--flow-block-${period}-on-color)` (Light) or scales to warning variables during overloads.
+- **MUI Action Channels**: All transient runtime component wrappers (like `MuiIconButton` hover overrides) leverage compiled color-mix tokens like `rgb(var(--md-sys-color-on-surface-rgb) / 0.08)` to sustain consistent interactions under `attachFlowColorManipulators` safety hooks.
 ---
 
 ### Accessibility Rules

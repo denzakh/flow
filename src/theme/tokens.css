@@ -58,7 +58,7 @@
   --md-sys-typescale-title-large-weight: 500;
   --md-sys-typescale-title-large-size: 22px;
   --md-sys-typescale-title-large-line-height: 28px;
-  --md-sys-typescale-title-large-letter-spacing: 0px;
+  --md-sys-typescale-title-large-letter-spacing: -0.5px;
 
   --md-sys-typescale-title-medium-font: 'Inter', system-ui, sans-serif;
   --md-sys-typescale-title-medium-weight: 500;
@@ -272,19 +272,63 @@
   --flow-weight-deep-on-color: #4E3D75;
   --flow-weight-deep-on-color-rgb: 78 61 117;
 
-  /* ─ Flow Custom: Time Blocks (Light) ── */
-  --flow-block-morning: #FFECE2;
-  --flow-block-morning-rgb: 255 236 226;
-  --flow-block-morning-on-color: #331200;
-  --flow-block-afternoon: #D1E4FF;
-  --flow-block-afternoon-rgb: 209 228 255;
-  --flow-block-afternoon-on-color: #001D36;
-  --flow-block-evening: #EADDFF;
-  --flow-block-evening-rgb: 234 221 255;
-  --flow-block-evening-on-color: #21005D;
-  --flow-block-night: #C5C4F0;
-  --flow-block-night-rgb: 197 196 240;
-  --flow-block-night-on-color: #0A0A3B;
+  /* ── Flow Custom: Time Blocks (Light) ── */
+  /* Morning */
+  --flow-block-morning: #8B4F24;
+  --flow-block-morning-rgb: 139 79 36;
+  --flow-block-morning-container: #FFECE2;
+  --flow-block-morning-container-rgb: 255 236 226;
+  --flow-block-morning-on-color: #FFFFFF;
+  --flow-block-morning-on-color-rgb: 255 255 255;
+  --flow-block-morning-on-container: #6E390E;
+  --flow-block-morning-on-container-rgb: 110 57 14;
+  --flow-block-morning-seed: #8C4F27;
+  --flow-block-morning-seed-rgb: 140 79 39;
+  --flow-block-morning-seed-on: #FFFFFF;
+  --flow-block-morning-seed-on-rgb: 255 255 255;
+
+  /* Afternoon */
+  --flow-block-afternoon: #35618E;
+  --flow-block-afternoon-rgb: 53 97 142;
+  --flow-block-afternoon-container: #D1E4FF;
+  --flow-block-afternoon-container-rgb: 209 228 255;
+  --flow-block-afternoon-on-color: #FFFFFF;
+  --flow-block-afternoon-on-color-rgb: 255 255 255;
+  --flow-block-afternoon-on-container: #194975;
+  --flow-block-afternoon-on-container-rgb: 25 73 117;
+  --flow-block-afternoon-seed: #36618E;
+  --flow-block-afternoon-seed-rgb: 54 97 142;
+  --flow-block-afternoon-seed-on: #FFFFFF;
+  --flow-block-afternoon-seed-on-rgb: 255 255 255;
+
+  /* Evening */
+  --flow-block-evening: #67558E;
+  --flow-block-evening-rgb: 103 85 142;
+  --flow-block-evening-container: #EADDFF;
+  --flow-block-evening-container-rgb: 234 221 255;
+  --flow-block-evening-on-color: #FFFFFF;
+  --flow-block-evening-on-color-rgb: 255 255 255;
+  --flow-block-evening-on-container: #4E3D75;
+  --flow-block-evening-on-container-rgb: 78 61 117;
+  --flow-block-evening-seed: #65558F;
+  --flow-block-evening-seed-rgb: 101 85 143;
+  --flow-block-evening-seed-on: #FFFFFF;
+  --flow-block-evening-seed-on-rgb: 255 255 255;
+
+  /* Night */
+  --flow-block-night: #5B5B81;
+  --flow-block-night-rgb: 91 91 129;
+  --flow-block-night-container: #C5C4F0;
+  --flow-block-night-container-rgb: 197 196 240;
+  --flow-block-night-on-color: #FFFFFF;
+  --flow-block-night-on-color-rgb: 255 255 255;
+  --flow-block-night-on-container: #505075;
+  --flow-block-night-on-container-rgb: 80 80 117;
+  --flow-block-night-seed: #595992;
+  --flow-block-night-seed-rgb: 89 89 146;
+  --flow-block-night-seed-on: #FFFFFF;
+  --flow-block-night-seed-on-rgb: 255 255 255;
+
   --flow-block-text: #1D1A20;
 }
 
@@ -410,24 +454,64 @@
   --flow-weight-deep-on-color: #37265C;
   --flow-weight-deep-on-color-rgb: 55 38 92;
 
-  /* ── Flow Custom: Time Blocks (Dark) ─ */
+  /* ── Flow Custom: Time Blocks (Dark) ── */
+  /* Morning */
   --flow-block-morning: #FFB787;
   --flow-block-morning-rgb: 255 183 135;
+  --flow-block-morning-container: #2A1A10;
+  --flow-block-morning-container-rgb: 42 26 16;
   --flow-block-morning-on-color: #502400;
+  --flow-block-morning-on-color-rgb: 80 36 0;
+  --flow-block-morning-on-container: #FFDCC7;
+  --flow-block-morning-on-container-rgb: 255 220 199;
+  --flow-block-morning-seed: #FFB68C;
+  --flow-block-morning-seed-rgb: 255 182 140;
+  --flow-block-morning-seed-on: #532200;
+  --flow-block-morning-seed-on-rgb: 83 34 0;
+
+  /* Afternoon */
   --flow-block-afternoon: #A0CAFD;
   --flow-block-afternoon-rgb: 160 202 253;
+  --flow-block-afternoon-container: #0A1A30;
+  --flow-block-afternoon-container-rgb: 10 26 48;
   --flow-block-afternoon-on-color: #003258;
+  --flow-block-afternoon-on-color-rgb: 0 50 88;
+  --flow-block-afternoon-on-container: #D1E4FF;
+  --flow-block-afternoon-on-container-rgb: 209 228 255;
+  --flow-block-afternoon-seed: #A0CAFD;
+  --flow-block-afternoon-seed-rgb: 160 202 253;
+  --flow-block-afternoon-seed-on: #003258;
+  --flow-block-afternoon-seed-on-rgb: 0 50 88;
+
+  /* Evening */
   --flow-block-evening: #D1BCFD;
   --flow-block-evening-rgb: 209 188 253;
+  --flow-block-evening-container: #1A0F2E;
+  --flow-block-evening-container-rgb: 26 15 46;
   --flow-block-evening-on-color: #37265C;
+  --flow-block-evening-on-color-rgb: 55 38 92;
+  --flow-block-evening-on-container: #EADDFF;
+  --flow-block-evening-on-container-rgb: 234 221 255;
+  --flow-block-evening-seed: #CFBDFE;
+  --flow-block-evening-seed-rgb: 207 189 254;
+  --flow-block-evening-seed-on: #36275D;
+  --flow-block-evening-seed-on-rgb: 54 39 93;
+
+  /* Night */
   --flow-block-night: #C1C1FF;
   --flow-block-night-rgb: 193 193 255;
+  --flow-block-night-container: #0A0A18;
+  --flow-block-night-container-rgb: 10 10 24;
   --flow-block-night-on-color: #2A2A60;
-  --flow-block-text: #FFFFFF;
+  --flow-block-night-on-color-rgb: 42 42 96;
+  --flow-block-night-on-container: #E1DFFF;
+  --flow-block-night-on-container-rgb: 225 223 255;
+  --flow-block-night-seed: #C2C1FF;
+  --flow-block-night-seed-rgb: 194 193 255;
+  --flow-block-night-seed-on: #2A2A60;
+  --flow-block-night-seed-on-rgb: 42 42 96;
 
-  /* ─ Flow Custom: Overflow Warning (Explicit) ── */
-  --flow-capacity-overload: #FCD34D;
-  --flow-capacity-overload-rgb: 252 211 77;
+  --flow-block-text: #FFFFFF;
 }
 
 /* ─────────────────────────────────────────
@@ -1085,38 +1169,6 @@ html {
   --md-sys-elevation-surface-3: rgba(208, 188, 255, 0.11);
   --md-sys-elevation-surface-4: rgba(208, 188, 255, 0.12);
   --md-sys-elevation-surface-5: rgba(208, 188, 255, 0.14);
-}
-
-/* ─────────────────────────────────────────
-   FLOW BLOCK EXTENDED TOKENS
-   Container + on-container variants for block cards
-───────────────────────────────────────── */
-:root {
-  /* Light Containers */
-  --flow-block-morning-container: #FFECE2;
-  --flow-block-morning-on-container: #331200;
-  --flow-block-afternoon-container: #D1E4FF;
-  --flow-block-afternoon-on-container: #001D36;
-  --flow-block-evening-container: #EADDFF;
-  --flow-block-evening-on-container: #21005D;
-  --flow-block-night-container: #C5C4F0;
-  --flow-block-night-on-container: #0A0A3B;
-
-  /* Weights */
-  --flow-capacity-overload: #FCD34D;
-  --flow-capacity-overload-rgb: 252 211 77;
-}
-
-.dark {
-  /* Dark Containers */
-  --flow-block-morning-container: #2A1A10;
-  --flow-block-morning-on-container: #502400;
-  --flow-block-afternoon-container: #0A1A30;
-  --flow-block-afternoon-on-container: #003258;
-  --flow-block-evening-container: #1A0F2E;
-  --flow-block-evening-on-container: #37265C;
-  --flow-block-night-container: #0A0A18;
-  --flow-block-night-on-container: #2A2A60;
 }
 
 /* ─────────────────────────────────────────
