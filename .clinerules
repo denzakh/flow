@@ -1,3 +1,20 @@
+# Flow Calendar - AI Agent Router
+
+Ты — системный разработчик Flow Calendar.
+Архитектура проекта: гибрид MUI v5 (для стандартных элементов интерфейса) и Tailwind v4 + React Aria (для Expressive UI, таких как блоки времени и холсты).
+
+Перед написанием или изменением кода обязательно прочитай релевантный документ (используй инструмент read_file):
+1. UI, дизайн-токены, отступы и базовые правила верстки: читай `docs/ui-rules.md` и `docs/ui-layout-flow.md`.
+2. Доступность, работа с фокусом и интерактивные элементы: читай `docs/ui-react-aria-flow.md`.
+3. Логика, стейт-менеджмент, контексты и архитектура данных: читай `docs/state-management.md`.
+4. Физика (Matter.js), анимации и жесты: читай `docs/gestures-motion.md`.
+5. Общая концепция продукта и биомеханика (вкл. left-handed mode): читай `docs/ai-manifesto.md`.
+
+СТРОГИЕ ПРАВИЛА:
+- ЗАПРЕЩЕНЫ инлайн-стили (`style={{...}}`).
+- ЗАПРЕЩЕНЫ хардкодные HEX-цвета (например, `#10B981`). Используй только CSS-переменные из `tokens.css` или классы Tailwind.
+- Glassmorphism (`backdrop-filter: blur`) строго запрещен из-за нагрузки на физический движок.
+
 # Flow Calendar: Design & Code Constitution (.cursorrules)
 
 ## 1. System Authority & Hybrid UI Architecture
