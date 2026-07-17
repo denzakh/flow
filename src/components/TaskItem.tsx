@@ -27,17 +27,17 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, index, lang, onToggle, onDele
   }[task.priority || 'medium'];
 
   // Определяем размер формы по весу
-  const shapeSize = {
-    quick: 24,
-    focused: 28,
-    deep: 32,
+  const shapeSizeClass = {
+    quick: 'w-6 h-6',
+    focused: 'w-7 h-7',
+    deep: 'w-8 h-8',
   }[task.weight];
 
   // Определяем цвет формы по весу
-  const shapeColor = {
-    quick: 'var(--flow-weight-quick-color, #10B981)',
-    focused: 'var(--flow-weight-focused-color, #F59E0B)',
-    deep: 'var(--flow-weight-deep-color, #EC4899)',
+  const shapeColorClass = {
+    quick: 'bg-flow-weight-quick',
+    focused: 'bg-flow-weight-focused',
+    deep: 'bg-flow-weight-deep',
   }[task.weight];
 
   const handleMouseEnter = () => setIsHovered(true);
@@ -110,21 +110,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, index, lang, onToggle, onDele
 
       {/* MaterialShape (Priority + Weight + Icon) */}
       <div
-        className="flex items-center justify-center flex-shrink-0"
-        style={{
-          width: `${shapeSize + 16}px`,
-          height: `${shapeSize + 16}px`,
-          borderRadius: '50%',
-          background: shapeColor,
-          opacity: isPressed ? 0.8 : isHovered ? 0.9 : 1,
-          transition: 'opacity 150ms ease',
-          position: 'relative',
-        }}
+        className={`flex items-center justify-center flex-shrink-0 ${shapeSizeClass} w-[calc(theme(spacing.4)+${shapeSizeClass})] h-[calc(theme(spacing.4)+${shapeSizeClass})] rounded-full ${shapeColorClass} transition-opacity duration-150 relative`}
+        aria-label={`Priority: ${task.priority}, Weight: ${task.weight}`}
       >
         <PriorityIcon
-          size={shapeSize}
+          className="text-on-primary"
           style={{
-            color: 'var(--md-sys-color-on-primary)',
             strokeWidth: 2,
           }}
         />

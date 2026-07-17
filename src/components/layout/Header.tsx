@@ -33,28 +33,10 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header
-      className="flex items-start self-stretch"
-      style={{
-        paddingLeft: '16px',
-        paddingRight: '16px',
-        paddingBottom: '16px',
-        gap: '10px',
-      }}
-    >
+    <header className="flex items-start self-stretch px-4 pb-4 gap-[10px]">
       {/* Текстовая часть */}
       <div className="flex flex-col flex-1">
-        <h1
-          className="m-0"
-          style={{
-            fontFamily: 'Inter, system-ui, sans-serif',
-            fontSize: '33px',
-            lineHeight: '40px',
-            fontWeight: 600,
-            letterSpacing: '-0.4px',
-            color: 'var(--md-sys-color-primary)',
-          }}
-        >
+        <h1 className="m-0 font-inter text-[33px] leading-[40px] font-semibold tracking-[-0.4px] text-primary">
           {getGreeting()}, {user?.name.split(' ')[0]}
         </h1>
       </div>
@@ -86,11 +68,13 @@ const Header: React.FC<HeaderProps> = ({
             }),
             // Hover state
             '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.08)', // on-surface-variant с opacity 0.08
+              backgroundColor: 'var(--md-sys-color-on-surface-variant)',
+              opacity: 0.08,
             },
             // Active/pressed state
             '&:active': {
-              backgroundColor: 'rgba(0, 0, 0, 0.12)', // on-surface-variant с opacity 0.12
+              backgroundColor: 'var(--md-sys-color-on-surface-variant)',
+              opacity: 0.12,
             },
             // Иконка поверх фона
             '& .MuiIconButton-root': {
@@ -126,11 +110,13 @@ const Header: React.FC<HeaderProps> = ({
             }),
             // Hover state
             '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.08)',
+              backgroundColor: 'var(--md-sys-color-on-surface-variant)',
+              opacity: 0.08,
             },
             // Active/pressed state
             '&:active': {
-              backgroundColor: 'rgba(0, 0, 0, 0.12)',
+              backgroundColor: 'var(--md-sys-color-on-surface-variant)',
+              opacity: 0.12,
             },
           }}
         >

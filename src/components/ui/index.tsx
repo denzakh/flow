@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { 
-  buttonBaseStyles, 
-  buttonPrimaryStyles, 
+import {
+  buttonBaseStyles,
+  buttonPrimaryStyles,
   buttonSecondaryStyles,
   inputBaseStyles,
   getTouchTargetStyles,
@@ -39,18 +39,18 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const sizeStyles = {
-    sm: { 
-      padding: `${spacing.sm} ${spacing.lg}`, 
+    sm: {
+      padding: `${spacing.sm} ${spacing.lg}`,
       fontSize: typography.fontSize.sm,
       minHeight: '36px',
     },
-    md: { 
-      padding: `${spacing.md} ${spacing.xl}`, 
+    md: {
+      padding: `${spacing.md} ${spacing.xl}`,
       fontSize: typography.fontSize.base,
       minHeight: '44px',
     },
-    lg: { 
-      padding: `${spacing.lg} ${spacing['2xl']}`, 
+    lg: {
+      padding: `${spacing.lg} ${spacing['2xl']}`,
       fontSize: typography.fontSize.lg,
       minHeight: '52px',
     },
@@ -170,7 +170,7 @@ export const Input: React.FC<InputProps> = ({
           {label}
         </label>
       )}
-      
+
       <div style={{ position: 'relative' }}>
         {leftIcon && (
           <div
@@ -187,13 +187,13 @@ export const Input: React.FC<InputProps> = ({
             {leftIcon}
           </div>
         )}
-        
+
         <input
           style={hasGradient ? {} : baseStyles}
           className={hasGradient ? 'input-field input-gradient' : ''}
           {...props}
         />
-        
+
         {rightIcon && (
           <div
             style={{
@@ -210,7 +210,7 @@ export const Input: React.FC<InputProps> = ({
           </div>
         )}
       </div>
-      
+
       {error && (
         <p
           style={{
@@ -281,8 +281,8 @@ export const Card: React.FC<CardProps> = ({
         ...variantStyles[variant],
         padding: spacing[padding],
         cursor: onClick ? 'pointer' : 'default',
-        transition: variant === 'default' || variant === 'glass' 
-          ? 'background-color 200ms cubic-bezier(0.34, 1.56, 0.64, 1)' 
+        transition: variant === 'default' || variant === 'glass'
+          ? 'background-color 200ms cubic-bezier(0.34, 1.56, 0.64, 1)'
           : undefined,
         ...style,
       }}
@@ -396,7 +396,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       >
         {icon}
       </div>
-      
+
       <h3
         style={{
           fontSize: typography.fontSize.lg,
@@ -407,7 +407,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       >
         {title}
       </h3>
-      
+
       {description && (
         <p
           style={{
@@ -419,7 +419,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           {description}
         </p>
       )}
-      
+
       {action && <div>{action}</div>}
     </div>
   );
