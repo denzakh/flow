@@ -53,8 +53,14 @@
 interface UserSettings {
   wakeUpTime: string;      // Формат "HH:MM", дефолт: "07:00"
   restTime: string;        // Формат "HH:MM", дефолт: "23:00"
+  recoveryDays: number[];  // Дни восстановления (ISO weekday: 0-6)
+  workHistory: any[];      // История выполнения задач
   language: 'en' | 'ru' | 'es';
-  isLeftHanded: boolean;   // КРИТИЧЕСКОЕ ПОЛЕ: Управляет биомеханикой и зеркалированием UI
+  alarm: { 
+    enabled: boolean; 
+    time: string; 
+    sound: string 
+  };
 }
 
 // Ключ в localStorage: 'flow_tasks'
@@ -64,13 +70,22 @@ type TaskList = Task[];
 interface VoiceSettings {
   enabled: boolean;
   language: string;
-  silenceThreshold: number;
+  autoSubmit: boolean;
+  requireConfirmation: boolean;
+  ttsEnabled: boolean;
+  confidenceThreshold: number;
 }
 ---
 
 ## 3. Планируемая Архитектура (НЕ РЕАЛИЗОВЫВАТЬ СЕЙЧАС)
 
 *Этот раздел является исключительно дорожной картой (roadmap).*
+
+### Adaptive Biomechanics (Фаза 2):
+
+* Глобальный контекст `isLeftHanded` — управление биомеханикой и эргономикой Thumb Zone.
+* Зеркалирование элементов интерфейса для левшей (DateNavigator кнопки, FlowToolbar фланги).
+* `primaryInputMethod` — выбор метода ввода (`'voice'` → Mic иконка, `'text'` → Plus иконка).
 
 ### User Bio-Resource Profile (Фаза 2):
 

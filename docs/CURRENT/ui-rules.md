@@ -47,10 +47,9 @@
 
 ### Б. Нижняя панель управления (FlowToolbar):
 Монолитный тулбар во всю ширину экрана без скруглений и боковых маргинов.
-- **Центр:** Всегда неподвижно зафиксирован круглый Smart FAB (`56x56px`, скругление `16px`). Если в настройках выбран ввод голосом — иконка Lucide `Mic`, если текстом — Lucide `Plus`.
-- **Фланги панели:**
-  - При `isLeftHanded === false`: Иконка `Inbox` и дата слева ➔ FAB по центру ➔ Иконка `Settings` справа.
-  - При `isLeftHanded === true`: Иконка `Settings` слева ➔ FAB по центру ➔ Иконка `Inbox` справа.
+- **Элементы:** 5 контрольных элементов + центральная Smart FAB.
+- **Центр:** Всегда неподвижно зафиксирован Smart FAB (`56x56px`, скругление `16px`).
+- **Фланги панели** (прав-handed layout): `[SettingsIcon] [InboxIcon] ➔ ➔ ➔ [FAB] ➔ ➔ ➔ [AddTask] [SmartPlanner]`
 
 ---
 
@@ -80,5 +79,24 @@
 | Шторки ввода (Bottom Sheet) | **MUI** (`@mui/material/SwipeableDrawer`) | Скругление верхних углов `28px` |
 | Циркадный блок времени | **React Aria + Tailwind** | Кастомный контейнер, управляющий холстом Matter.js |
 | Физический пузырь задачи | **React Aria + Tailwind** | Свободное тело в симуляции, форма зависит от pts-веса |
-| Переключатель дат (Слой времени) | **React Aria + Tailwind** | Горизонтальный флекс-контейнер, адаптивный под `isLeftHanded` |
+| Переключатель дат (Слой времени) | **React Aria + Tailwind** | Горизонтальный флекс-контейнер для навигации Prev/Next/Today |
 | Иконки приложения | **Lucide React** | Запрещено использовать `@mui/icons-material`. Только `lucide-react`. |
+
+---
+
+## Планируемые правила (Фаза 2)
+
+### Adaptive Biomechanics (Left-Handed Mode)
+
+Глобальный контекст `isLeftHanded` управляет биомеханикой и эргономикой Thumb Zone. Интерфейс динамически перестраивает геометрию элементов для левшей.
+
+#### DateNavigator
+- `isLeftHanded === false`: Текст даты слева, кнопки-стрелки (Prev/Next) справа (Thumb Zone правши).
+- `isLeftHanded === true`: Кнопки-стрелки слева (Thumb Zone левши), текст даты справа.
+
+#### FAB Icon Logic
+- Если `primaryInputMethod === 'voice'` → иконка Lucide `Mic`.
+- Если `primaryInputMethod === 'text'` → иконка Lucide `Plus`.
+
+#### FlowToolbar Mirroring
+- При `isLeftHanded === true` фланговые элементы зеркально перемещаются для доступа активной рукой.

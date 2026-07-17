@@ -61,7 +61,7 @@ VoiceCommandResult: { success, command?, error?, requiresConfirmation, confirmat
 `/layout/Header.tsx` — top bar featuring the greeting, view switching toggles (grid vs list), and the theme toggle (light vs dark).  
 `components/layout/FlowToolbar.tsx` — monolithic full-width bottom toolbar containing 5 control elements and the centered Smart FAB.  
 `components/common/DateNavigator.tsx` — Temporal Layer (z-10) handling previous/next/today navigation.
-`components/common/ViewSwitcher.tsx` — tab bars for switching between global view modes (day/week/month/year). 
+`components/common/ViewSwitcher.tsx` — tab bar for switching between view modes (day/week/month/year), NOT date navigation.
 
 #### Circadian Blocks & Canvas (Expressive UI)
 `components/views/` — DayView, WeekView, MonthView, and YearView layouts.  
@@ -339,21 +339,30 @@ updateTask(tasks[0].id, { priority: 'high' });
 
 ---
 
-### ☀️ Light Theme Tokens Map
-*Status: Architecture Design Intent (consuming default structural :root tokens)*
+### ⚙️ Time Blocks Color Mapping (SSOT)
+*Status: ✅ FULLY IMPLEMENTED in src/theme/tokens.css*
 
-| UI Element | CSS Token Variable | HEX Value | Usage / Component Target |
+| UI Element | CSS Token Variable | Usage / Component Target |
+| :--- | :--- | :--- |
+| **Container Background** | `var(--flow-block-[period]-container)` | Morning/Afternoon/Evening/Night block fills |
+| **Title Text** | `var(--flow-block-[period]-on-container)` | Period titles and main content text |
+| **Meta Text** | `var(--flow-block-[period]-on-container)` (opacity 0.7) | Time ranges, capacity indicators |
+| **Progress Fill** | `var(--flow-block-[period]-seed)` | Active progress bar indicator |
+| **Progress Track** | `var(--flow-block-[period]-seed-on)` | Progress bar background track |
+| **Progress Border** | `0.2px solid var(--flow-block-[period]-on-container)` | Subtle progress border accent |
+
+**Period placeholders:** `[period]` → `morning`, `afternoon`, `evening`, `night`
+
+---
+
+### 🎨 Weight Bubbles Color Mapping
+*Status: ✅ FULLY IMPLEMENTED in src/theme/tokens.css*
+
+| Weight | CSS Token Variable (Background) | CSS Token Variable (Text) | Usage |
 | :--- | :--- | :--- | :--- |
-| **App Canvas** | `var(--md-sys-color-background)` | `#F7F5F2` | Main page backdrop behind layouts |
-| **Surface/Cards** | `var(--md-sys-color-surface)` | `#FFFFFF` | Bottom sheets, Modals, Task list rows |
-| **Morning Block** | `var(--flow-block-morning-container)` | `#FFECE2` | Terracotta tint for morning card fill |
-| **Afternoon Block**| `var(--flow-block-afternoon-container)`| `#E3F2FD` | Royal blue tint for afternoon card fill |
-| **Evening Block** | `var(--flow-block-evening-container)` | `#F3E5F5` | Purple tint for evening card fill |
-| **Night Block** | `var(--flow-block-night-container)` | `#ECEFF1` | Deep indigo/grey tint for night recovery fill |
-| **Block Text** | `var(--flow-block-text)` | `#1D1A20` | Dynamic text colors inside active blocks |
-| **Quick Weight** | `var(--flow-weight-quick-color)` | `#CCFCE3` | Mint fill for 1pt tasks (Size: Small) |
-| **Focused Weight**| `var(--flow-weight-focused-color)`| `#FEF3C7` | Lemon fill for 3pt tasks (Size: Medium) |
-| **Deep Weight** | `var(--flow-weight-deep-color)` | `#FCE4F5` | Rose fill for 6pt tasks (Size: Large) |
+| **Quick (1 pt)** | `var(--flow-weight-quick-color)` | `var(--flow-weight-quick-on-color)` | Small mint tasks |
+| **Focused (3 pts)** | `var(--flow-weight-focused-color)` | `var(--flow-weight-focused-on-color)` | Medium lemon tasks |
+| **Deep (6 pts)** | `var(--flow-weight-deep-color)` | `var(--flow-weight-deep-on-color)` | Large rose/lavender tasks |
 
 ---
 
@@ -686,8 +695,10 @@ Idea: { id: string; text: string; createdAt: string; tags?: string[]; convertedT
 ### FlowToolbar Specifications
 - **Position**: Fixed bottom, full width, no side margins
 - **Background**: `var(--md-sys-color-surface-container)` (монолитный фон)
+- **Elements**: 5 control elements + centered Smart FAB
 - **Central FAB**: 56×56px, `borderRadius: '16px'`, primary background, on-primary icon
 - **Icon Buttons**: 48×48px touch targets, `on-surface-variant` color
+- **Element Layout** (right-handed): `[SettingsIcon] [InboxIcon] ➔ ➔ ➔ [FAB] ➔ ➔ ➔ [AddTask] [SmartPlanner]`
 - **Gesture Bar**: At very bottom, `var(--md-sys-color-on-surface)`, w-32 h-1, rounded-full
 - **Behavior**: Scroll-hide (>50px down = translate-y-full, up = translate-y-0)
 
@@ -727,9 +738,11 @@ Idea: { id: string; text: string; createdAt: string; tags?: string[]; convertedT
   - Motion: M3 easing curves и duration tokens
   - Shapes: corner radius tokens от none до extra-large
   - Flow-specific tokens: weight colors, block colors, custom utilities
-- `src/theme/design-tokens.ts` — TypeScript типы для design tokens
+- `src/theme/design-tokens.ts` — TypeScript типы для design tokens (legacy, мигрирует)
 - `src/theme/mui-theme.ts` — MUI theme configuration, consuming CSS variables from tokens.css
 - `tailwind.config.ts` — Tailwind configuration, mapping CSS variables to Tailwind classes
+
+⚠️ `design-tokens.ts` и `styles.css` — legacy, мигрируют в `src/theme/tokens.css`
 
   ---
 
