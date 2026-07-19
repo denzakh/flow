@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Mic, AlertTriangle, Trash2 } from 'lucide-react';
 import { UserSettings, AlarmConfig, Language, VoiceSettings } from '../../types.ts';
 import { TRANSLATIONS, VOICE_TRANSLATIONS } from '../../constants.tsx';
-import { Button } from '../ui/Button';
+import { Button } from '@mui/material';
 
 // Language map for Web Speech API
 const LANG_MAP: Record<string, string> = {
