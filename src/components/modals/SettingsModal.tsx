@@ -17,6 +17,7 @@ interface SettingsModalProps {
   tempRest: string;
   tempLang: Language;
   tempAlarm: AlarmConfig;
+  isDirty: boolean;
   error: string | null;
   voiceSettings?: VoiceSettings;
   onSave: () => void;
@@ -34,6 +35,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   tempRest,
   tempLang,
   tempAlarm,
+  isDirty,
   error,
   voiceSettings,
   onSave,
@@ -335,18 +337,20 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           )}
 
-          <div className="pt-6 border-t flow-divider border-t flex flex-col gap-3">
-            <Button variant="filled" onPress={onSave}>
-              {t.save}
-            </Button>
-            <button
-              onClick={onLogout}
-              className="w-full py-5 text-[10px] font-black uppercase tracking-widest rounded-3xl transition-all flex items-center justify-center gap-2 md-state-layer"
-              style={{ color: 'var(--md-sys-color-error)', minHeight: 48 }}
-            >
-              <Trash2 size={14} /> {t.rhythm === 'Your Rhythm' ? 'Log Out' : t.rhythm}
-            </button>
-          </div>
+          {isDirty && (
+            <div className="pt-6 border-t flow-divider border-t flex flex-col gap-3">
+              <Button variant="contained" onClick={onSave}>
+                {t.save}
+              </Button>
+              <button
+                onClick={onLogout}
+                className="w-full py-5 text-[10px] font-black uppercase tracking-widest rounded-3xl transition-all flex items-center justify-center gap-2 md-state-layer"
+                style={{ color: 'var(--md-sys-color-error)', minHeight: 48 }}
+              >
+                <Trash2 size={14} /> {t.rhythm === 'Your Rhythm' ? 'Log Out' : t.rhythm}
+              </button>
+            </div>
+          )}
 
           {error && (
             <div className="flex items-center gap-2 text-rose-400 text-[10px] font-bold">

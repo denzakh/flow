@@ -36,7 +36,13 @@ const Header: React.FC<HeaderProps> = ({
     <header className="flex items-start self-stretch px-4 pb-4 gap-[10px]">
       {/* Текстовая часть */}
       <div className="flex flex-col flex-1">
-        <h1 className="m-0 font-inter text-[33px] leading-[40px] font-semibold tracking-[-0.4px] text-primary">
+        <h1
+          className="m-0 font-inter font-semibold tracking-[-0.4px] text-primary"
+          style={{
+            fontSize: 'var(--md-sys-typescale-headline-large-size)',
+            lineHeight: 'var(--md-sys-typescale-headline-large-line-height)',
+          }}
+        >
           {getGreeting()}, {user?.name.split(' ')[0]}
         </h1>
       </div>

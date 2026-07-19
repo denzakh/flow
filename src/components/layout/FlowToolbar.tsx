@@ -45,7 +45,7 @@ export const FlowToolbar: React.FC<FlowToolbarProps> = ({
                 }`}
             style={{
                 zIndex: 100,
-                backgroundColor: 'var(--md-sys-color-surface-container)',
+                backgroundImage: 'linear-gradient(var(--flow-app-tint), var(--flow-app-tint)), var(--md-sys-color-surface-container)',
                 boxShadow: 'var(--md-sys-elevation-2)',
             }}
         >

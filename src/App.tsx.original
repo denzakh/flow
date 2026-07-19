@@ -41,7 +41,6 @@ import { VoiceControlService } from './services/voice/VoiceControlService.ts';
 import { VoiceCommandProcessor } from './services/voice/VoiceCommandProcessor.ts';
 import VoiceFeedback from './components/voice/VoiceFeedback.tsx';
 import FlowToolbar from './components/layout/FlowToolbar';
-import TaskBubble from './components/ui/TaskBubble';
 
 type ViewMode = 'day' | 'week' | 'month' | 'year';
 
@@ -118,13 +117,6 @@ const App: React.FC = () => {
   const t = TRANSLATIONS[settings.language];
   const todayStr = currentTime.toISOString().split('T')[0];
   const muiTheme = useMemo(() => createMuiTheme(isDarkTheme ? 'dark' : 'light'), [isDarkTheme]);
-
-  const isSettingsDirty = useMemo(() => {
-    return tempWake !== settings.wakeUpTime ||
-      tempRest !== settings.restTime ||
-      tempLang !== settings.language ||
-      JSON.stringify(tempAlarm) !== JSON.stringify(settings.alarm);
-  }, [tempWake, tempRest, tempLang, tempAlarm, settings]);
 
   const isWindDown = useMemo(
     () => getIsWindDown(settings.restTime, currentTime),
@@ -357,11 +349,11 @@ const App: React.FC = () => {
           prev.map((task, index) =>
             index === taskIndex
               ? {
-                ...task,
-                weight: command.entities.weight ?? task.weight,
-                periods: command.entities.period ? [command.entities.period] : task.periods,
-                priority: command.entities.priority ?? task.priority,
-              }
+                  ...task,
+                  weight: command.entities.weight ?? task.weight,
+                  periods: command.entities.period ? [command.entities.period] : task.periods,
+                  priority: command.entities.priority ?? task.priority,
+                }
               : task
           )
         );
@@ -699,11 +691,6 @@ const App: React.FC = () => {
         </div>
 
         <main className="animate-in fade-in space-y-10 duration-500">
-          <div className="flex gap-4 p-4">
-            <TaskBubble weight="quick" priority="low" title="Quick Task" />
-            <TaskBubble weight="focused" priority="medium" title="Focused Task" />
-            <TaskBubble weight="deep" priority="high" title="Deep Work" />
-          </div>
           {viewMode === 'day' && (
             <DayView
               isRecoveryMode={isRecoveryMode}
@@ -778,7 +765,6 @@ const App: React.FC = () => {
             tempRest={tempRest}
             tempLang={tempLang}
             tempAlarm={tempAlarm}
-            isDirty={isSettingsDirty}
             error={settingsError}
             voiceSettings={voiceSettings}
             onVoiceSettingsChange={setVoiceSettings}

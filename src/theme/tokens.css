@@ -134,6 +134,10 @@
   --md-sys-motion-duration-long1: 450ms;
   --md-sys-motion-duration-long2: 500ms;
 
+  /* Global App Background Tokens */
+  --flow-app-bg: var(--md-sys-color-background);
+  --flow-app-tint: transparent;
+
   /* State Layer Opacity */
   --md-sys-state-hover-opacity: 0.08;
   --md-sys-state-focus-opacity: 0.12;
@@ -1091,10 +1095,38 @@ html {
   font-family: var(--md-sys-typescale-body-large-font);
   font-size: var(--md-sys-typescale-body-large-size);
   line-height: var(--md-sys-typescale-body-large-line-height);
-  background-color: var(--md-sys-color-background);
+  background-color: var(--flow-app-bg);
   color: var(--md-sys-color-on-background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--md-sys-motion-duration-long2) var(--md-sys-motion-easing-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    transition: none;
+  }
+}
+
+/* Circadian UI Tinting - Attribute Selectors */
+[data-period="morning"] {
+  --flow-app-bg: var(--flow-block-morning-container);
+  --flow-app-tint: color-mix(in srgb, var(--flow-block-morning-container) 12%, transparent);
+}
+
+[data-period="afternoon"] {
+  --flow-app-bg: var(--flow-block-afternoon-container);
+  --flow-app-tint: color-mix(in srgb, var(--flow-block-afternoon-container) 12%, transparent);
+}
+
+[data-period="evening"] {
+  --flow-app-bg: var(--flow-block-evening-container);
+  --flow-app-tint: color-mix(in srgb, var(--flow-block-evening-container) 12%, transparent);
+}
+
+[data-period="night"] {
+  --flow-app-bg: var(--flow-block-night-container);
+  --flow-app-tint: color-mix(in srgb, var(--flow-block-night-container) 12%, transparent);
 }
 
 /* ── Elevation helper (applies surface tint) ── */
