@@ -8,9 +8,9 @@ interface TaskBubbleProps {
 }
 
 const sizeMap: Record<TaskBubbleProps['weight'], number> = {
-    quick: 60,
-    focused: 90,
-    deep: 114,
+    quick: 56,
+    focused: 84,
+    deep: 120,
 };
 
 // SVG path from Figma component scaled to objectBoundingBox (0-1 range)
