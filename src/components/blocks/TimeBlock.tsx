@@ -49,7 +49,7 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
 
   return (
     <section
-      className={`block-card md-state-layer relative p-6 transition-shadow duration-md-medium2 ease-md-standard ${isActive ? 'border-l-[3px] border-l-white/90' : ''
+      className={`block-card md-state-layer relative p-6 transition-shadow duration-md-medium2 ease-md-standard overflow-visible ${isActive ? 'border-l-[3px] border-l-white/90' : ''
         }`}
       style={{
         borderRadius: 'var(--md-sys-shape-corner-extra-large)',
@@ -164,7 +164,7 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-3 overflow-visible">
         {tasks.length > 0 ? (
           tasks.map((task, index) => (
             <div key={task.id} className="task-enter task-enter-active">

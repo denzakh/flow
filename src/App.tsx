@@ -699,10 +699,10 @@ const App: React.FC = () => {
         </div>
 
         <main className="animate-in fade-in space-y-10 duration-500">
-          <div className="flex gap-4 p-4">
-            <TaskBubble weight="quick" priority="low" title="Quick Task" />
-            <TaskBubble weight="focused" priority="medium" title="Focused Task" />
-            <TaskBubble weight="deep" priority="high" title="Deep Work" />
+          <div className="flex items-center justify-center gap-8 p-8 border-2 border-dashed border-red-500 mb-8 rounded-xl bg-red-50">
+            <TaskBubble priority="low" title="Deep" weight="deep" />
+            <TaskBubble priority="medium" title="Focused" weight="focused" />
+            <TaskBubble priority="high" title="Quick" weight="quick" />
           </div>
           {viewMode === 'day' && (
             <DayView

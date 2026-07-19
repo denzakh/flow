@@ -53,7 +53,7 @@ const DayView: React.FC<DayViewProps> = ({
   onDeleteAll,
 }) => {
   return (
-    <>
+    <div style={{ overflow: 'visible' }}>
       {isRecoveryMode && (
         <RecoveryBanner
           isWindDown={isWindDown}
@@ -87,14 +87,14 @@ const DayView: React.FC<DayViewProps> = ({
 
       <TaskSheet
         isOpen={isTaskSheetOpen}
-        onClose={onCloseTaskSheet || (() => {})}
+        onClose={onCloseTaskSheet || (() => { })}
         onTaskAdd={onTaskAdd}
         activePeriodId={activePeriodId}
         tasks={tasks}
         currentTime={currentTime}
         language={language}
       />
-    </>
+    </div>
   );
 };
 
