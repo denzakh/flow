@@ -10,7 +10,7 @@ interface BubbleBlockProps {
 }
 
 // Calculate target positions for even distribution
-const calculateTargetPositions = (count: number, width: number) => {
+const calculateTargetPositions = (count: number, width: number, height: number) => {
     const positions = [];
     const padding = 60;
     const availableWidth = width - padding * 2;
@@ -18,7 +18,7 @@ const calculateTargetPositions = (count: number, width: number) => {
     for (let i = 0; i < count; i++) {
         positions.push({
             x: padding + (availableWidth / (count + 1)) * (i + 1),
-            y: 110
+            y: height / 2
         });
     }
     return positions;
@@ -61,7 +61,7 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
             return;
         }
 
-        const targets = calculateTargetPositions(tasks.length, width);
+        const targets = calculateTargetPositions(tasks.length, width, height);
 
         const getRadius = (weight: TaskWeight): number => {
             switch (weight) {
@@ -99,7 +99,7 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
             setContainerWidth(containerRef.current.clientWidth);
         }
 
-        initializeBubbles(containerWidth, 220);
+        initializeBubbles(containerWidth, containerRef.current?.clientHeight || 200);
 
         // Start animation
         animationRef.current = requestAnimationFrame(animate);
@@ -114,14 +114,14 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
     // Update target positions when tasks change
     useEffect(() => {
         if (containerWidth > 0) {
-            initializeBubbles(containerWidth, 220);
+            initializeBubbles(containerWidth, containerRef.current?.clientHeight || 200);
         }
     }, [tasks, containerWidth]);
 
     // Physics update loop
     const updatePhysics = (width: number, height: number) => {
         if (!shouldUsePhysics) {
-            const targets = calculateTargetPositions(bubblesRef.current.length, width);
+            const targets = calculateTargetPositions(bubblesRef.current.length, width, height);
             bubblesRef.current.forEach((bubble, index) => {
                 const target = targets[index] || bubble;
                 bubble.x = target.x;
@@ -169,20 +169,20 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
             }
 
             // Wall bounds check
-            if (b.x - b.radius < 8) {
-                b.x = b.radius + 8;
+            if (b.x - b.radius < 0) {
+                b.x = b.radius;
                 b.vx *= -0.3;
             }
-            if (b.x + b.radius > width - 8) {
-                b.x = width - b.radius - 8;
+            if (b.x + b.radius > width) {
+                b.x = width - b.radius;
                 b.vx *= -0.3;
             }
-            if (b.y - b.radius < 8) {
-                b.y = b.radius + 8;
+            if (b.y - b.radius < 0) {
+                b.y = b.radius;
                 b.vy *= -0.3;
             }
-            if (b.y + b.radius > height - 8) {
-                b.y = height - b.radius - 8;
+            if (b.y + b.radius > height) {
+                b.y = height - b.radius;
                 b.vy *= -0.3;
             }
 
@@ -222,7 +222,7 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
         if (!container) return;
 
         const width = container.clientWidth;
-        const height = 220;
+        const height = container.clientHeight;
 
         updatePhysics(width, height);
 
@@ -230,7 +230,7 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
         bubblesRef.current.forEach((b, i) => {
             const el = bubbleElementsRef.current[i];
             if (el) {
-                el.style.transform = `translate(${b.x}px, ${b.y}px)`;
+                el.style.transform = `translate3d(${b.x - b.radius}px, ${b.y - b.radius}px, 0)`;
             }
         });
 
@@ -242,7 +242,7 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
         const handleResize = () => {
             if (containerRef.current) {
                 setContainerWidth(containerRef.current.clientWidth);
-                initializeBubbles(containerRef.current.clientWidth, 220);
+                initializeBubbles(containerRef.current.clientWidth, containerRef.current.clientHeight || 200);
             }
         };
 
@@ -256,7 +256,7 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
             setContainerWidth(containerRef.current.clientWidth);
         }
 
-        initializeBubbles(containerWidth, 220);
+        initializeBubbles(containerWidth, containerRef.current?.clientHeight || 200);
 
         // Start animation
         animationRef.current = requestAnimationFrame(animate);
@@ -271,18 +271,18 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
     // Update target positions when tasks change
     useEffect(() => {
         if (containerWidth > 0) {
-            initializeBubbles(containerWidth, 220);
+            initializeBubbles(containerWidth, containerRef.current?.clientHeight || 200);
         }
     }, [tasks, containerWidth]);
 
     if (!bubblesRef.current || bubblesRef.current.length !== tasks.length) {
-        return <div style={{ position: 'relative', width: '100%', height: '220px' }} />;
+        return <div style={{ position: 'relative', width: '100%', height: '100%' }} />;
     }
 
     return (
         <div
-            className="relative w-full"
-            style={{ height: '220px', overflow: 'visible' }}
+            className="absolute inset-0 w-full h-full"
+            style={{ overflow: 'hidden' }}
             ref={containerRef}
             aria-label="Task bubbles - click to toggle"
         >

@@ -64,6 +64,7 @@ const TimeBlockList: React.FC<TimeBlockListProps> = ({
             onDelete={onDelete}
             onUpdate={onUpdate}
             language={language}
+            viewMode={isListView ? 'vertical' : 'grid'}
           />
         );
       })}
