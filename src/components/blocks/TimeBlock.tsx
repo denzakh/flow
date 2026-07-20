@@ -3,6 +3,7 @@ import { Grid, Plus, AlertTriangle } from 'lucide-react';
 import { TimeBlockConfig, TimePeriod, Task, Language } from '../../types.ts';
 import { BLOCK_CAPACITY, TRANSLATIONS } from '../../constants.tsx';
 import TaskItem from '../TaskItem.tsx';
+import BubbleBlock from './BubbleBlock.tsx';
 import { getIcon } from '../../constants.tsx';
 
 interface TimeBlockProps {
@@ -164,20 +165,14 @@ const TimeBlock: React.FC<TimeBlockProps> = ({
         </div>
       )}
 
-      <div className="space-y-3 overflow-visible">
+      <div className="overflow-visible">
         {tasks.length > 0 ? (
-          tasks.map((task, index) => (
-            <div key={task.id} className="task-enter task-enter-active">
-              <TaskItem
-                task={task}
-                index={index + 1}
-                lang={language}
-                onToggle={onToggle}
-                onDelete={onDelete}
-                onUpdate={onUpdate}
-              />
-            </div>
-          ))
+          <BubbleBlock
+            tasks={tasks}
+            isRecoveryMode={false}
+            blockId={block.id}
+            onBubbleClick={onToggle}
+          />
         ) : (
           <button
             type="button"
