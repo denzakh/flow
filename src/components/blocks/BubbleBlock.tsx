@@ -10,22 +10,17 @@ interface BubbleBlockProps {
 }
 
 // Calculate target positions for even distribution
-const calculateTargetPositions = (count: number, width: number, height: number): { x: number; y: number }[] => {
-    if (count === 0) return [];
+const calculateTargetPositions = (count: number, width: number) => {
+    const positions = [];
+    const padding = 60;
+    const availableWidth = width - padding * 2;
 
-    const positions: { x: number; y: number }[] = [];
-    if (count === 1) {
-        positions.push({ x: width / 2, y: height * 0.5 });
-    } else {
-        const spacing = (width - 40) / (count - 1);
-        for (let i = 0; i < count; i++) {
-            positions.push({
-                x: 20 + i * spacing,
-                y: height * 0.5,
-            });
-        }
+    for (let i = 0; i < count; i++) {
+        positions.push({
+            x: padding + (availableWidth / (count + 1)) * (i + 1),
+            y: 110
+        });
     }
-
     return positions;
 };
 
@@ -66,7 +61,7 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
             return;
         }
 
-        const targets = calculateTargetPositions(tasks.length, width, height);
+        const targets = calculateTargetPositions(tasks.length, width);
 
         const getRadius = (weight: TaskWeight): number => {
             switch (weight) {
@@ -87,7 +82,7 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
             return {
                 id: task.id,
                 x: target.x,
-                y: target.y,
+                y: target.y + 50,
                 vx: 0,
                 vy: 0,
                 targetX: target.x,
@@ -126,7 +121,7 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
     // Physics update loop
     const updatePhysics = (width: number, height: number) => {
         if (!shouldUsePhysics) {
-            const targets = calculateTargetPositions(bubblesRef.current.length, width - 40, 220 * 0.35);
+            const targets = calculateTargetPositions(bubblesRef.current.length, width);
             bubblesRef.current.forEach((bubble, index) => {
                 const target = targets[index] || bubble;
                 bubble.x = target.x;
@@ -140,14 +135,15 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
         // Update each bubble
         for (let i = 0; i < bubbles.length; i++) {
             const b = bubbles[i];
+            if (b.settled) continue;
 
             // Attraction to target
-            b.vx += (b.targetX - b.x) * 0.04;
-            b.vy += (b.targetY - b.y) * 0.04;
+            b.vx += (b.targetX - b.x) * 0.02;
+            b.vy += (b.targetY - b.y) * 0.02;
 
             // Damping
-            b.vx *= 0.75;
-            b.vy *= 0.75;
+            b.vx *= 0.65;
+            b.vy *= 0.65;
 
             // Soft repulsion between bubbles
             for (let j = 0; j < bubbles.length; j++) {
@@ -156,17 +152,19 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
                 const dx = b.x - other.x;
                 const dy = b.y - other.y;
                 const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                const minDist = b.radius + other.radius + 6;
+                const minDist = b.radius + other.radius + 16;
 
                 if (dist < minDist) {
-                    const force = (minDist - dist) / minDist * 0.5;
+                    const force = (minDist - dist) / minDist * 2.0;
                     const nx = dx / dist;
                     const ny = dy / dist;
 
                     b.vx += nx * force;
                     b.vy += ny * force;
-                    other.vx -= nx * force;
-                    other.vy -= ny * force;
+                    if (!other.settled) {
+                        other.vx -= nx * force;
+                        other.vy -= ny * force;
+                    }
                 }
             }
 
@@ -194,10 +192,10 @@ const BubbleBlock: React.FC<BubbleBlockProps> = ({
 
             // Check if this bubble is settled
             const isSettled = (b: Bubble) =>
-                Math.abs(b.vx) < 0.05 &&
-                Math.abs(b.vy) < 0.05 &&
-                Math.abs(b.x - b.targetX) < 1.0 &&
-                Math.abs(b.y - b.targetY) < 1.0;
+                Math.abs(b.vx) < 0.5 &&
+                Math.abs(b.vy) < 0.5 &&
+                Math.abs(b.x - b.targetX) < 3.0 &&
+                Math.abs(b.y - b.targetY) < 3.0;
             if (isSettled(b)) {
                 b.x = b.targetX
                 b.y = b.targetY
